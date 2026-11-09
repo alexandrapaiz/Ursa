@@ -7,7 +7,7 @@ this seat or another had done between the event being written and this run
 reading it, and the fourth was discharged by a descendant branch rather than
 by the repair it asked for.
 
-**Nothing severe. No secret found, nothing to rotate.** Two findings, both
+**Nothing severe. No secret found, nothing to rotate.** Three findings, all
 fixed. One red and one conflict retired by reference rather than by work.
 
 This branch carries runs 14, 15 and 16, whose reports are
@@ -104,6 +104,44 @@ the file. The price of the class is not hypothetical and is quoted in
 `tools/testing/tmpdir.mjs`: one file of this suite took the shared host to 90
 per cent and cost three seats their installs the same morning.
 
+## F140 — a red that exists only on the merge, for the second time in one window
+
+**Fixed** in `tools/ledger/check.test.mjs`.
+
+Found by running the full gate list on this branch rather than by looking for
+it. `tooling-suites` failed with `ReferenceError: mkdtempSync is not defined`
+at `tools/ledger/check.test.mjs:324`, and both parent trees are green.
+
+| tree | the file's `mkdtempSync` call sites | its `node:fs` import of it |
+|---|---|---|
+| `origin/main` | 0, the one site converted to `tempDir` | deleted |
+| this branch before the merge | 2 | present |
+| the merge | 1, the one run 16 added | deleted |
+
+The engineer seat's leak repair landed on `main` and converted the call site
+that existed when it was written, deleting the import in the same commit. Run
+16 of this seat added the `LEDGER_ABSENT` case afterwards, using the import
+that was about to be removed. The two hunks are 300 lines apart, so git had no
+reason to report a conflict and correctly kept both sides' intent: main's
+import line and this branch's new test. The result compiles and throws at run
+time.
+
+**This is F136's class with a different mechanism, four hours later.** F136
+was two registrations of one section arriving from opposite sides of a merge.
+This is a binding deleted on one side and used on the other. What they share
+is the thing worth generalising: **a merge of two trees that each pass every
+gate can fail one, and no gate on either parent can see it.** Both instances
+were found by this seat running the full list after merging, and the repair for
+the class is not a code change here — it is that merging `main` into a branch
+is followed by running the list, not by pushing.
+
+**And the ratchet's documented blind spot, live.** `tmpdir-leak` passed at
+exit 0 on the tree carrying this defect, because its rule is "makes a
+temporary directory and contains no removal call of any kind", and this file
+imports `tempDir`, which removes. The baseline says so in its own
+`what_this_list_is_not` field: the 28 files that remove something are not
+thereby certified. That caveat has an instance now.
+
 ## The two sweeps
 
 **Secrets, working tree.** No new credential-shaped value. Clean: the
@@ -140,6 +178,17 @@ scaffolder. Nothing in this run's diff or in `main`'s diff since touches a
 lockfile, which was checked rather than assumed, so a second reading would have
 measured the same lockfiles. The `ursa-major` caveat in that report still
 applies: its row was resolved from `package-lock.json` alone.
+
+**One unrunnable probe, reported and not fixed.** A sweep for the F140 shape
+across all 554 tracked source files, looking for a call to one of seven common
+imports with no binding in the file, found one other instance:
+`docs/design/reviews/2026-10-26e/data/probe-bar-contrast.mjs` calls
+`mkdtempSync`, `tmpdir`, `writeFileSync`, `execFileSync` and `join` and
+imports only `launch`. Read rather than run, since running it drives a
+browser. It is a one-off design-review probe from 2026-10-26 in another
+seat's lane, so it is named here rather than edited, and the reason it is
+worth naming at all is that a probe which cannot run is a recorded
+measurement nobody can re-perform.
 
 **Workflows.** Posture unchanged, and nothing in this run touched
 `.github/workflows/`. The one observation added by run 16 still holds and is
@@ -180,7 +229,7 @@ them on the tip.
 
 ## For the ledger
 
-Two entries, in `docs/ideas.md`.
+Three entries, in `docs/ideas.md`.
 
 1. **A consumer that re-encodes a gate's verdict can have no slot for a
    refusal** — `built`, the fix being F138 above. Filed because the class is
@@ -191,6 +240,11 @@ Two entries, in `docs/ideas.md`.
    under "What remains" above. Filed rather than resolved because which of the
    two instruments should survive, or whether both should, is not one seat's
    call.
+3. **A merge of two trees that each pass every gate can fail one, and nothing
+   on either parent can see it** — `proposed`, the generalisation of F136 and
+   F140. Its first step is a practice this seat has already adopted and costs
+   nothing: a merge of `main` into a branch is followed by the full list, not
+   by a push.
 
 ## External sources read
 

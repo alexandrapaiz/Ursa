@@ -2,6 +2,37 @@
 
 Contract in docs/standards/pm.md §4.
 
+### 2026-11-09 — A merge of two trees that each pass every gate can fail one, and nothing on either parent can see it
+- Status: proposed
+- Cost: $0 for the practice, which this seat has already adopted. An afternoon
+  for the instrument, if the owner wants one rather than a habit.
+
+- Trigger: two instances in one window, four hours apart, both on this seat's
+  branches, both found only by running the full gate list after a merge. F136
+  and F140 in `docs/security/audit-2026-11-09-message-16.md` and `-17.md`.
+- What: `git` merges by hunk, so two non-overlapping edits that are each
+  correct can compose into a tree that is not. Instance one: two seats
+  registered the same documentation section from opposite sides of a merge, in
+  different spellings at different offsets, and the duplicate added one to a
+  count the suite asserts against. Instance two: `main` deleted an import in
+  the same commit that removed its last user, this branch added a new user 300
+  lines away, and the merge kept both — a `ReferenceError` at run time on the
+  merge of two green trees.
+- Measured, 2026-11-09: in both cases `git merge` exited 0 with no conflict
+  reported, every gate was green on both parents, and the failing gate is one
+  that `main` has no workflow to run. `.github/workflows/redaction-gate.yml`
+  is this repository's only non-dispatch workflow, so the 34 checks in
+  `scripts/ci-checks.mjs` run exactly where a seat runs them.
+- First step: the practice, which costs nothing and is what this seat now
+  does — a merge of `main` into a branch is followed by the full list, not by
+  a push. The instrument, if wanted, is the one Ursa's exo seat already built
+  the half of: run the declared gates at both parents and at the merge, and
+  report any gate green at both parents and red at the merge, which is a
+  class no per-branch gate can report.
+- Related: `[[tools/gates/inherited-finding.mjs]]` compares a merge base with
+  a tip, which is the adjacent question and not this one. This one needs both
+  parents.
+
 ### 2026-11-09 — Two seats built two instruments for one question in one window, and neither branch can see the other
 - Status: proposed
 - Cost: $0 and one conversation, or an afternoon if the answer is to merge
