@@ -931,14 +931,33 @@ html {
     color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* The wash below is guarded on both kinds of unavailable, and the guard
+   was missing entirely until 2026-11-09 (ledger L66). `.rec-row` has
+   carried `:not([aria-disabled="true"])` since L65; `.rec-action`, which
+   is the same device on seven other controls, carried neither that nor
+   `:not(:disabled)`. One rendering was asked for the guard and the other
+   was not, which is L63's shape again.
+
+   What that cost, measured under the pointer against this stylesheet on
+   the real page: with the submit button busy, `:hover` matched and
+   `:disabled` matched, and the button computed rgb(168,199,250) with its
+   underline lit while its cursor computed `not-allowed`. The control
+   refused the pointer and answered it at the same time. The dimming the
+   markup asks for is a Tailwind `disabled:` utility, and this rule beat
+   it; the exact mechanism is not asserted here, because it was not
+   measured.
+
+   Stating both halves rather than only the aria one: `:disabled` is still
+   live on this control for the empty-field case, and `.cta` further up
+   this file is genuinely disabled too. */
 @media (hover: hover) {
-  .rec-action:hover {
+  .rec-action:hover:not(:disabled):not([aria-disabled="true"]) {
     color: var(--polar);
     text-decoration-color: var(--polar);
   }
 }
 
-.rec-action:active {
+.rec-action:active:not(:disabled):not([aria-disabled="true"]) {
   color: var(--polar);
   text-decoration-color: var(--polar);
 }

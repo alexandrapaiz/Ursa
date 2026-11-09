@@ -78,6 +78,13 @@ export function PublishedSite() {
   const readSite = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      // The refusal of a second submit used to belong to the browser,
+      // because the button was `disabled` while busy. It is `aria-disabled`
+      // now (see the button below and ledger L66), which is advisory, so
+      // the refusal lives here. A form can also be submitted by Enter from
+      // inside the field, which `disabled` never covered either: that path
+      // reached this handler on main and started a second index fetch.
+      if (busy) return;
       const url = indexUrlFor(address);
       if (!url) {
         setError("That is not a web address. Paste the address your published site is served at.");
@@ -117,7 +124,7 @@ export function PublishedSite() {
         setBusy(false);
       }
     },
-    [address],
+    [address, busy],
   );
 
   const openRecord = useCallback(
@@ -198,10 +205,28 @@ export function PublishedSite() {
             className="w-full min-w-0 border-b border-[var(--line)] bg-transparent pb-2 font-mono text-[0.72rem] text-[var(--star)] placeholder:text-[var(--dim)] focus:border-[var(--polar)] focus:outline-none sm:text-[0.76rem]"
           />
         </label>
+        {/* The condition this button was disabled on was `busy || !address`,
+            which is two different kinds of unavailable wearing one
+            attribute, and they want different ones (ledger L66).
+
+            `!address` is genuinely unavailable: nothing is typed, the
+            control has never been used, and there is nothing to submit.
+            That stays `disabled`, and it cannot cost a focus loss, because
+            the only way to empty the field is to be standing in the field.
+
+            `busy` is L65's case, one control instead of a list. The person
+            has just pressed this and is waiting on it, and `disabled`
+            takes it out of the focus order, so the browser moves focus to
+            `<body>` and the label the button is about to change to is
+            announced on a control that is no longer there. `aria-disabled`
+            holds focus and still says unavailable. The second-activation
+            refusal moves into `readSite`. */}
         <button
           type="submit"
-          disabled={busy || !address}
-          className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)]"
+          disabled={!address}
+          aria-disabled={busy}
+          aria-busy={busy}
+          className="rec-action rec-hit shrink-0 font-mono text-[0.7rem] tracking-[0.06em] text-[var(--polar)] disabled:cursor-not-allowed disabled:text-[var(--dim)] aria-disabled:cursor-wait aria-disabled:text-[var(--dim)]"
         >
           {busy ? "reading…" : "read the site"}
         </button>
