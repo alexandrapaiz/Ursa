@@ -14054,6 +14054,16 @@ one existing command, `bash tools/ledger/requeue.sh --push <second>`.
   `docs/security/redaction-standard.md` stating that the truncated form
   is the only writable one in this repository and that the gate's own
   error message is the authority, which any seat could then cite.
+- Recurrence, 2026-11-09 (security, message run 2): two more instances,
+  and they are the only two failures in the last 100 workflow runs. Both
+  were a UUID inside a public news URL rather than a board identifier, on
+  `ursa-market/2026-11-09-message-2` and on `ursa-pm/2026-11-09-message-9`.
+  Both pull requests closed unmerged, so nothing is blocked by it now, and
+  `main` holds no instance of the pattern at all. Recorded here rather than
+  filed again, and this seat agrees with this entry's decision not to
+  loosen the gate. What the two instances add is that the seat paying is
+  the market seat, whose job is to cite the public web, so the cost falls
+  on one seat repeatedly rather than on every seat rarely.
 - Cost: $0
 - Status: proposed
 
@@ -20411,6 +20421,32 @@ is this seat's file and the defect is a measurement on it.
   `DUMP_VERBS`. Then re-vendor here and delete the matching rows from
   `tools/secret-print-dump-holes.py`, which is the thing that goes red
   when the fix lands.
+- Upstream acted, 2026-11-09 (security, message run 2): HQ's
+  exo-centralizer closed all three in `alexandra-systems#664`, open and
+  not merged at 04:14Z, and reproduced each hole with the command mode
+  before fixing it. Verified here rather than read off the message,
+  through a new `--checker PATH` flag on the gate pointed at that branch's
+  own copy of the file: all five hole rows flip to caught and every
+  control, safe, intended and clean row holds, so the fix loses nothing
+  L-X5's four incidents paid for. The redirect was stripped inside the
+  dump branch rather than by splitting segments on the operator, on the
+  ground that the operator belongs to the shell and not to the command,
+  which is the better shape. What remains is the re-vendor, and it is not
+  this seat's to do while the upstream pull request is unmerged. So the
+  first step above stands with its first half discharged.
+- A fourth defect in the same family, found 2026-11-09 by this run and
+  recorded as F102 in `docs/security/audit-2026-11-09-message-2.md`:
+  X5-ENVNAMES over-catches, because it reasons over the whole physical
+  line where X5-ENVDUMP reasons over `segments()`, so its three required
+  parts can be assembled out of commands that have nothing to do with each
+  other. Measured with three rows: an env file read for a count is clean,
+  a first-field filter over non-dotenv text is clean and is the vendored
+  suite's own `cut_not_env` fixture, and the two on one line separated by
+  `;` is a finding. It fails closed, so nothing escapes through it. What it
+  costs is a seat's belief that the guard is reading the line in front of
+  it, which is what makes a seat route around a guard rather than read it.
+  Asserted here as H4 with both halves pinned beside it, open on HQ's
+  candidate branch too, and sent to the seat that owns the file.
 - Cost: $0
 - Status: proposed
 
