@@ -350,11 +350,19 @@ for (const [vname, w, h] of VIEWPORTS) {
       lap.push(`${stage} ${Date.now() - at}ms`)
       return out
     }
-    await mark('goto', async () => {
-      reach.saw(path, await page.goto(BASE + path, { waitUntil: 'networkidle' }))
+    // Only the navigation is wrapped. The settle and everything after it are
+    // the measuring, and a refusal scoped over those would turn a finding
+    // into a non-answer.
+    const reached = await mark('goto', async () => {
+      if (!(await reach.visit(page, BASE + path, path)).ok) return false
       if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
       await page.waitForTimeout(WAIT)
+      return true
     })
+    if (!reached) {
+      process.stderr.write(`${name} COULD NOT LOAD, skipped\n`)
+      continue
+    }
     const items = await mark('collect', () => page.evaluate(COLLECT))
     const shotA = await mark('shotA', async () =>
       `data:image/png;base64,${(await page.screenshot(opts)).toString('base64')}`)

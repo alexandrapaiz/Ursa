@@ -132,7 +132,10 @@ for (const [vname, w, h] of MATRIX) {
     // nothing ever gated on it, so a run over a site whose every route
     // had been renamed photographed five not-found pages and reported
     // `no frame overflows its viewport`. Measured 2026-11-09.
-    const status = reach.saw(path, await page.goto(BASE + path, { waitUntil: 'networkidle' }))
+    // Only the navigation is wrapped; the shutter below is the measuring.
+    const visit = await reach.visit(page, BASE + path, path)
+    if (!visit.ok) continue
+    const status = visit.status
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
     if (enterState) await enterState(page, name)
     // Ask the page what time it thinks it is, rather than trusting that the

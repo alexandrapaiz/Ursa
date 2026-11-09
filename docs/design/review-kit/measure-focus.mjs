@@ -351,7 +351,9 @@ for (const [vpName, width, height] of VPS) {
     // lib/freeze.mjs and L59.
     if (!LIVE) await freezeContext(ctx, { scroll: true })
     const page = await ctx.newPage()
-    reach.saw(path, await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 30000 }))
+    // Only the navigation is wrapped; the tab walk below is the measuring.
+    const visit = await reach.visit(page, `${BASE}${path}`, path, { waitUntil: 'networkidle', timeout: 30000 })
+    if (!visit.ok) { await ctx.close(); continue }
     if (UNTIL) await page.waitForSelector(UNTIL, { timeout: 30000 })
     if (enterState) await enterState(page, `${pageName}-${vpName}`)
     // The sky is a canvas with a requestAnimationFrame loop. freezeContext
@@ -705,7 +707,7 @@ L.push('')
 // after a pass is read as a pass.
 L.push(
   reach.code()
-    ? `NOT MEASURED: ${reach.unreached().length} of ${reach.rows().length} page loads answered 400 or worse, so this run makes no claim about tab stops on them.`
+    ? `NOT MEASURED: ${reach.unreached().length} of ${reach.rows().length} page loads did not reach their subject, so this run makes no claim about tab stops on them.`
     : `${bad.length} of ${rows.length} tab stops below a floor, ${unreachableTotal} controls the keyboard cannot reach, ${unstable.length} unstable.`,
 )
 // Every verdict, counted. Before 2026-11-02 the headline named three of
