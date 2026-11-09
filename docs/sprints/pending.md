@@ -2,6 +2,52 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-sixth pass): #844 (security) reviewed against Tier B and merged, subsuming #837; #840's standing orphan claim confirmed stale a second way
+
+Wake named `#844` (security, run 13) for review against the merge rule,
+plus a standing block repeating the `#840` orphan claim this seat's own
+twenty-fifth pass (`#849`) had already resolved. Full account in
+`docs/agents/pm-2026-11-09-message-26-run.md`.
+
+1. **`#844` reviewed against Tier B and merged, nothing left for you on
+   it.** Not this seat's own PR. Not a draft, no `hold` label, no
+   comment, no review since the last push. One check (`scan`), green.
+   `gh pr diff --name-only` showed 19 files under `docs/`, `scripts/`,
+   `tools/` and `ursa-major/tools/` — no `prompts/`, no
+   `.github/workflows/`, no `company.yaml`, no secret. GitHub reported
+   `mergeable: MERGEABLE`; checked independently with `git merge-tree`
+   against `origin/main` in a scratch worktree, clean. Read the diff
+   rather than trusted the description: ran `tools/gates/fetch-exec.mjs`
+   itself inside that worktree (464 occurrences, 23 declared-package
+   drift, 0 unaccounted, exit 2 with exactly one owner-reserved finding —
+   `prompts/exo-agent.md`'s pre-approved `npx -y` — matching the PR's own
+   count to within the few files this clone's tree differs on), confirmed
+   the `--no-install` fix actually landed in
+   `tools/stack/integrate.sh` and the two advice-string repairs, and
+   confirmed both new gates (`fetch-exec`, `prompt-slots`) are wired into
+   `scripts/ci-checks.mjs` with `passExit: [0, 2]`. Merged under Tier B
+   (`gh pr merge 844 --merge --delete-branch`).
+2. **`#844` subsumed `#837` (ancestry confirmed with
+   `git merge-base --is-ancestor`); GitHub marked `#837` merged the
+   moment `#844` merged.** Nothing further to close by hand.
+3. **`#840`'s standing orphan claim is stale, confirmed a second way.**
+   `GET /api/standing?company=ursa&seat=pm` now returns empty — the
+   claim this seat's own twenty-fifth pass (`#849`) already traced and
+   found false (a live follow-up run, not an orphan) has already
+   cleared from the board. Not re-investigated. `#840` itself is still
+   open and still a draft, moving normally (`updatedAt` within the
+   hour); nothing for you here.
+
+**One real finding is still yours, named by `#844` itself (its own
+label: F121) rather than by this pass.** `prompts/exo-agent.md` §5b
+pre-approves a registry fetch (`npx -y @mermaid-js/mermaid-cli@11`)
+under `--no-sandbox`, on Actions, with a live token. `prompts/` is not
+any seat's to edit — not security's, not this seat's. Filed `urgent`
+in `docs/ideas.md` ("a charter pre-approves a registry fetch-and-execute
+with the yes flag...") by the security seat; confirmed still the one
+open row there with no repair, verified against the live file rather
+than the PR's own claim.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-fifth pass): #843 reviewed and merged, #840's timeout traced to a live follow-up run already in flight, this seat's own stuck #841/#847 pair absorbed, a four-Monday ceremony gap escalated to the ledger
 
 Four things on the wake: exo's finished run (naming its own merged
