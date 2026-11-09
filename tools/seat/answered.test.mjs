@@ -111,3 +111,77 @@ test('shape: company is part of the address, so two seats of one name do not cro
   const { notes } = classify({ rows: [note, toWrongCompany], me: ME });
   assert.equal(verdictOf(notes, 'n-f'), 'unanswered');
 });
+
+// "order:" the listing's own ordering, which no test pinned until 2026-11-09.
+// Both of the previous two spellings of it were wrong, in different ways, and
+// neither was wrong in a way the fixtures above could see, because all three
+// of this window's notes carry distinct and well-formed instants. The cases
+// that separate the three spellings are ties and an unplaceable `ts`, so
+// those are what these assert.
+test('order: notes come back newest first', () => {
+  const rows = [
+    { id: 'mid', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-08T10:00:00Z' },
+    { id: 'new', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-09T10:00:00Z' },
+    { id: 'old', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-07T10:00:00Z' },
+  ];
+  assert.deepEqual(classify({ rows, me: ME }).notes.map((n) => n.id), ['new', 'mid', 'old']);
+});
+
+test('order: newest first is by instant, not by spelling', () => {
+  // The defect instant.mjs exists for. These two are five hours apart and the
+  // text compare puts them the wrong way round, because `-06:00` reads as six
+  // hours earlier than it is.
+  const rows = [
+    { id: 'offset-is-newer', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-08T01:00:00-06:00' },
+    { id: 'zulu-is-older', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-08T06:00:00Z' },
+  ];
+  assert.deepEqual(
+    classify({ rows, me: ME }).notes.map((n) => n.id),
+    ['offset-is-newer', 'zulu-is-older'],
+  );
+});
+
+test('order: notes on the same instant keep the order they arrived in', () => {
+  // This is what `sortByInstant(notes, k).reverse()` got wrong and what the
+  // `localeCompare` it replaced got right. A stable ascending sort reversed
+  // is descending with its ties reversed, so this came back c,b,a.
+  const at = '2026-11-08T10:00:00Z';
+  const rows = ['a', 'b', 'c'].map((id) => ({
+    id, from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: at,
+  }));
+  assert.deepEqual(classify({ rows, me: ME }).notes.map((n) => n.id), ['a', 'b', 'c']);
+});
+
+test('order: one unplaceable ts does not disturb the rows around it', () => {
+  // This is what `compareInstants(b.ts, a.ts) ?? 0` got wrong. The `??`
+  // reports an unplaceable row as equal to every other row, which makes the
+  // comparator inconsistent, and an inconsistent comparator does not merely
+  // misplace the bad row -- it leaves the good ones out of order too. Here it
+  // returned n1,BAD,n2,n3 with n1 of the 8th ahead of n2 of the 9th.
+  const rows = [
+    { id: 'n1', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-08T10:00:00Z' },
+    { id: 'BAD', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: 'not an instant' },
+    { id: 'n2', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-09T10:00:00Z' },
+    { id: 'n3', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-07T10:00:00Z' },
+  ];
+  const got = classify({ rows, me: ME }).notes.map((n) => n.id);
+  assert.deepEqual(got.filter((id) => id !== 'BAD'), ['n2', 'n1', 'n3']);
+  // And it is kept rather than dropped, which is the other half of the
+  // module's contract: a row whose timestamp was refused is still a row a
+  // reader has to see.
+  assert.ok(got.includes('BAD'));
+});
+
+test('order: a null ts is survivable, which the original localeCompare was not', () => {
+  // `b.ts.localeCompare(a.ts)` threw a TypeError on this input, so the whole
+  // listing was lost to one malformed row. Both replacements fixed that and
+  // this pins it so a third one cannot lose it again.
+  const rows = [
+    { id: 'n1', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-08T10:00:00Z' },
+    { id: 'NUL', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: null },
+    { id: 'n2', from_seat: 'pm', from_company: 'Ursa', to_seat: 'exo', to_company: 'Ursa', ts: '2026-11-09T10:00:00Z' },
+  ];
+  const got = classify({ rows, me: ME }).notes.map((n) => n.id);
+  assert.equal(got.length, 3);
+  assert.deepEqual(got.filter((id) => id !== 'NUL'), ['n2', 'n1']);
+});
