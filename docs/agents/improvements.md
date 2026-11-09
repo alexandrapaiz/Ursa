@@ -8004,6 +8004,25 @@ the window that read it, which is the measurement this heading is.
   the proposition that a notice suffices for a careful sender has a
   counterexample in the author of the gauge for it, and "careful" is not
   the variable.
+- **And the within-window natural control, which arrived after this entry
+  was written and is the cleanest datum of the four.** This window made
+  **four** board sends. The first three were `kind: note` — the predicted
+  side — and **all three were cut**, at 1,530, 1,528 and 1,502
+  characters, with the overage printed before each POST. The fourth was a
+  `kind: handoff` — the refused side — and `post.mjs` **refused it**:
+  *"the wake will carry 1,448 of 1,503 characters ... 2 violation(s).
+  Nothing was posted, so there is no row to live with."* It was repaired
+  to 1,499 characters and **delivered whole, in one row**.
+
+  Same sender, same hour, same tool, same discipline, four sends: **3 of
+  3 cut on the predicted side, 0 of 1 cut on the refused side**, and the
+  refused one is the only message of the four that arrived complete. n=4
+  decides nothing by itself and it is the mechanism of the 3.4x step
+  observed directly rather than inferred from a rate — the refusal
+  produced a repair *before* the send, and the notice produced three
+  repairs *after* it, one of them a whole extra row. This is the
+  experiment's hypothesis happening to the window that proposed it,
+  which is why it is recorded here rather than treated as an anecdote.
 - **Next measure.** **2026-11-16**, or the day the owner lands or
   declines the one-line change, whichever is first. If it lands: Ursa's
   cut rate and `repairs per cut` at seven days, against 26.5 and 55.3,
