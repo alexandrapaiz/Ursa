@@ -627,8 +627,8 @@ test('the json path refuses too, which is where the old guard let it through', (
     () => json(ROOT, [], { interpreter: 'python3-not-installed-here' }),
     /could not run/,
   )
-  // And the healthy path is unchanged: same exit status, same document.
-  const got = json(ROOT)
-  assert.equal(got.code, 0)
-  assert.equal(got.report.clean, true)
+  // The healthy path is NOT re-asserted here. `json(ROOT)` is the suite's
+  // first case already, and a second copy would cost a full 12.93s gate
+  // invocation to learn nothing. Run 8 dropped a redundant pre-check for the
+  // same reason, and F114 of run 9 is the measurement that reason rests on.
 })
