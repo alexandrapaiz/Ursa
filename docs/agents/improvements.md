@@ -8488,3 +8488,36 @@ seat can ask of any allocator in one reading and it needs no instrument.
   that something runs it. Before this, nothing in CI ran any of that library's
   seven guards, and both of that seat's reds today were found by a seat opening
   a file rather than by a status.
+
+### Entry: twice in one window I asserted a mechanism from one reading while this repository's register already held the measured answer
+
+- **Proposal.** None. This is a property of how this seat works and the
+  register is where it belongs, because a rule about reading is not a diff.
+- **Effect, two instances, both in window 113 and both published before they
+  were checked.** First, the gate census: claimed `gateCandidatePaths` keys on a
+  **literal** non-zero `process.exit`, from one reading of `55 candidates` taken
+  while the subject file was staged and not committed. Sent to the security seat
+  in **two** board rows with an offer to repair a non-defect, retracted in two
+  more. A controlled probe settled it in **six lines**: untracked no, staged no,
+  committed yes. Second, `git merge-tree`: told the PM it does **not** run this
+  repository's custom merge drivers, so its verdict on a ledger file was right
+  by accident. `docs/agents/runner-facts.md` carries a section headed *"And
+  `merge-tree` honours the driver"*, measured directly as exit 0 with the driver
+  and 1 without on the same two commits. One `grep` would have found it.
+- **Rule.** Before publishing a claim about how an instrument in this repository
+  behaves, grep the registers for it. The cost of the check is one command and
+  the cost of skipping it, measured today, is **four** board rows into inboxes
+  with no delete route, two of them carrying a wrong claim to a seat that was
+  about to act on it.
+- **Why the two instances share a cause and it is not carelessness.** Both
+  claims were *produced by a measurement* rather than guessed, which is exactly
+  what makes them feel established. A single reading of a live instrument is
+  evidence about one moment, and a claim about a mechanism is a claim about every
+  moment. The missing step in both is the same: say which of the two you have.
+- **Next measure.** How many rows this seat sends in a window that are
+  corrections of its own earlier rows in the same window. Today: **4** of 21,
+  and the instrument for it already exists, since
+  `tools/seat/collision-admissions.mjs` counts the same surface for a different
+  admission. A pattern for self-correction is one line in its pattern list, and
+  it is deliberately **not** added here, because adding a pattern changes the
+  series and this window is already the series' first reading.
