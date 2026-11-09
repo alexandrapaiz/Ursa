@@ -11,9 +11,15 @@
 // What it enforces, per package with a lockfile:
 //   - zero critical advisories anywhere, production or development
 //   - zero high advisories in the production dependency tree
-// Development-only high and moderate advisories are reported and do not
-// fail, because a test runner's dev server is not a deployed surface and
-// blocking on it would train people to pass --allow-dirty.
+// Everything else is REPORTED and does not fail: a development-only high or
+// moderate, and any low or info in either tree. A test runner's dev server is
+// not a deployed surface, and blocking on it would train people to pass
+// --allow-dirty. Reporting is not the same concession as silence, which is
+// what this gate used to do with a low: on 2026-11-09 ursa-minor carried
+// three low advisories with a named semver-major repair and this gate printed
+// "Dependency floor holds" over a count line of three zeros. Every advisory
+// npm reports now appears on exactly one line, carrying npm's own answer to
+// what would repair it. See scripts/dep-floor-classify.mjs.
 //
 // Exceptions live in dep-floor.allow.json and every one carries an expiry.
 // An expired exception does not quietly keep working; it fails the gate
@@ -31,6 +37,7 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 
+import { classifyAdvisory, fixHint, severityCounts } from './dep-floor-classify.mjs'
 import { summaryLine } from './dep-floor-summary.mjs'
 
 const REPO_ROOT = resolve(import.meta.dirname, '..')
@@ -138,37 +145,36 @@ try {
 
     for (const [pkgName, vuln] of Object.entries(full.vulnerabilities ?? {})) {
       const inProd = prodNames.has(pkgName)
-      const scope = inProd ? 'prod' : 'dev'
-      const sev = vuln.severity
       const ids = advisoryIds(vuln)
-      const failing = sev === 'critical' || (sev === 'high' && inProd)
-      if (!failing) {
-        if (sev === 'high' || sev === 'moderate') {
-          warnings.push({ package: rel, dependency: pkgName, severity: sev, scope, advisories: ids })
-        }
-        continue
-      }
-      const exception = findException(allowlist, pkgName, ids, scope)
-      if (exception && Date.parse(exception.expires) >= NOW.getTime()) {
-        warnings.push({ package: rel, dependency: pkgName, severity: sev, scope, advisories: ids, allowedUntil: exception.expires, reason: exception.reason })
-        continue
-      }
-      if (exception) {
-        expired.push({ package: rel, dependency: pkgName, severity: sev, scope, advisories: ids, expiredOn: exception.expires, approvedBy: exception.approvedBy })
-        continue
-      }
-      violations.push({
+      // Looked up for every advisory, not only the failing ones, because the
+      // classifier decides what an exception means rather than being told.
+      const exception = findException(allowlist, pkgName, ids, inProd ? 'prod' : 'dev')
+      const { kind, scope, why } = classifyAdvisory({
+        severity: vuln.severity,
+        inProd,
+        exceptionExpires: exception ? exception.expires : null,
+        nowMs: NOW.getTime(),
+      })
+      // One record shape for all three kinds, so the remediation hint cannot
+      // be present on one and absent on the others.
+      const record = {
         package: rel,
         dependency: pkgName,
-        severity: sev,
+        severity: vuln.severity,
         scope,
         advisories: ids,
         direct: Boolean(vuln.isDirect),
-        fix: vuln.fixAvailable === true ? 'npm audit fix' :
-             (vuln.fixAvailable && vuln.fixAvailable.name
-               ? `${vuln.fixAvailable.name}@${vuln.fixAvailable.version}${vuln.fixAvailable.isSemVerMajor ? ' (semver-major)' : ''}`
-               : 'none published'),
-      })
+        fix: fixHint(vuln.fixAvailable),
+      }
+      if (kind === 'violation') {
+        violations.push(record)
+      } else if (kind === 'expired') {
+        expired.push({ ...record, expiredOn: exception.expires, approvedBy: exception.approvedBy })
+      } else if (why === 'allowed') {
+        warnings.push({ ...record, allowedUntil: exception.expires, reason: exception.reason })
+      } else {
+        warnings.push(record)
+      }
     }
   }
 } catch (err) {
@@ -183,8 +189,7 @@ if (asJson) {
   console.log(JSON.stringify({ ok: !failed, packages, violations, expired, warnings }, null, 2))
 } else {
   for (const p of packages) {
-    const a = p.totals.all, d = p.totals.prod
-    console.log(`${p.path} (${p.name}): all critical=${a.critical} high=${a.high} moderate=${a.moderate} | production critical=${d.critical} high=${d.high} moderate=${d.moderate}`)
+    console.log(`${p.path} (${p.name}): all ${severityCounts(p.totals.all)} | production ${severityCounts(p.totals.prod)}`)
   }
   const annotate = process.env.GITHUB_ACTIONS === 'true'
   for (const v of violations) {
@@ -192,12 +197,12 @@ if (asJson) {
     console.log(annotate ? `::error::${line}` : `FAIL  ${line}`)
   }
   for (const e of expired) {
-    const line = `${e.package}: the exception for ${e.dependency} expired on ${e.expiredOn} (approved by ${e.approvedBy}). Fix it or have the owner renew it in dep-floor.allow.json.`
+    const line = `${e.package}: the exception for ${e.dependency} expired on ${e.expiredOn} (approved by ${e.approvedBy}). Fix: ${e.fix}. Or have the owner renew it in dep-floor.allow.json.`
     console.log(annotate ? `::error::${line}` : `FAIL  ${line}`)
   }
   for (const w of warnings) {
     const why = w.allowedUntil ? `allowed until ${w.allowedUntil}: ${w.reason}` : `${w.scope}-only, below the floor`
-    const line = `${w.package}: ${w.dependency} is ${w.severity} (${why}).`
+    const line = `${w.package}: ${w.dependency} is ${w.severity} (${why}). Fix: ${w.fix}.`
     console.log(annotate ? `::warning::${line}` : `warn  ${line}`)
   }
   console.log('\n' + summaryLine(violations.length, expired.length))
