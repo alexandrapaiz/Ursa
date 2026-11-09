@@ -1184,8 +1184,8 @@
   },
   "clearing-a-record-for-release/E28": {
     "verdict": "widened",
-    "read": "2026-10-27",
-    "lines": "82e5d892dbe61207",
+    "read": "2026-11-09",
+    "lines": "276c5ca799f6615c",
     "what": "f6b909b09e697a54",
     "passages": "3e74f2d4869307a6"
   },
@@ -1317,10 +1317,10 @@
   },
   "clearing-a-record-for-release/E45": {
     "verdict": "supports",
-    "read": "2026-10-27",
+    "read": "2026-11-09",
     "lines": "1d3bb84ec292122b",
-    "what": "df3b20693c1d68bd",
-    "passages": "96ef4139cbd7997d"
+    "what": "94787dd2ccf0cda9",
+    "passages": "867c1389361a975c"
   },
   "clearing-a-record-for-release/E5": {
     "verdict": "supports",
