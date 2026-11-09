@@ -2164,3 +2164,83 @@ does not clear it, since one edge of that control is 230 pixels. A ring
 drawn in its own backdrop's colour has no clearing pixels at all. Both of
 those stay `BELOW_FLOOR`, and the second is the selftest's fixture 4,
 which still fails as it should.
+
+---
+
+## L61 — The walk identified a tab stop by where it had been scrolled to
+
+**measured**, 2026-11-09, the home page at 390x844, with the mechanism
+reproduced on a fixture first and then photographed on the site.
+
+Run h left this as the next item in the lane and named the right first
+question, which was whether the tab walk was terminating early rather
+than whether the control was genuinely stranded. It was terminating
+early. The site was right.
+
+`measure-focus.mjs` walks the page with Tab and stops when a stop's
+identity repeats, because that is how a closed ring is detected. A stop
+the DOM enumeration declared carries a probe attribute and is identified
+by it. A stop the enumeration never declared has no probe, and it was
+identified by its tag and its `getBoundingClientRect` coordinates.
+
+Those coordinates are **viewport-relative**, and Tab scrolls each stop
+into view before the walk reads them. So the coordinate of an undeclared
+stop is not a fact about the stop. It is a fact about where the browser
+parks whatever it has just focused, and on a long page it is very nearly
+the same number every time.
+
+The measurement, taken by walking past the point where the tool quits:
+
+| stop | identity the tool used | document y | element |
+|---|---|---|---|
+| 0 | `pre@49,401` | 2510 | the `git clone` command |
+| 2 | `pre@49,560` | 2669 | the `npx tsx` command |
+| 6 | `pre@49,401` | 3204 | the `curl` command |
+
+Stops 0 and 6 are two different elements 694 pixels apart in the
+document, and they handed the walk the same identity. The walk called
+the ring closed at stop 6, so stop 7 was never reached, and stop 7 is
+the third copy button. It was reported as a control the keyboard cannot
+reach. It is reachable, and it answers focus with 200 indicator pixels
+at 100% share and a median of 11.25, which is exactly what its two
+siblings answer.
+
+**Why it was only the phone.** Chromium makes an overflowing `<pre>`
+keyboard-focusable, so the undeclared stops are the install commands,
+and whether a command overflows depends on the width. At 390 all three
+overflow and there are three undeclared stops to collide. At 820 and
+1440 only one does, so there was nothing to collide with and the page
+reported clean.
+
+**The shape of the defect, which is the part worth carrying.** Both of
+this tool's headline numbers are set differences against the walk, so
+anything that shortens the walk inflates the unreachable count and
+deflates the stop count at the same time, and the two errors corroborate
+each other. The run that found this had a reason to trust the report: it
+reported a real defect on the same page in the same pass. An instrument
+whose two numbers are derived from one traversal has one failure that
+moves both, so agreement between them is not evidence.
+
+**The fix.** The identity is stamped onto the element on first sight,
+`data-focus-walk`, rather than computed from where it happens to be. Two
+elements cannot share it and one element keeps it however far the page
+scrolls under it. A repeat now means the keyboard genuinely returned to
+a stop it had already been on.
+
+**The check.** A new selftest fixture, `tall.html`: a 4000px page with
+three scrollable `<pre>` blocks at absolute integer tops, so all three
+land at exactly `20,289` at the selftest's 800x600 rather than within a
+pixel, which is the difference between a fixture that fails on the old
+code every time and one that fails on it sometimes. The first version of
+that fixture used uniform margins and the landings came out 412 and 411,
+one pixel apart, which is how close the near-miss is. Five of its six
+assertions fail with the identity line put back, reporting two of six
+stops and two false unreachables. Receipt committed.
+
+**What it changes about the record.** The site has no keyboard-reach
+defect and has never had one. Run h's second deferred finding, the
+undeclared `<pre>` stops, was also undercounted by the same break: it
+reported two and there are three at 390. Whether those blocks should
+carry an accessible name is still the product question run h said it was.
+The sweep after the fix reads 86 tab stops across five pages and three
+viewports, 0 below a floor, 0 unreachable, 0 unstable.
