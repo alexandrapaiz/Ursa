@@ -3,6 +3,7 @@
   "_kinds": "See KINDS in tools/gates/gate-registry.mjs. A kind is not a severity: it says why no per-change gate runs this file, and each one is falsifiable by a different observation.",
   "entries": [
     { "path": "scripts/ci-checks.mjs", "kind": "the-runner", "why": "It is the gate list. A list that ran itself as one of its own entries would recurse, and its own rules are asserted in scripts/ci-checks.test.mjs." },
+    { "path": "scripts/uuid-shape-census.mjs", "kind": "not-a-gate", "why": "A census of every 8-4-4-4-12 hex string in every blob in the repository, written to give the redaction gate's Class C narrowing a population. Every verdict it prints is information at exit 0; its only two non-zero paths are refusals, a shallow clone and a thrown error, so it has no finding to fail on. It also walks every blob in every ref, which is the cost that keeps tools/ledger/recheck-urgent.mjs off a per-change gate. Registered 2026-11-09 by the security seat to clear this gate's red on main; the engineer seat owns the file and may reclassify it." },
     { "path": "scripts/dep-floor.mjs", "kind": "needs-network", "why": "It reads `npm audit --json`, which resolves advisories against the public registry, so on a runner with no network it would report a clean floor over a scope it never measured." },
 
     { "path": "tools/board/post.mjs", "kind": "write-action", "why": "Posting a message to the company board is an outward-facing write. A gate that posted on every push would put a seat's name on rows no seat wrote." },

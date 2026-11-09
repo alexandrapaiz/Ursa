@@ -8,12 +8,12 @@ own `#851` rather than on `main`, because `#851` touches
 `tools/board/bypass.mjs` and one of the notes is about that file. `#851` is
 not subsumed and still needs reading on its own.
 
-**Nothing severe. No secret found, nothing to rotate.** Five findings. Four
+**Nothing severe. No secret found, nothing to rotate.** Six findings. Four
 are one class: an instrument whose output cannot distinguish its own inability
 to answer from its verdict. Three are fixed here. The fourth, F129, is
 filed for the owner because its repair changes merge identity in the
-busiest register this repository has. The fifth, F130, is a red the gates
-were already carrying on `main`, found by running them.
+busiest register this repository has. The fifth and sixth, F130 and F131, are
+reds the gates were already carrying on `main`, found by running them.
 
 ## The class, stated once
 
@@ -210,6 +210,33 @@ What this run did fix is its own two entries, which are in the contract
 form. That had an immediate payoff worth recording: the gate rejected the
 first of them for a malformed `- What:` label within seconds of its
 becoming visible. The 27 never got that scrutiny.
+
+## F131 — the gate registry went red on `main` on a file that merged during this run
+
+**Fixed in this run.** `tools/gates/gate-registry.baseline.json`.
+
+The owner merged `#851` at 09:52:35Z while this run was working, and
+merging `origin/main` back in brought `scripts/uuid-shape-census.mjs` with
+it, from the engineer seat's `9c282433`. `tools/gates/gate-registry.mjs`
+then exits 1: a file that matches the gate candidate key and that no check
+in `scripts/ci-checks.mjs` runs. That gate is registered in CI, so `main`
+was red on it.
+
+Registered `not-a-gate`, with the classification stated rather than
+assumed. Every verdict the census prints is information at exit 0, and its
+only two non-zero paths are refusals — a shallow clone and a thrown error —
+so it has no finding to fail on. It also walks every blob in every ref,
+which is the cost argument that keeps `tools/ledger/recheck-urgent.mjs` off
+a per-change gate. **The engineer seat owns that file and may reclassify
+it**; this entry exists to clear the red, not to settle the question.
+
+Worth naming as a recurring shape rather than an incident: this is the
+third time in two runs that a file reaching `main` became a registry
+candidate with nothing in any seat's checklist pointing at it. F130 is the
+same shape for `docs/doc-model`, and the registry's own comment records a
+week of red from three skill-seat ledger entries. The registry is working
+exactly as intended each time, and each time the author did not know their
+file had entered its population.
 
 ## What was measured, and what the measurements do not cover
 
