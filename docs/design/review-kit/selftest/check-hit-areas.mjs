@@ -65,10 +65,12 @@ try {
   // Each expectation names the case in the fixture it is reading, so a
   // failure says which half is wrong rather than only that a count moved.
   const want = [
-    ["targets seen", rows.length, 7],
-    ["standalone controls (cases 1 and 2)", standalone.length, 2],
-    ["of those, short — the floor still bites", standalone.filter((r) => r.short).length, 2],
-    ["inline and exempt (case 3), 2.5.8 survived the third category", rows.filter((r) => r.inline).length, 1],
+    ["targets seen", rows.length, 10],
+    ["standalone controls (cases 1, 2 and the two of case 9)", standalone.length, 4],
+    ["of those, short — the floor still bites", standalone.filter((r) => r.short).length, 4],
+    ["inline and exempt (cases 3 and 8), 2.5.8 survived the third category", rows.filter((r) => r.inline).length, 2],
+    ["case 8: words in a sibling SPAN exempt the link the way a bare text node does", rows.some((r) => r.label === "a link to this record alone" && r.inline), true],
+    ["case 9: two abutting controls are NOT a sentence, so both stay short", rows.filter((r) => r.label === "copy" || r.label === "share").every((r) => !r.inline && r.short), true],
     ["document spans (cases 4 to 7)", docs.length, 4],
     ["document spans covering their own line (4 and 5)", docs.filter((r) => r.coversLine === true).length, 2],
     ["document spans under their own line (case 6)", docs.filter((r) => r.coversLine === false).length, 1],
