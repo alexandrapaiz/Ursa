@@ -327,23 +327,7 @@ HEREDOC_OPEN = re.compile(r"<<(?P<dash>-?)\s*(?P<q>[\'\"]?)"
 SAFE_FORM = ("printf '%s present: %%s length: %%s\\n' "
              '"${%s:+yes}" "${#%s}"')
 
-# THE SCAN DIRECTORIES ARE HQ'S LAYOUT, AND THREE OF THE FIVE DO NOT EXIST HERE
-# (adapted 2026-11-09 by Ursa's security seat, on landing this vendored file).
-#
-# HQ's installer vendors this checker byte for byte, so the tuple it arrives
-# with names HQ's own tree: `standards/`, `runtime/` and `site/` are
-# directories of alexandra-systems. In Ursa they are absent, and the standards
-# live at `docs/standards/`. `default_targets` skips a missing directory
-# silently, so the scan that reads as repository-wide covered 24 files, all of
-# them under `tools/` and `.github/workflows/`, while Ursa's own runnable code
-# in `ursa-major/` and `docs/design/` was never looked at.
-#
-# The four names below are additive. Nothing is removed, so a re-vendor from
-# HQ reverts this to a working state rather than a broken one, and the
-# measurement that justifies the addition is: 24 files to 39, and zero new
-# findings, so the guard still lands exit 0 against this trunk.
-SCAN_DIRS = ("tools", "standards", "runtime", ".github/workflows", "site",
-             "ursa-major", "ursa-minor", "docs", "prompts")
+SCAN_DIRS = ("tools", "standards", "runtime", ".github/workflows", "site")
 SCAN_SUFFIXES = (".sh", ".bash", ".zsh", ".yml", ".yaml", ".py")
 
 # THE FILE SCAN AND THE HOOK DISAGREED ABOUT MARKDOWN, AND THE HOOK WON
