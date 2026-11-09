@@ -544,3 +544,114 @@ test('the two entries name paths, and this tree really lacks both', () => {
   const got = premiseFailures(ROOT)
   assert.deepEqual(got, [], JSON.stringify(got))
 })
+
+// THE DIRECTION `absent_path` COULD NOT REACH (added 2026-11-09, security
+// seat, measured; named by Ursa's ExO seat)
+//
+// `absent_path` reads the premise off the filesystem, so it catches the
+// fixture ARRIVING. It says nothing about the fixture staying absent while
+// the exempted test starts failing for a SECOND reason, because the entry
+// subtracts a test NAME from the failure set and a name carries no reason.
+//
+// Measured before the repair, on the tree as it then stood: one extra
+// assertion inside `test_check_actions_reach_is_clean`, asserting the checker
+// flags `echo hello` as a print, which it does not and should not. That is a
+// red about the checker in the shape a real regression takes.
+// `tools/secret-print-tests.py` printed `2 exempt as absent fixtures, 0
+// unexpected`, then `the vendored checker passes every test that is about the
+// checker`, and exited 0. `absent_path` was never consulted, because the
+// premise was true the whole time.
+//
+// Why no reading of the tree could have closed it. `absent_path` is a claim
+// about the tree. "This test fails BECAUSE of that absence" is a claim about
+// causation, and the filesystem is not asked about causation. So the reason
+// is executed: materialise the fixture, re-run that one test, and absorb the
+// failure only if it goes green.
+//
+// Entry 1 is used in the instance cases below because its stand-in is an
+// empty file under `tools/`, and `instance()` copies `tools/` only. Entry 2's
+// stand-in is a copy of `docs/standards/lessons.md`, which no instance has.
+const ABSENT_1 =
+  'test_secret_print.TheSafeFormsAreNeverFlagged.test_check_actions_reach_is_clean'
+
+function probe(dir, name) {
+  const out = spawnSync('python3', ['-c', [
+    'import importlib.util, json, sys',
+    'spec = importlib.util.spec_from_file_location("w", sys.argv[1])',
+    'm = importlib.util.module_from_spec(spec)',
+    'spec.loader.exec_module(m)',
+    'v, note = m.failure_is_about_the_absence(',
+    '    sys.argv[2], m.EXPECTED_ABSENT_FIXTURES[sys.argv[2]])',
+    'print(json.dumps([v, note]))',
+  ].join('\n'), path.join(dir, 'tools', 'secret-print-tests.py'), name],
+  { cwd: dir, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
+  assert.equal(out.status, 0, out.stderr)
+  return JSON.parse(out.stdout.trim().split('\n').pop())
+}
+
+test('the exemption\'s reason is executed: the test goes green once the fixture exists', () => {
+  // Against the real tree, because entry 2's stand-in is Ursa's own register
+  // and only the real tree has it. This is the case that would catch a
+  // stand-in declared wrongly, in either entry.
+  for (const name of [ABSENT_1,
+    'test_secret_print.TheRegisterTheRuleLivesIn'
+    + '.test_the_register_is_still_scannable_when_a_caller_names_it']) {
+    const [verdict, note] = probe(ROOT, name)
+    assert.equal(verdict, true, `${name}: ${note}`)
+  }
+})
+
+test('the probe leaves no stand-in behind, so the next run is not told the fixture arrived', () => {
+  // The hazard the probe introduces, asserted rather than trusted: it writes
+  // into the working tree. A surviving stand-in makes `absent_path` report
+  // the fixture as present, which is red and wrong.
+  probe(ROOT, ABSENT_1)
+  assert.deepEqual(premiseFailures(ROOT), [],
+    'a stand-in or its directory outlived the probe')
+  assert.equal(fs.existsSync(path.join(ROOT, 'tools/check-actions-reach.sh')), false)
+  assert.equal(fs.existsSync(path.join(ROOT, 'standards')), false)
+})
+
+test('a red that survives the fixture appearing is not absorbed', () => {
+  // The measured regression, as a case. The injected assertion is false about
+  // the checker and is placed inside the exempted test, which is precisely
+  // where the pre-repair runner could not see it.
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'tests', 'test_secret_print.py')
+  const before = fs.readFileSync(p, 'utf8')
+  const anchor = '        self.assertEqual(0, run(target, "--quiet").returncode,\n'
+    + '                         run(target).stdout)\n'
+  assert.ok(before.includes(anchor), 'the exempted test no longer has this shape')
+  fs.writeFileSync(p, before.replace(anchor, anchor
+    + '        self.assertEqual(["X5-PRINT"], codes("--command", "echo hello"))\n'))
+  const [verdict, note] = probe(dir, ABSENT_1)
+  assert.equal(verdict, false, note)
+  assert.match(note, /fails with the fixture PRESENT too/)
+  // And the note names what was raised. Reading `[-1]` of the traceback gave
+  // `+ []`, which is the tail of an assertion diff and names nothing.
+  assert.match(note, /AssertionError/)
+})
+
+test('an entry with no stand_in is a premise failure, not a trusted name', () => {
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'secret-print-tests.py')
+  // What an edit to this dict that forgets the stand-in looks like.
+  fs.writeFileSync(p, fs.readFileSync(p, 'utf8')
+    .replace(/^\s*"stand_in": .*$/gm, ''))
+  const got = premiseFailures(dir)
+  assert.equal(got.length, 2, JSON.stringify(got))
+  assert.match(got[0][1], /carries no `stand_in`/)
+})
+
+test('the gate reports a missing stand_in as undecided', () => {
+  const dir = instance()
+  const p = path.join(dir, 'tools', 'secret-print-tests.py')
+  fs.writeFileSync(p, fs.readFileSync(p, 'utf8')
+    .replace(/^\s*"stand_in": .*$/gm, ''))
+  const { code, report } = json(dir)
+  assert.equal(code, 1)
+  const mine = report.problems.filter(
+    (x) => x.kind === 'undecided' && /stand_in/.test(x.why))
+  assert.equal(mine.length, 2, JSON.stringify(report.problems))
+  assert.match(mine[0].why, /causation/)
+})

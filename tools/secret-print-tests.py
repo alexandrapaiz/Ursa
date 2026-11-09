@@ -230,6 +230,23 @@ class CannotProbe(Exception):
     """The differential could not be performed. Never a pass."""
 
 
+TESTS_DIR = os.path.join(ROOT, "tools", "tests")
+
+
+def _importable():
+    """Put the vendored suite on `sys.path`, idempotently.
+
+    This was `main()`'s first line and nothing else. The probe below loads one
+    test BY NAME, so it needs the same path, and depending on a caller's side
+    effect made it fail with `ImportError: Failed to import test module` when
+    called as a unit. That answer was red, which is the safe direction, but it
+    was red for the loader rather than for the test, and a guard that reports
+    the wrong reason is the shape this whole file is about. Found by this
+    file's own new case in `tools/secret-print-exemptions.test.mjs`."""
+    if TESTS_DIR not in sys.path:
+        sys.path.insert(0, TESTS_DIR)
+
+
 def _first_raised(traceback_text):
     """The line that names what was raised, not the last line of the text.
 
@@ -257,6 +274,7 @@ def failure_is_about_the_absence(name, value):
     dest = os.path.join(ROOT, str(value["absent_path"]))
     if os.path.exists(dest):
         return None, "the path exists, so there was nothing to materialise"
+    _importable()
     created = []
     try:
         created = _materialise(value["stand_in"], dest)
@@ -265,9 +283,17 @@ def failure_is_about_the_absence(name, value):
     except OSError as exc:
         return None, f"the stand-in could not be written: {exc}"
     try:
+        # Counted from a mark, not from emptiness: `main()` has already run
+        # `discover()` on the same loader, so any error it collected is still
+        # in this list and is not this probe's.
+        seen = len(unittest.defaultTestLoader.errors)
+        loaded = unittest.defaultTestLoader.loadTestsFromName(name)
+        if len(unittest.defaultTestLoader.errors) > seen:
+            return None, ("the exempted test could not be loaded, so nothing "
+                          "was proved either way: " + _first_raised(
+                              unittest.defaultTestLoader.errors[seen]))
         result = unittest.TextTestRunner(
-            verbosity=0, stream=open(os.devnull, "w")
-        ).run(unittest.defaultTestLoader.loadTestsFromName(name))
+            verbosity=0, stream=open(os.devnull, "w")).run(loaded)
         passed = not (result.failures or result.errors)
         if passed:
             return True, ""
@@ -293,9 +319,9 @@ def failure_is_about_the_absence(name, value):
 
 
 def main():
-    sys.path.insert(0, os.path.join(ROOT, "tools", "tests"))
+    _importable()
     suite = unittest.defaultTestLoader.discover(
-        start_dir=os.path.join(ROOT, "tools", "tests"), top_level_dir=os.path.join(ROOT, "tools", "tests"))
+        start_dir=TESTS_DIR, top_level_dir=TESTS_DIR)
     result = unittest.TextTestRunner(verbosity=1, stream=sys.stderr).run(suite)
 
     def name(test):
