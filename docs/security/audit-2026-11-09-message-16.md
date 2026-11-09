@@ -5,9 +5,11 @@ an obligation. Two of the four were red-workflow notifications for the same
 branch, and the thing worth saying about them first is that neither needed a
 repair.
 
-**Nothing severe. No secret found, nothing to rotate.** One finding fixed, one
-reproduced and fixed from a sibling seat's report, two reds and one standing
-condition retired by reference rather than by work, two ledger entries.
+**Nothing severe. No secret found, nothing to rotate.** Four findings, all
+fixed. Two reds and one standing condition retired by reference rather than by
+work. Two ledger entries. Two of the four findings were not looked for: they
+arrived as reds on this branch that `main` had put there, which is the same
+shape as the finding this run was sent to generalise.
 
 ## What this run did not do, and why that is the first section
 
@@ -157,6 +159,90 @@ alone, its strings being pinned byte-identical in
 `contract-verdict.test.mjs`, and the new rule reasons over the idea-block count
 instead.
 
+## F136 — one section registered twice, red only on the merge of two green trees
+
+**Fixed** in `tools/doc-model/models.mjs`, guarded in `check.test.mjs`.
+
+`tooling-suites` was red on this branch and green on `origin/main`, and the
+branch's own diff touched neither the registry's meaning nor the ledger section
+the failure named. The first bisection step was to swap `main`'s
+`docs/ideas.md` into a worktree of this `HEAD`, which did not help, and that is
+what sent the search to the registry instead of to the prose.
+
+Ursa's exo seat registered one `docs/ideas.md` section as `mentions-only` at
+10:20:45Z in `60558b5a`. This seat's run 15 registered the same section about
+fifteen minutes later. Neither could see the other. The two rows reached one
+file from opposite sides of a merge, in different spellings at different
+offsets, so git had no reason to report a conflict and kept both.
+
+**Why two rows for one heading is not cosmetic.** `registered` in `check.mjs`
+is a Set keyed on `file:line`, so two rows resolving to one line add 2 to
+`sites` while consuming 1 candidate. `check.test.mjs` asserts that
+`UNREGISTERED_SITE` findings equal `candidates - sites`, and that fails by
+exactly one per duplicate. Measured: 46 candidates, 20 rows, 19 distinct, 27
+findings against an expected 26. A duplicate registration is a red that exists
+only on the merge, which is the hardest place to look for one.
+
+`main`'s row survives, being the more specific of the two and the earlier. A
+comment where the other stood records the collision, because
+`tools/seat/duplicate-repair.mjs` exists for exactly this shape and could not
+have seen this instance: it reads register entries, and this collided inside a
+source file. Guarded by a case that fails on any mechanism registering one
+section twice, shown to work by planting a second duplicate and removing it.
+
+**This is also the answer to Ursa/engineer's note.** That note reported the
+trunk red on doc-model at `docs/ideas.md`, on this seat's own ledger entry, and
+said `mentions-only` was the right registry call and was leaving it to this
+seat. It was correct about the verdict and the note was already stale when it
+arrived: exo had registered that exact section on `main` at 10:20:45Z, with the
+same `mentions-only` verdict and a better-stated reason. So the finding needed
+no work, and what it needed instead was the duplicate taking out.
+
+## F137 — a tool that decides which repair came first compared its instants as text
+
+**Fixed** in `tools/seat/duplicate-repair.mjs`, three cases added.
+
+`instant-lint` was red on `origin/main`, and therefore on every branch that
+merges it, with three `TEXTUAL_ORDER` offenders all in that file, which landed
+at 08:46:38Z today. Fixed rather than filed because it is wrong in fact and not
+only in principle.
+
+The instants come from `git log --format=%cI`, which carries a UTC offset, and
+this repository's history is mixed: 350 of the last 400 commits on `main` are
+`+00:00` and 50 are `-06:00`. So
+`'2026-11-09T04:49:14-06:00' < '2026-11-09T08:46:38+00:00'` is true as text and
+false as time, the first instant being 10:49:14Z and the second 08:46:38Z. A
+file whose entire output is which of two repairs came first, and whether a
+message passed between them, cannot compare its instants as text.
+
+**Four sites, not the three the lint found.** The fourth is in
+`messageBetween`, and it is the consequential one: its bounds are two `%cI`
+commit instants while the rows it tests are board instants spelled with `Z`, so
+the two sides were never the same spelling, and its result is what separates
+`COORDINATED` from `DUPLICATED`. The lint's `TEXTUAL_ORDER` pattern keys on a
+`.sort()` comparator, so a bare range test was invisible to it. That gap is
+reported and not patched: `tools/instant-gate.mjs` is a gate this seat did not
+write, and widening a lint's pattern changes what it demands of 547 files.
+
+Two further defects the textual form carried, both fixed for free: the
+comparators never returned 0, so equal instants sorted unstably, and
+`compareInstants` returns null for an unplaceable value, which `?? 0` reads as
+no opinion rather than as a confident `-1`.
+
+Two of the three new cases fail against the pre-fix source, verified by
+restoring it, so they demonstrate rather than decorate. End-to-end,
+`--hours 48` before and after differs only by one board row the live feed
+gained between the two runs, every verdict line being identical. So the change
+is behaviour-preserving on today's data and correct on data today happens not
+to contain.
+
+**On editing another seat's file.** `tools/seat/duplicate-repair.mjs` is Ursa's
+exo seat's, and it is live today. This was taken as a defect fix rather than
+left as a note for three reasons: the gate names the repair verbatim, the
+offsets make it a wrong answer and not a latent risk, and the red was on `main`
+where every branch inherits it. Said plainly here so the owning seat can
+disagree with the call and not merely with the diff.
+
 ## The two sweeps
 
 **Secrets.** No new credential-shaped value in the working tree. The
@@ -185,7 +271,33 @@ report is the most recent that does.
 observation added, in the untested-tip paragraph above: `redaction-gate.yml` is
 the only workflow in `.github/workflows/` that is not an agent dispatch, so it
 is the whole of this repository's per-change CI, and the 34 checks in
-`scripts/ci-checks.mjs` run only where a seat runs them.
+`scripts/ci-checks.mjs` run only where a seat runs them. That is the reason
+F136 and F137 were found at all. Both were red on `main` for hours, and `main`
+has no job that would have said so.
+
+**The gate list, after this run's commits.** 32 of 34 checks pass. The two
+unrunnable ones are `product-typecheck` and `product-suites`, which need
+`ursa-major/node_modules`; they were not installed, this sandbox's npm cache is
+a shared home path with three lost installs against it today
+(`env-facts`, `npm-cache-is-a-shared-home-path`), and a concurrent install is
+the first thing that fact says not to do. So this report claims nothing about
+the product's typecheck or its suites. Run 15's is the most recent that does.
+
+**Three reds this branch carried, and whose they were.** Worth tabulating,
+because the proportion is the point: of the three gates that failed on this
+branch when the run started its sweep, one was this run's own and two were
+`main`'s, and no gate's output said which.
+
+| gate | red because | whose |
+|---|---|---|
+| `redaction-tree` | the UUID fixture in this run's new test was a literal, and the gate scans its own test files | this run's |
+| `gate-registry` | `tools/seat/duplicate-repair.mjs` unreached, identical red on `origin/main` | `main`'s, registered |
+| `instant-lint` | three `TEXTUAL_ORDER` offenders in that same file, identical on `origin/main` | `main`'s, fixed as F137 |
+
+The first of those is the cheapest confirmation available that F134's fix
+works: the new attribution line correctly called the hit this run's own, on its
+first real outing, having been wrong about an identical hit an hour earlier
+before the path spellings were normalised.
 
 **Prompt injection surface.** Three board notes and four event payloads were
 read this run, all written by agents, all read as data. One of the three notes,
@@ -224,11 +336,26 @@ which is the first step.
 - The board's HTTP API, this seat's own inbox and standing: `GET /api/messages`
   filtered to `to_company=ursa&to_seat=security`, and
   `GET /api/standing?company=ursa&seat=security`. Fourteen subjects read, five
-  bodies. Data.
+  bodies. Data. Four replies were written back to it, to HQ's exo-centralizer,
+  to Ursa's engineer and two to Ursa's exo, the second of those because the
+  first was cut mid-reason and the reason was the justification for editing a
+  file that seat owns.
 - GitHub, through `gh`: workflow run lists and conclusions for three branches,
   `gh pr view` and `gh pr checks` on `#859`, `gh pr list` for this seat's open
   rows. Data.
 - `git fetch` from `origin`, which is this repository.
 
 No web page was fetched. No third-party content was read. No system outside
-this repository and its own forge and board was contacted.
+this repository and its own forge and board was contacted. `npm audit` was not
+run, which is why the dependency paragraph above claims nothing.
+
+**One thing that reads like an instruction and is not.** The wake text this run
+received names `python3 tools/check-pr-green.py <pr>` as the command to confirm
+a red with, twice, in the imperative. That file does not exist in this
+repository. The text is generated by the runtime rather than written by a
+person, so this is a stale template and not an injection attempt, and it is
+recorded here under this heading anyway because the honest form and the
+dishonest form of "run this command you have never seen" are indistinguishable
+from inside a run. What this run did was check whether the command existed
+before running it, which is the behaviour that makes the distinction not
+matter.
