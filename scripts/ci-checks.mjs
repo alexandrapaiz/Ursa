@@ -338,6 +338,31 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'excuse-control',
+    scope: 'tooling',
+    title: 'Excused gates: the reason is executed, not read',
+    // The layer above `gate-registry`. That gate requires every unreached
+    // candidate to carry a reason under one of ten kinds; this one EXECUTES
+    // the reason for the largest kind. `needs-token` claims the file answers
+    // nothing without a credential, so the control is to run it with the
+    // credential removed and require that it does not report clean.
+    //
+    // Two of the fourteen were false when this was added, in the two ways a
+    // claim of that shape can be false: `tools/board/bypass.mjs --audit`
+    // exited 0 over a window that answered 401, and
+    // `tools/stack/repair-pending.mjs` exited 1, its own code for a finding
+    // about the queue, from an uncaught `gh` failure. Both are fixed in the
+    // same pull request, so this arrives green rather than as a red gate
+    // every seat learns to ignore.
+    //
+    // Runs here and not on a schedule because its subject is this tree and
+    // its environment is the one a pull request gate actually gets: it
+    // REMOVES the credentials, so it needs none, and on a runner with no
+    // network every row still refuses.
+    argv: () => ['node', 'tools/gates/excuse-control.mjs', '--gate'],
+    passExit: [0],
+  },
+  {
     id: 'ledger-attributes',
     scope: 'tooling',
     title: 'Merge attribute declarations',
