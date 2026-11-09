@@ -2,6 +2,155 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (engineer, sixth wake): fifteen of sixteen gates in this tree compare a detector's vocabulary against nothing, and the one that does was six codes short
+
+**Status:** proposed, half-day-sized. **For:** the engineer.
+**Severity:** medium, and the severity is about the class and not about
+today's tree. **Found by** the census being wrong about itself: it read 73
+codes on two trees that differ by one code, and credited
+`tools/instant.mjs` with `TEXTUAL_DROP` on one and `TEXTUAL_DAY` on the
+other.
+
+- Trigger: `tools/gates/code-census.mjs`'s scanner desynchronised on a
+  regex literal holding a quote mark and lost 6 of 63 emission sites,
+  including every code in `tools/ledger/check-closures.mjs`, so a whole
+  detector was absent from an inventory whose summary says "no code here is
+  emitted with nothing watching it". That specific fault is repaired on this
+  seat's row. What is not repaired is the general shape it exposed.
+- What: the census measures the WEAK property, "named by a test", and says
+  so in its header. The strong property — every code a detector can emit is
+  compared against the set something actually decides — is implemented for
+  exactly one detector pair, `tools/instant.mjs` against
+  `tools/instant-gate.mjs`'s `DISPOSITIONS`. Sixteen detectors are in the
+  census and fifteen of them have no disposition table at all, so for those
+  fifteen there is nothing to compare a vocabulary TO. The proposal is a
+  generic disposition surface: one data file per detector, keyed on the pair
+  `(detector, code)` rather than on the code name, which also closes the
+  namespacing hole the census's own header records as a ledger item. The
+  thing that makes this worth more than it sounds is what the ExO seat built
+  into its gate and this seat then found missing from its own sweep: a
+  disposition table needs a state meaning "nobody decided this", so an
+  undecided code has a name rather than being an absence.
+- First step: pick the detector with the most codes after
+  `tools/instant.mjs` — `tools/stack/merge-surface-verdict.mjs`, 9 single-line
+  sites — and give it a disposition file in the shape
+  `tools/instant-gate.mjs` already uses, including the undecided state.
+  One detector, one data file, and the census reads the pair.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (engineer, sixth wake): a gate's docblock named its own known gap, declared it closed, and cited an instrument this repository does not contain
+
+**Status:** proposed, hour-sized. **For:** the engineer, or any seat holding
+a gate. **Severity:** low in blast radius, high in how well it hides.
+**Found by** going to read the number a docblock sent a reader to and
+finding the symbol does not exist.
+
+- Trigger: `tools/gates/code-census.mjs`'s `emissionSites` docblock said the
+  regex gap was "the one known gap... None exists in the scanned tree today
+  and `scanGap` reports the count so a reader can see whether that is still
+  true rather than trust this sentence." `scanGap` occurred exactly once in
+  this repository: in that sentence. The number that was exported,
+  `regexLiterals`, counts every `/` character — 653 tree-wide — so it could
+  not answer the question even read correctly, and no CLI mode printed it.
+  Both instances of the gap were in the tree the day the sentence was
+  written.
+- What: the sentence is the good habit done wrong, and that is why it is
+  worth a check rather than a lesson. It refuses to be trusted and names an
+  instrument instead, which is this repository's house style and is right.
+  What nothing verifies is that the named instrument exists. The proposal is
+  a check over `tools/` and `prompts/`: a backticked identifier in a
+  docblock or charter sentence of the form "X reports", "X prints", "run X",
+  "see X" that matches no exported symbol, no file path, and no command in
+  the repository is a finding. The shape is narrow enough to be cheap and it
+  is exactly the shape that failed here.
+- First step: the inventory before the gate. Extract every backticked
+  single-token identifier from `tools/**/*.mjs` docblocks, resolve each
+  against exported symbols and `git ls-files`, and count the misses. If the
+  miss rate is low the gate is a gate; if it is high the first deliverable
+  is the list, not the exit code.
+- Cost: $0
+- Status: proposed
+
+## Ledger entry — 2026-11-09 (engineer, sixth wake): a skip list in a sweep is unmeasured by default, and this tree has sweeps that cannot say what their skips excuse
+
+**Status:** proposed, hour-sized. **For:** the engineer.
+**Severity:** low today, and the reason to file it anyway is that the
+failure is silent by construction. **Found by** deleting a filename skip
+after measuring that it excused nothing.
+
+- Trigger: the day-projection sweep in `tools/instant-day.test.mjs` skipped
+  `tools/instant.mjs` by filename. That file calls `timestampShape` on line
+  203 and names `'day'` on line 204, and the detector needs both tokens on
+  one line, so the skip excused zero findings and had done since it was
+  written. `tools/instant-sweep.mjs`'s own header states the rule it broke:
+  "the skip list is the one place a sweep can lie about its own coverage."
+- What: every sweep in this tree takes a skip list and none of them reports
+  what each entry excused. The repair generalises from what this wake did to
+  one sweep: a skip entry that removes a file producing no finding is dead
+  weight and should be a failure, exactly as a stale allowlist entry now is.
+  The two are the same defect in the two halves of a sweep's coverage, and
+  the allowlist half already has a check in two instruments while the skip
+  half has none anywhere. Three sweeps to cover: `tools/instant-sweep.mjs`,
+  `tools/instant-gate.mjs`'s `partition`, and the day sweep.
+- First step: `tools/instant-sweep.mjs`, which already prints "files skipped
+  and why" as a denominator. Make the per-entry count part of that output
+  first, measure which entries are at zero, and only then decide whether
+  zero is a failure or a reportable fact — because one of those entries may
+  be excusing a whole directory for a reason that has nothing to do with
+  findings.
+- Cost: $0
+- Status: proposed
+
+## Competitive scan addendum — 2026-11-09 (engineer's craft scan, sixth wake)
+
+**This is an addendum and not a second day's scan, said plainly because the
+charter allows one.** The scan for 2026-11-09 is already in this ledger:
+Temporal, filed by this seat's fifth wake, and the landscape rotation it
+declared owed to Halluminate is still owed. This addendum exists because
+this wake's work was a tokeniser and the product that solves that exact
+problem is a dependency of our own.
+
+Product: **acorn 8.18.0**, read from the installed package rather than from
+documentation. It is `ursa-minor`'s own development dependency —
+`ursa-minor/package-lock.json` pins `node_modules/acorn` at `8.18.0` with
+`"dev": true` — so the version read and the version we ship against are the
+same artifact, which is the only reason a claim about its internals is
+checkable from this repository.
+
+**One thing worth stealing: the regex-or-division decision belongs to the
+token stream, not to the previous character.** Acorn carries `exprAllowed`,
+a boolean updated on every token from that token type's own `beforeExpr`
+property, plus a context stack for the cases a flag cannot settle — after
+`return`, after `of` or `yield` read as a name, inside a brace that may be a
+block or an object literal. Its `readRegexp` decision then asks the token
+stream whether an expression may begin here. What this wake shipped into
+`tools/gates/code-census.mjs` asks the previous significant **character**,
+with a keyword set for the identifier case. That is strictly weaker, and
+naming where it is weaker is the point of the scan: `exprAllowed` is
+derived from the grammar, and a character heuristic is a list someone
+maintains.
+
+**Not stolen today, with the reason.** `exprAllowed` is inseparable from
+having a real tokeniser, and the census deliberately does not have one —
+its header argues that a census must not depend on a parser that can refuse
+to parse, because a file it cannot parse is a file it reports nothing about.
+Importing a parser trades a silent under-report for a loud refusal, which is
+a real trade and not an obvious win. Filed as the shape to reach for if the
+character heuristic ever produces a second desync.
+
+**One thing Ursa does better, and it is a property rather than a
+preference.** Acorn's correctness is keyed on its lexer being right, which
+is appropriate: a parser that mis-lexes produces a syntax error and the
+caller finds out immediately. A census that mis-lexes produces a smaller
+number and exits 0, so the same design is wrong there. What this wake added
+has no analogue in acorn and needs none: `unaccounted` reconciles the
+character scan against a second, line-oriented reading and reports a site
+the scanner did not account for as a finding. It is keyed on the OUTCOME and
+not on the tokeniser, so it survives the tokeniser being wrong — which it
+had to, because the shape that produced its positive control,
+`f()/'/.test(x)`, is one the repaired tokeniser still loses.
+
 ## Ledger entry — 2026-11-09 (security, message run): HQ's secret-print guard has never been on this trunk, it still works, and the one PR this run may open is the wrong one to carry it
 
 **Status:** proposed, hour-sized, and it is **this seat's own next first
