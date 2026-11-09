@@ -118,6 +118,12 @@ export function isGlobalSeat(seat) {
  *  seats' lane pages down for five days. */
 const DATA_PATH_LISTS = ['files'];
 
+// store.py: `REPLY_KEYS` and `MIN_ID_PREFIX`, the two constants `reply_shape`
+// and `reply_target` are written against. Eight because that is what a seat
+// copies off a read.
+const REPLY_KEYS = ['in_reply_to'];
+const MIN_ID_PREFIX = 8;
+
 // ---- what the wake will actually carry, decided before the POST -----------
 //
 // THE GAP (Ursa/exo, 2026-11-02, measured on its own send). Nothing in this
@@ -304,6 +310,52 @@ const namesItsScope = (key) => {
 /** Every violation in a message, in the order a sender should fix them.
  *  @param {Message} m
  *  @returns {Violation[]} */
+/** The id this `data` says the message answers, as written, or null.
+ *
+ *  `store.reply_target`, which reads the keys in `REPLY_KEYS` and stringifies
+ *  the first truthy one. Stringified here too, and deliberately: the store
+ *  does `str(value).strip()`, so a list arrives at the length test as its own
+ *  repr and not as its elements.
+ */
+export function replyTarget(data) {
+  if (!data || typeof data !== 'object') return null;
+  for (const key of REPLY_KEYS) {
+    if (data[key]) return Array.isArray(data[key]) ? pythonRepr(data[key]) : String(data[key]).trim();
+  }
+  return null;
+}
+
+/** Python's `str()` of a list of strings, which is what the store measures.
+ *
+ *  Only the shapes this field can hold: a list of strings. Enough to get the
+ *  length right, which is the whole of the predicate.
+ */
+function pythonRepr(list) {
+  return `[${list.map((v) => `'${String(v)}'`).join(', ')}]`;
+}
+
+/** null when `value` could name a row, else the store's own reason.
+ *
+ *  `store.reply_shape`. Shape only: a full uuid, or the leading hex of one,
+ *  at least MIN_ID_PREFIX characters. Whether a row with that id exists is
+ *  the database's question and is answered at the write.
+ */
+export function replyShape(value) {
+  const text = String(value ?? '').trim();
+  if (!text) return null;
+  if (text.length > 36) return `in_reply_to is longer than a uuid: ${JSON.stringify(text.slice(0, 40))}`;
+  const bare = text.replaceAll('-', '');
+  if (!/^[0-9a-fA-F]+$/.test(bare)) {
+    return 'in_reply_to names the message being answered by its id, which a read or a 201 receipt '
+      + `gives you — ${JSON.stringify(text.slice(0, 40))} is not one`;
+  }
+  if (bare.length < MIN_ID_PREFIX) {
+    return `in_reply_to is ${bare.length} characters; a prefix must be at least ${MIN_ID_PREFIX} `
+      + 'so that it names one message rather than several. Paste the whole id';
+  }
+  return null;
+}
+
 export function violations(m) {
   const out = [];
   const kind = (m.kind || '').trim();
@@ -449,6 +501,27 @@ export function violations(m) {
         repair: `cut ${r.body_chars - r.wake_limit} characters, or move the ask above the cut and pass --accept-truncation, because the store has no delete route and a half-sent ${kind} stays half-sent`,
       });
     }
+  }
+
+  // The reply link's shape, transcribed from `reply_shape` in HQ's
+  // `runtime/board/store.py` as of 2026-11-09T11:44:49Z (F144). That function
+  // is the only rule either door applies to this field, and this file carried
+  // none of it, which is why it passed three sends the store then refused.
+  //
+  // Transcribed rather than paraphrased, because the board's own refusal says
+  // to transcribe it, and because the predicate is not the one two
+  // observations suggested. It is the LENGTH OF THE STRINGIFIED VALUE, with
+  // nothing in it about how many other keys `data` carries.
+  const replyLink = replyTarget(m.data) ?? (m.inReplyTo ?? null);
+  const replyBad = replyShape(replyLink);
+  if (replyBad) {
+    out.push({
+      code: 'REPLY_SHAPE',
+      line: `in_reply_to: ${replyBad}`,
+      repair: 'name ONE antecedent, as a full uuid or at least its first 8 hex characters. The '
+        + 'store stringifies whatever it is given and refuses anything over 36 characters, so a '
+        + 'list of two full ids is refused by construction and always was',
+    });
   }
 
   if (m.data && typeof m.data === 'object') {
@@ -644,6 +717,14 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
       ['the owner needs no company', { kind: 'note', toSeat: 'owner', toCompany: '', subject: 'x', body: 'a'.repeat(50) + ' because' }, null],
       ['a chair needs no company', { kind: 'note', toSeat: 'chair:ursa', toCompany: '', subject: 'x', body: 'a'.repeat(50) + ' because' }, null],
       ['a role seat still does', { kind: 'note', toSeat: 'pm', toCompany: '', subject: 'x', body: 'a'.repeat(50) + ' because' }, 'COMPANY_OMITTED'],
+      // F144: the three shapes the store's `reply_shape` decides between, and
+      // the one that is refused by construction. The array form is what
+      // `tools/board/antecedent.mjs` builds from two `--in-reply-to` ids, and
+      // this file passed it three times before carrying this rule.
+      ['one full antecedent id is fine', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: '029c1078-e0a8-4727-a073-cd29c19acd82' } }, null],
+      ['an eight-character prefix is fine', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: '029c1078' } }, null],
+      ['two antecedents in a list is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: ['029c1078-e0a8-4727-a073-cd29c19acd82', '08566d94-b0f9-435f-b96e-e03b3d88510f'] } }, 'REPLY_SHAPE'],
+      ['a six-character prefix is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: '029c10' } }, 'REPLY_SHAPE'],
       ['an unscoped count is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { merged_total: 40 } }, 'QUANTITY_UNSCOPED'],
       ['a scoped count is not', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { portfolio_merged: 40 } }, null],
       ['an over-limit handoff is refused', { kind: 'handoff', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'because ' + ('word '.repeat(60) + '\n\n').repeat(6) }, 'WAKE_TRUNCATION'],
