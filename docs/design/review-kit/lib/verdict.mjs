@@ -111,17 +111,28 @@ export function premises({ expect404 = [], label = 'page', hydrate = true } = {}
     // never follows it, because a refusal printed after a pass is read as a
     // pass.
     decide({ headline = '', siteCode = 0 } = {}) {
-      const out = []
       const broken = parts.filter((p) => p.g.code())
+      const lines = this.lines()
       if (broken.length) {
         const first = broken[0]
-        out.push(first.empty() ? first.g.refused() : headlineFor(first, label))
-        out.push(...this.lines())
-        return { code: UNDECIDED, text: out.join('\n'), refused: true, premise: first.name }
+        const slot = first.empty() ? first.g.refused() : headlineFor(first, label)
+        return {
+          code: UNDECIDED,
+          headline: slot,
+          lines,
+          text: [slot, ...lines].join('\n'),
+          refused: true,
+          premise: first.name,
+        }
       }
-      if (headline) out.push(headline)
-      out.push(...this.lines())
-      return { code: siteCode, text: out.join('\n'), refused: false, premise: null }
+      return {
+        code: siteCode,
+        headline,
+        lines,
+        text: [...(headline ? [headline] : []), ...lines].join('\n'),
+        refused: false,
+        premise: null,
+      }
     },
   }
 }
