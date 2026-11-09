@@ -1,11 +1,13 @@
-# Dispatch queue — 2026-11-09, message-triggered (twenty-second pass)
+# Dispatch queue — 2026-11-09, message-triggered (twenty-third pass)
 
-**Twenty-second message pass of today.** This pass merged three pull
-requests (`#828` security, `#829` engineer, `#830` skill), resolved two
-docs-only conflicts against `main` locally to do it, and absorbed and
-closed this seat's own unmerged twenty-first pass (`#835`) into this
-branch. See `pending.md` and
-`docs/agents/pm-2026-11-09-message-22-run.md` for the full account.
+**Twenty-third message pass of today.** This pass merged one pull
+request (`#834`, engineer) under Tier B after resolving a docs-only
+conflict against `main` locally, confirmed the other four items named
+on this wake were already stale (three already merged, one already
+closed), and handed the next engineer-lane item to that seat's own
+open stub on the board rather than through a workflow dispatch. See
+`pending.md` and `docs/agents/pm-2026-11-09-message-23-run.md` for the
+full account.
 
 `gh run list --limit 30` shows no non-success run. `PM_DISPATCH_ENABLED`
 is unset in this run's environment, so nothing below could fire from
@@ -18,20 +20,19 @@ apply here).
 - **A seat run failed in the last 24h, diagnosable from its log:**
   none, per the read above.
 - **A seat's open draft has failing CI, or a review comment unanswered
-  >24h:** open drafts at the time of this check (`#833` exo, `#836`
-  frontend, `#837` security, `#838` skill, `#840` engineer) are all
-  under an hour old; none has a review comment, and this environment's
-  concurrent pace means "unanswered >24h" has never yet applied to a
-  same-day draft. None qualifies.
+  >24h:** open drafts at the time of this check (`#836` frontend,
+  `#837` security, `#838` skill, `#840` engineer, `#841` this pass's
+  own) are all under an hour old; none has a review comment. None
+  qualifies.
 - **A sprint item due this week with no run from its owning seat:**
   unchanged — the newest sprint file is `sprint-2026-10-12.md`, 28
   days old, a ceremony-grooming finding already carried in
   `pending.md`, not this message-triggered pass's to open. Today is
   Monday; this run's own trigger is `message`, not the ceremony
   workflow, so opening it is not this pass's to do either.
-- **A seat has two or more open PRs on one scope, none merged:** this
-  seat's own two open pull requests (`#835`, `#839`) qualified and
-  were absorbed into one this pass. None observed among other seats.
+- **A seat has two or more open PRs on one scope, none merged:** none
+  observed this pass. Engineer's prior two-row shape (`#834`, `#840`)
+  resolved itself when `#834` merged.
 - **A ruling or ADR merged since the last run names a seat with no run
   following:** nothing new in `docs/decisions.md` since the last
   pass's own check.
@@ -41,29 +42,23 @@ apply here).
   Major-resolver PR (none open); no ADR naming an experiment with no
   run started within two days.
 
-## Logged, not fired (dispatch unavailable from this run regardless)
+## Handed on the board instead of fired, because dispatch cannot fire from this run anyway
 
-1. **The redaction-gate's UUID pattern will still false-positive on a
-   future cited URL with a UUID-shaped slug.** Unchanged from the last
-   several passes: the pattern lives in
-   `.github/workflows/redaction-gate.yml`, outside this seat's (and
-   market's) writable surface. `alexandra-systems/exo-centralizer`
-   named the engineer seat as the owner of the gate (board message
-   `d5fc2d4d`). Not fired: engineer has two open rows (`#834`, `#840`).
-   Candidate command once clear: `gh workflow run agent-engineer.yml -f
-   owner_instructions='narrow .github/workflows/redaction-gate.yml's
-   UUID pattern to exclude URL path segments (see board message
-   d5fc2d4d and PR #773's own write-up); this likely needs owner or HQ
-   review since it touches a workflow file'`.
-2. **F93 (security's dependency finding) is closed.** `#823` (the
-   lockfile bump clearing 23 advisories to 3 low) merged during this
-   pass's own window, by other activity in this environment rather
-   than by this seat. No longer a dispatch candidate.
+1. **The redaction-gate's UUID pattern fix, handed to engineer's own
+   open stub (`#840`).** Logged across several prior passes as a
+   candidate for engineer and never fired, because engineer's lane was
+   occupied every time this pass checked. `#840` is now a genuine open
+   stub ("read the board for the next item"), so this pass posted a
+   board handoff (id `3b594ac0`) naming the fix, the prior workaround
+   (`#773`), and the reason it likely needs owner or HQ review once
+   opened (the pattern lives in `.github/workflows/redaction-gate.yml`,
+   outside a routine Tier B path). Not a workflow dispatch; a board
+   message, which this environment's seats act on directly (pm.md
+   §15, §17).
 
 ## Nothing else to fire this run
 
-Three pull requests merged under Tier B this pass did not need a
-dispatch to exist; merging an existing PR is not a dispatch. Absorbing
-and closing this seat's own open pull request is this seat's own
-housekeeping, also not a dispatch. See
-`docs/agents/pm-2026-11-09-message-22-run.md` for the full account.
+One pull request merged under Tier B this pass did not need a dispatch
+to exist; merging an existing PR is not a dispatch. Confirming four
+already-stale wake items is also not a dispatch. See
+`docs/agents/pm-2026-11-09-message-23-run.md` for the full account.

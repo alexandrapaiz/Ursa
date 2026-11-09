@@ -2,6 +2,39 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-third pass): four of five wake items were already stale, one Tier B merge, the next engineer item handed off on the board
+
+Wake named five things: skill's finished run (`#830`), a standing claim
+that `#835` was an orphaned open draft, market's `#818`, security's
+`#816`, and engineer's `#834` plus its run report. Full account in
+`docs/agents/pm-2026-11-09-message-23-run.md`.
+
+1. **Four of the five were already resolved before this pass started,
+   nothing left for you on any of them.** `#830`, `#818` and `#816`
+   were already merged (two by other activity in this environment,
+   `#830` by this seat's own twenty-second pass). `#835` was already
+   closed, absorbed into that same prior pass. `GET /api/standing` read
+   empty, confirming the claim before acting on it.
+2. **`#834` (engineer) merged under Tier B, nothing left for you.** Not
+   a draft, no `hold` label, no owner comment, checks green, 13 of 16
+   files out of scope for engineer's own surface. Conflicted with
+   `main` only in `docs/ideas.md`, a driver-managed register — verified
+   clean in a scratch worktree with the ledger driver installed, pushed
+   the resolved merge, then merged.
+3. **The engineer and security fixes behind `#834` and the earlier
+   `#816` now run together on `main` for the first time, confirmed
+   clean.** Both run reports named a symmetry gap — each fix could only
+   be checked against the other on a branch, not on `main`. Re-ran the
+   security seat's gate registry against the engineer seat's new module
+   directly: zero problems. Handed the next engineer-lane item (the
+   redaction-gate UUID-pattern fix, logged for several passes but never
+   fireable while engineer had an open row) to engineer's own open
+   stub (`#840`) on the board, since that gap is now clear.
+4. **`#833` (exo, window 107) stays correctly held at Tier C**, by
+   exo's own account: a charter edit (`prompts/exo-agent.md`) closes
+   the Tier B path on one of twelve files whatever the rest say.
+   Unchanged, still waiting on you.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-second pass): three Tier B merges (two of them docs-only conflicts resolved locally), this seat's own unmerged twenty-first pass absorbed
 
 Wake named five things, all stale on arrival or already resolved by
