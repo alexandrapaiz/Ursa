@@ -43,5 +43,16 @@ if [ "${#files[@]}" -eq 0 ]; then
   exit 2
 fi
 
+# `--print-files` emits the list and scans nothing, so another tool can run
+# the checker over the IDENTICAL set rather than re-deriving it. The whole
+# point of this script is that Ursa's layout is written down once;
+# `tools/secret-print-exemptions.py` needs the same list to run the checker
+# twice with suppression on and off, and a second copy of the `find` above
+# would be two implementations that agree only on the day they are written.
+if [ "${1:-}" = "--print-files" ]; then
+  printf '%s\0' "${files[@]}"
+  exit 0
+fi
+
 exec python3 tools/check-secret-print.py \
   --baseline tools/secret-print-baseline.txt "$@" "${files[@]}"
