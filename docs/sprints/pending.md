@@ -8,6 +8,47 @@ for why).** Nothing open was dropped in the move; still-open items are
 carried forward in this file's own current entries, not left only in the
 archive.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-third pass): #865 and #867 merged under Tier B, #858 and #862 closed as superseded (one of them by GitHub itself), the own-PR stack still waits on another merger
+
+Wake named four events: two notes from frontend about a `redaction-gate`
+red that was `main`'s and already fixed on both sides, frontend's run
+finished (`#865`), and engineer's PR/run (`#867`). Full account in
+`docs/agents/pm-2026-11-09-message-33-run.md`, stacked on pass 32's own
+open `#869` and on this morning's ceremony `#871`, per the own-PR-first
+rule.
+
+1. **`#865` (frontend) and `#867` (engineer) both merged under Tier B.**
+   Both green (`scan` SUCCESS), clean, not drafts, no hold label, no
+   owner comment, under seven days old, no Tier C path in either diff
+   (`gh pr diff --name-only`: design-kit docs, `ursa-minor/`, and
+   `tools/`, `docs/ideas.md`, `docs/runs/` respectively — nothing under
+   `prompts/`, `.github/workflows/`, or `company.yaml`).
+2. **`#858` closed as superseded by `#865`, and `#862` turned out to
+   already be merged.** Frontend's own PR body declared `#858` carried
+   whole into `#865`; checked rather than taken on the sentence alone —
+   `git diff --name-only main refs/pr/858` is a strict subset of the
+   same against `refs/pr/865`, and the eight files that differ between
+   the two carry `#865`'s later fixes layered on top of `#858`'s, not a
+   regression. Closed `#858` pointing at `#865`. `#862` (engineer) is a
+   literal git ancestor of `#867` (`merge-base --is-ancestor` true), so
+   merging `#867` landed `#862`'s commits too and GitHub marked it
+   merged on its own; `gh pr close 862` correctly refused with "already
+   merged."
+3. **The next item is already in each seat's own hands, not a new
+   dispatch.** `#872` (frontend, draft, opened 11:26:43Z) and `#873`
+   (engineer, draft, opened 11:32:08Z) are both live continuations —
+   frontend's own charter steps 3/4 and engineer's pickup of
+   `sprint-2026-11-09.md` item 1 (the KR1.3 corpus sweep) respectively.
+   Posted both as board notes rather than firing a dispatch: §11.4
+   forbids dispatching a seat whose last PR is still open, and this is
+   an event-driven wake, not a scheduled standup pass, so no §11.3
+   criterion was checked or needed to fire one.
+
+**Unchanged from pass 32:** this seat's own Tier B work (`#864`, `#869`,
+now also `#871`, `#874`) still needs a merger other than Ursa's own PM,
+per pm.md §20. Already asked of `alexandra-systems/pm` last pass; not
+re-asked this pass to avoid repeating an unanswered ask inside one hour.
+
 ## Top three for the owner, 2026-11-09 Monday ceremony (cron-triggered): the four-Monday ceremony gap closes, sprint-2026-10-12 retro says 3/3 shipped, sprint-2026-11-09 opens with two items
 
 The host's own `ursa-pm` cron slot fired on a Monday for the first
