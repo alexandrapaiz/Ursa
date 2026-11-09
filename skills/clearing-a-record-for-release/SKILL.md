@@ -156,8 +156,11 @@ evidence:
     what: both revoke-axiom and consent show report the axioms that still say nearly the same thing as the revoked one and were deliberately left alone, show covering revocations already made and revoke-axiom covering the one just made
     source: ursa-major/src/consent.cli.ts:219-233, ursa-major/src/consent.cli.ts:112-130
   - ref: E45
-    what: the gate runs grep with -I, which skips every binary file, so none of its three patterns has ever been applied to surface 5, the screenshot, and the standard's own note since 2026-10-26 is that the one-flag fix was routed to HQ rather than applied, so the limit is still live; the rendered half is checkable by nothing, so its rule is a rule for people, capture fixtures and never a real project's records
+    what: the redaction gate runs grep with -I, which skips every binary file, so none of its three patterns has ever been applied to surface 5, the screenshot, and the standard's own note since 2026-10-26 is that the one-flag fix was routed to HQ rather than applied, so that limit is still live
     source: docs/security/redaction-standard.md:234-248
+  - ref: E46
+    what: that the earlier conclusion drew one inference too many, because what a capture depicts is pixels and which store it was rendering is written down, so provenance is checkable; that capture-provenance.mjs runs in ci-checks.mjs reading committed text and never a pixel, firing only where a directory both renders a record surface and names no store; and that a green run means the question was answered rather than that the answer is true
+    source: docs/security/redaction-standard.md:250-287
 supersedes: []
 ---
 
@@ -387,14 +390,23 @@ viewer embeds and the pixels hold it exactly as the HTML did [E28]. Two
 things follow, and the second is the one that catches a careful seat.
 Redacting at the moment of capture is the same mistake as redacting at
 the moment of rendering, because the unredacted page had to exist to be
-photographed [E28]. And the gate cannot help here at all: it runs `grep`
+photographed [E28]. What a gate can do about it was overstated here
+until 2026-11-09, and the correction is worth carrying rather than
+quietly swapping, because the shape of the error is the one this step
+exists to teach. The redaction gate cannot read an image: it runs `grep`
 with `-I`, which skips every binary file, so not one of its three
-patterns has ever been applied to an image, and the half that is drawn
-into the picture is checkable by nothing [E45]. So the rule for this
-surface is a rule for people rather than a gate, which is to capture
-fixtures and never a real project's records, and if a point genuinely
-needs real data to land, that is the owner's decision and not a
-judgement call at capture time [E45].
+patterns has ever been applied to a capture [E45]. The conclusion drawn
+from that was that the surface is checkable by nothing, and it drew one
+inference too many. What a capture *depicts* is pixels and unreadable.
+Which store it was rendering is written down, in the directory beside
+it, and that is checkable [E46]. `capture-provenance` now holds exactly
+that half, firing only where a directory both renders a record surface
+and names no store, and a green run from it means the question was
+answered rather than that the answer is true [E46]. So the rule that
+stays a rule for people is the narrow one, which is to capture fixtures
+and never a real project's records, and if a point genuinely needs real
+data to land, that is the owner's decision and not a judgement call at
+capture time.
 
 Output: a passage, plus a written note of which clause it went out
 under.
