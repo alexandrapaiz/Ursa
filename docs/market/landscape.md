@@ -984,6 +984,42 @@ with no clear RLHF/preference-data product and no public pricing —
 not a Category 1 fit. Snorkel AI, Sama, iMerit, and Appen remain
 unchecked leads for a future run with capacity to spare.
 
+### Snorkel AI
+
+What it is: a data-labeling-automation vendor (originally a Stanford
+research project, "weak supervision") that has shifted business model
+to "data-as-a-service" — delivering completed, labeled datasets and RL
+environments directly, built on a hybrid of synthetic data generation
+and subject-matter-expert review, rather than selling the labeling
+software alone. New entry, picked up from the same 18th-run
+unchecked-lead list as Labelbox (Appen, Snorkel AI, Sama, iMerit) —
+and a correction to this file's own record: the 2026-10-26
+cross-cutting note (above) already asserted Snorkel AI was "already
+tracked above" in this category; it was not, and had no dedicated
+entry until this run. Who it serves: not named in sources checked this
+run — no specific frontier lab or enterprise customer identified by
+name, an unusually thin disclosure even against this category's
+standing opacity norm. Pricing: enterprise sales-only, six-figure
+annual contracts per secondary pricing-guide sources (not Snorkel's
+own published figures — no rate card found), consistent with every
+other entry in this category except Toloka. Funding: a $350M Series E
+(2026-09-22, led by Insight Partners and S32, with Addition,
+Lightspeed, Greylock, GV, and Wells Fargo participating) at a $3.5B
+valuation — TechCrunch reports this as roughly triple Snorkel's prior
+valuation, attributed in the same reporting to "AI labs' insatiable
+appetite for high-end training data" rather than to any named deal.
+Strengths: the funding scale is itself a demand signal for this
+category as a whole (money moving toward human-plus-synthetic hybrid
+data production), read alongside Mercor's and Handshake's own
+valuation jumps already on file. Weakness against Ursa: identical
+structural gap to the rest of Category 1 — labeling and dataset
+construction performed on request against a specification, not
+derived from real work a person was doing anyway for its own sake, no
+generation-to-outcome join. Positioning consequence in
+docs/market/positioning.md. Last observed 2026-11-09: [TechCrunch:
+Snorkel AI triples valuation to $3.5B as demand for AI training data
+booms](https://techcrunch.com/2026/09/22/snorkel-ai-triples-valuation-to-3-5b-as-demand-for-ai-training-data-booms/).
+
 ## Category 2 — Evaluation and arena products
 
 These produce a preference-shaped signal (a human or a rubric choosing
@@ -2388,3 +2424,14 @@ moment](https://www.lorekit.io/blog/open-agent-memory-format).
   roundup article that does not mention the product at all, so the
   entry's "no independent traction numbers" line still holds.
   Positioning consequence in docs/market/positioning.md.
+- 2026-11-09 (message, 20th run) — added Snorkel AI (Category 1, 23rd
+  entry), the last of the 18th run's named leads that was genuinely
+  unchecked: a 2026-10-26 cross-cutting note had already asserted
+  Snorkel AI was "tracked above" in this category, and it was not,
+  until this run gave it a dedicated entry. Its $350M Series E
+  (2026-09-22, Insight Partners/S32-led) at a $3.5B valuation, reported
+  as roughly triple its prior mark and attributed to labs' demand for
+  training data, is this file's clearest funding-scale demand signal
+  for the category since Mercor's and Handshake's own valuation jumps.
+  Pricing and customers remain undisclosed, consistent with every
+  entry in this category except Toloka.

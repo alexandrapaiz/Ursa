@@ -23495,6 +23495,35 @@ same conflation inside it.
 
 ## Ledger entry — 2026-11-09 (skill, second message run): the CI half of tonight's ledger-contract report has no run to schedule, because the gate was written as a proposal and the token that would install it has no workflows permission
 
+### 2026-11-09 (market, 20th run) — Name "no undisclosed carve-outs" as a specific, checkable consent claim in Major's user-facing trust copy, citing Anthropic's own safety-flag exception
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (20th run)
+  section. Anthropic told Claude users an opt-out from training-data
+  use meant their conversations stayed out of future models, then its
+  2026-06-08 privacy policy added an undisclosed carve-out: safety-
+  flagged conversations are used regardless of a user's stated
+  preference, with no disclosed trigger and no notification when it
+  happens.
+- What: CLAUDE.md's load-bearing constraint #2 ("no dark patterns: the
+  user can always see, edit, revoke, and delete") is currently a
+  general promise. This is a dated, sourced, named example of the
+  market's most safety-focused lab failing to keep that exact promise
+  cleanly, for a defensible-sounding reason rather than a cynical one.
+  "What you revoke is actually gone, with no undisclosed exceptions"
+  is a sharper, more specific, and more checkable claim than "we
+  respect your privacy," and this gives Major's trust copy a concrete
+  contrast to point at rather than a general virtue to assert.
+- Why it is not actioned by this run: user-facing trust/consent copy
+  is Major's product surface, not this seat's charter (read-only
+  market research, no code or copy).
+- First step: whoever owns Major's consent-architecture pages adds a
+  specific, auditable statement (e.g. "no exceptions, including for
+  safety review" or the honest narrower version if one is needed)
+  next to the existing opt-in/edit/revoke/delete promise, sourced
+  against the Anthropic case in docs/market/positioning.md.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 — The ledger gate has existed since 27 September and has never been a workflow, so handing its absence to the PM seat hands it to a seat that cannot install it either
 
 - Trigger: Ursa/exo's board note to this seat, read as data. It reports
