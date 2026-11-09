@@ -2,6 +2,72 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (pass 28): #851 (security) merged after a real ledger conflict fixed, #846 (exo) reconfirmed Tier C and waiting, three of this seat's own stuck PRs closed
+
+Wake named four things: review `#840` (engineer) against the merge rule,
+review `#851` (security) the same way, review `#846` (exo) the same way,
+and read an inbox handoff from exo about that same row. Full account in
+`docs/agents/pm-2026-11-09-message-28-run.md`.
+
+1. **`#840` was already merged by this seat's own prior pass (`#855`)
+   before this run started.** Confirmed on GitHub directly rather than
+   trusted from a PR title. Nothing left to do on it.
+2. **`#851` had a real blocker, not a false one, and it is fixed.**
+   `main`'s own copy of `docs/ideas.md` held four ledger entries
+   duplicated verbatim in a 147-line block, the residue of a race
+   between two of this seat's own earlier passes today. The ledger
+   merge driver correctly refused to guess which copy was live, which
+   blocked a clean merge for anything touching that file, including
+   `#851`. Docs-only, so this seat's to resolve under Tier B's own
+   rule (§10): deduped `main`'s copy, then pushed the identical
+   resolution onto `#851`'s own branch so it would merge clean, then
+   merged it under Tier B (not a draft, no `hold`, no comment, one
+   green check, no Tier C path). The duplicate is gone from `main`.
+3. **`#846` reconfirmed Tier C, independent of what its own seat
+   claimed.** `prompts/exo-agent.md` is in its diff, which is Tier C
+   by path regardless of anything else in the row. Refetched the
+   branch after `#851` landed and reran `merge-tree` myself: still one
+   clean tree hash. Replied to exo's handoff on the board (message
+   `9b221269`) saying so. It waits on you; nothing is owed back to
+   exo's seat.
+4. **This seat's own stuck three-PR chain (`#849`, `#850`, `#855`) is
+   closed.** All three were still open, non-draft, Tier-B-shaped own
+   PRs that this seat cannot merge itself under §10 ("a PM's own Tier
+   B PR waits for another merger"). Rather than leave a fourth one
+   stacking on top of a chain nobody was going to merge, this pass's
+   branch absorbed all three (`git merge-base --is-ancestor` confirmed
+   each is now contained) and closed them, naming `#856` as the one
+   PR carrying their content forward. One of the three
+   (`#850`) had a final commit pushed after `#855` branched off it and
+   was missed by `#855`'s own subsumption claim; that commit is also
+   folded in, so nothing from today's five earlier passes was lost.
+5. **One thing this seat broke and fixed in the same pass, said
+   plainly rather than quietly repaired.** Merging `#850`'s content
+   required running `install-driver.sh` inside a scratch worktree to
+   resolve the ledger conflict there, and that script writes an
+   absolute path into the repo-wide git config rather than a
+   worktree-local one. Removing the worktree afterward left the merge
+   driver pointing at a path that no longer existed, which broke this
+   seat's own next merge with a `MODULE_NOT_FOUND` until re-run from
+   the main checkout. Worth a line in `docs/decisions.md` or the
+   runner-facts register if another seat hits the same shape; not
+   filed there yet by this pass, since it was caught and fixed inside
+   the same run rather than left for a reader to rediscover.
+6. **Dispatch: nothing fired, and could not have.** `PM_DISPATCH_ENABLED`
+   403s on this run's token, same wall every host pass has hit since
+   2026-10-17, and `GITHUB_ACTIONS` is unset, confirming this is a host
+   run rather than a GitHub Actions run, so `gh workflow run
+   agent-<seat>.yml` would not apply even if the switch read `true`.
+   Checked anyway for anything worth queuing: `gh run list --limit 20`
+   showed one failure, this pass's own (a full UUID citation this
+   seat's own prior run left in `docs/agents/pm-2026-11-09-message-27-run.md`,
+   tripping the exact redaction-gate false-positive `#840` already
+   diagnosed); fixed by truncating it to 8 characters, the same
+   convention other seats already use. No other failed run, no open
+   PR stuck past its own seat's rebase, no undispatched ADR experiment.
+   `docs/sprints/dispatch-queue.md` rewritten this pass, nothing to
+   fire.
+
 ## Top three for the owner, 2026-11-09 message-triggered (twenty-seventh pass): #840 (engineer) reviewed against Tier B and merged; its workflow patch routed to HQ; #846 (exo) flagged Tier C
 
 Wake named `engineer`'s `done` on the redaction-gate item, built into
