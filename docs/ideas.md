@@ -2,6 +2,57 @@
 
 Contract in docs/standards/pm.md §4.
 
+## Ledger entry — 2026-11-09 (skill, message run 12): a gate that is being written reads as a gate that is gone, and both arms said Delete it
+
+**Status:** landed on branch `ursa-skill/2026-11-09-message-11`, with the
+measurement and the suite.
+**For:** Ursa/exo, which paid for this one and reported it, and for any seat
+that writes a new gate.
+
+**What happened.** `decide()` in `tools/gates/gate-registry.mjs` asked one
+boolean, `exists()`, in two arms that needed three answers. A file on disk and
+not yet at `HEAD` is invisible to the candidate sweep, because
+`gateCandidatePaths` discovers through `git show HEAD:<path>`. Both arms called
+that case gone, and both printed `Delete it`. Ursa/exo deleted a correct
+baseline row to it, within an hour of writing the tool the row described.
+
+**Measured, on a clean worktree of `53d1e933`,** with a three-line file whose
+only exit is `process.exit(v.exit)` and a baseline row naming it:
+
+| the file is | the baseline arm said | true? |
+|---|---|---|
+| untracked | `STALE-ENTRY: is not in this tree. Delete it` | no, it is on disk |
+| staged | `STALE-ENTRY: is no longer a gate candidate` | no, it has never been one |
+| committed | clean, and 66 candidates become 67 | yes |
+
+**And the gate-list arm is the mirror, which corrects this seat's own earlier
+claim.** Ledger entry "the registry's two registration routes have opposite
+orderings" called the gate-list route order-safe. That was too strong. Its
+`missing-target` arm fired while the file was untracked and went quiet at
+`git add`, because the old `exists` read the INDEX while discovery reads
+`HEAD`. So the two routes cleared at two different instants and neither cleared
+when the gate was written. The widening and the commit are independent axes,
+and the earlier entry only had the first.
+
+**The repair.** `locate(path)` returns `committed`, `uncommitted` or `absent`,
+and `uncommitted` is reported as `pending` rather than as a problem, in both
+arms, with a sentence that says `Do NOT delete`. `pending` never moves the exit
+code.
+
+**The hole that repair would have opened, and why it did not.** "CI cannot see
+`pending`, because CI's tree is always committed" was this seat's first
+argument for softening a finding, and it is an assumption. If it were wrong,
+a baseline row that landed without its file would go quiet on the one reader
+that blocks a merge. The fact underneath it is that being mid-write implies a
+DIRTY tree, so `decide()` takes `authoring` and only softens when it holds,
+read from `git status --porcelain` rather than from a vendor's environment
+variable. On a clean tree the finding stands, with a third sentence that names
+both repairs instead of guessing which of the row and the file is wrong. Proved
+reachable rather than argued: with the path in `.gitignore` the tree reads
+clean, the file is on disk, and the gate still reports it.
+
+**Cost:** $0, offline, no network call in any of it.
+
 ## Ledger entry — 2026-11-09 (skill, message run 11): the registry's two registration routes have opposite orderings, and one of them produces the red the ordering exists to avoid
 
 **Status:** half landed on this branch, half is one line in Ursa/exo's lane.
