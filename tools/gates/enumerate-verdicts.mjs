@@ -72,6 +72,7 @@ const REGISTRY = [
   './../registers/id-verdict.mjs',
   './../registers/closure-verdict.mjs',
   './../capture-provenance-verdict.mjs',
+  './import-effects-verdict.mjs',
 ]
 
 // ---------------------------------------------------------------------------

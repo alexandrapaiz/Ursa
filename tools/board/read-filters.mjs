@@ -369,11 +369,6 @@ const argv = process.argv.slice(2);
 const flag = (n, d = '') => { const i = argv.indexOf(n); return i === -1 ? d : (argv[i + 1] ?? ''); };
 const has = (n) => argv.includes(n);
 
-if (has('--help') || has('-h')) {
-  console.log('usage: read-filters.mjs [--route messages|events|runs] [--json] [--strict]');
-  process.exit(0);
-}
-
 const base = (process.env.BOARD_API_URL || '').replace(/\/$/, '');
 const token = process.env.BOARD_RUNTIME_TOKEN;
 
@@ -427,6 +422,19 @@ async function pageAll(path, rowsKey, hours, extra = '') {
 }
 
 async function main() {
+  // Usage is answered INSIDE main and not at module scope, and the comment at
+  // the bottom of this file -- "Importable for the tests without running the
+  // probes" -- is why. Demonstrated on 2026-11-09 from a two-line importer run
+  // as `node importer.mjs --help`: the import printed this usage line and
+  // exited the importing process, which never reached its own second line. The
+  // file was importable for `node --test`, whose argv carries no `--help`, and
+  // not importable in general. `tools/gates/import-effects.mjs` is the gate
+  // that found it.
+  if (has('--help') || has('-h')) {
+    console.log('usage: read-filters.mjs [--route messages|events|runs] [--json] [--strict]');
+    process.exit(0);
+  }
+
   const fault = liveTargetFault({ apiUrl: process.env.BOARD_API_URL, token });
   if (fault) {
     console.error(`${fault.code}: ${fault.line}`);

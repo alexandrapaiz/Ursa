@@ -47,6 +47,7 @@ import { execFileSync } from 'node:child_process'
 import { closeSync, openSync, readFileSync, readSync } from 'node:fs'
 import { LOCUS } from './gates/verdict-shape.mjs'
 import { INERT_CHUNKS, TEXT_CHUNKS, carrierLine, unusable, verdict } from './image-metadata-verdict.mjs'
+import { pathToFileURL } from 'node:url'
 
 const JSON_OUT = process.argv.includes('--json')
 const LIST = process.argv.includes('--list')
@@ -289,4 +290,13 @@ function main() {
   process.exit(v.exitCode)
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop())) main()
+// Entry point. The predicate compares this module's own URL to the resolved
+// entry point, which is the only form that asks whether THIS module is the
+// one being run. The form it replaces compared a file NAME, so it was true
+// for any entry point whose own name is a suffix of this one; the general
+// case is `tools/gates/import-effects.mjs`'s GUARD_ASKS_THE_WRONG_QUESTION
+// and the demonstrated instance is in that gate's header.
+const invokedDirectly =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (invokedDirectly) main()

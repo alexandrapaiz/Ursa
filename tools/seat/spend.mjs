@@ -101,6 +101,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { calendarDay } from '../instant.mjs';
+import { pathToFileURL } from 'node:url';
 
 export const LOG_ROOT = '/srv/asc/state/.epito/logs';
 
@@ -559,7 +560,14 @@ async function main(argv) {
   return 0;
 }
 
-const invokedDirectly = process.argv[1] && process.argv[1].endsWith('spend.mjs');
+// Entry point. The predicate compares this module's own URL to the resolved
+// entry point, which is the only form that asks whether THIS module is the
+// one being run. The form it replaces compared a file NAME, so it was true
+// for any entry point whose own name is a suffix of this one; the general
+// case is `tools/gates/import-effects.mjs`'s GUARD_ASKS_THE_WRONG_QUESTION
+// and the demonstrated instance is in that gate's header.
+const invokedDirectly =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (invokedDirectly) {
   main(process.argv.slice(2)).then((code) => process.exit(code)).catch((e) => {
     console.error(`cannot answer: ${e.message}`);
