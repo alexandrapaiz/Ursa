@@ -69,12 +69,35 @@ export const CHECKED_PATH = 'tools/board/post.mjs';
 // A write to the route, by any of curl's four spellings of a body plus the two
 // of an explicit method. Keyed on the pair (route, write), never on the route
 // alone: every seat reads this board many times a run and a read must pass.
+// `-d` is matched inside a CLUSTER of short flags, not only alone, because
+// `curl -sd @m.json URL` is one keystroke from the form every charter here
+// writes and the long form is already covered separately. The trade is stated
+// rather than assumed: a false positive costs one deny with a named escape
+// beside it, and a false negative is a silent bypass, which is the entire
+// defect this file exists for. Widen the detector; never narrow it.
 const WRITE_FORMS = [
   /-X\s*'?"?POST/i,
   /--request\s*'?"?POST/i,
-  /(^|\s)-d(\s|=|'|")/,
+  /(^|\s)-[a-zA-Z]*d(\s|=|'|")/,
   /--data(-raw|-binary|-urlencode)?(\s|=|'|")/,
 ];
+
+// THE ROUTE AND THE WRITE FORM MUST BE IN THE SAME SHELL SEGMENT, and the
+// first version of this function tested them against the whole command. That
+// cost a false positive within a minute of shipping, on this file's own author:
+// one line held a board READ and a `git commit -m` whose message quoted the
+// string `--data` while explaining this detector. Route from one call, write
+// form from another, and the deny was correct about neither.
+//
+// A command is a conjunction of calls and a predicate over its text is a
+// predicate over all of them at once, which is this seat's own recurring shape
+// for the third time in two windows: an attribute computed over a set, read as
+// if it named a member. Splitting on the shell's own separators keeps the real
+// compound bypass — `post.mjs ... && curl -X POST <route> -d @f` still has both
+// in its second segment — and drops the pairings that were never one call.
+export function segments(command) {
+  return command.split(/&&|\|\||[;|\n]/);
+}
 
 /** Why this command is or is not a bypass. `{ bypass, reason, form }`. */
 export function classify(command) {
@@ -84,7 +107,12 @@ export function classify(command) {
   if (!command.includes(ROUTE)) {
     return { bypass: false, reason: 'NOT_THE_BOARD_WRITE_ROUTE' };
   }
-  const form = WRITE_FORMS.find((re) => re.test(command));
+  let form;
+  for (const seg of segments(command)) {
+    if (!seg.includes(ROUTE)) continue;
+    form = WRITE_FORMS.find((re) => re.test(seg));
+    if (form) break;
+  }
   if (!form) {
     return { bypass: false, reason: 'READ_NOT_WRITE' };
   }
@@ -164,8 +192,12 @@ export const CONTROL = [
   { want: false, command: `curl -s "$BOARD_API_URL${ROUTE}?to_seat=exo&since_hours=24"` },
   { want: false, command: `node ${CHECKED_PATH} --seat exo --kind note --subject x --body y` },
   { want: true, command: `node ${CHECKED_PATH} --seat exo --kind note --subject x --body y && curl -X POST "$B${ROUTE}" -d @m.json` },
+  { want: true, command: `curl -sd @m.json "$BOARD_API_URL${ROUTE}"` },
   { want: false, command: `curl -X POST "$BOARD_API_URL${ROUTE}" -d @m.json  # ${ESCAPE_MARKER}: rule ungraded` },
   { want: false, command: 'git log --oneline -5' },
+  // The live false positive this guard cost its own author. Route from the
+  // read, write form from a commit message that quotes it.
+  { want: false, command: `curl -s "$B${ROUTE}?limit=1" && git commit -m 'the long --data form was already covered'` },
 ];
 
 export function selftest() {

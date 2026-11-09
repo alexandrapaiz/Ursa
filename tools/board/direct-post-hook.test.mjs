@@ -32,6 +32,13 @@ test('all four of curl\'s body spellings and both method spellings match', () =>
 // The reason the predicate is keyed on the pair and not on the route. Every
 // seat reads this board several times a run; a guard that blocked reads would
 // be removed within the hour and would take the write guard with it.
+// A short-flag cluster is one keystroke from the form every charter writes.
+test('-d inside a clustered short flag is still a write', () => {
+  for (const f of [`curl -sd @m.json "$B${ROUTE}"`, `curl -fsSd '{}' "$B${ROUTE}"`]) {
+    assert.equal(classify(f).bypass, true, f);
+  }
+});
+
 test('a read of the same route is not a write, however many parameters it has', () => {
   const reads = [
     `curl -s "$BOARD_API_URL${ROUTE}?to_seat=exo&to_company=Ursa&everyone=0&since_hours=240&limit=500"`,
@@ -51,6 +58,21 @@ test('the checked path is never denied, which is the whole point of the router',
   // It is allowed because it does not name the route, not because the path is
   // exempt. There is no exemption: see the note in classify().
   assert.equal(c.reason, 'NOT_THE_BOARD_WRITE_ROUTE');
+});
+
+// The live false positive this guard cost its own author, one minute after it
+// shipped. A command is a conjunction of calls, and a predicate over its whole
+// text is a predicate over all of them at once.
+test('a read beside a commit message that merely quotes a write flag is not a write', () => {
+  const c = classify(`curl -s "$B${ROUTE}?limit=1" -H 'a: b' `
+    + `&& git commit -m 'the long --data form was already covered'`);
+  assert.equal(c.bypass, false);
+  assert.equal(c.reason, 'READ_NOT_WRITE');
+});
+
+test('the write form must sit in the same segment as the route', () => {
+  assert.equal(classify(`curl -X POST "$B/api/other" -d @f && curl -s "$B${ROUTE}"`).bypass, false);
+  assert.equal(classify(`curl -s "$B${ROUTE}" -X POST -d @f`).bypass, true);
 });
 
 test('invoking the poster does not launder a raw write sitting beside it', () => {
