@@ -70,7 +70,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { readVerdict, completedBetween, capacityDays } from './outage.mjs'
-import { sortByDay, isDayAfter, utcDay, timestampShape } from '../instant.mjs'
+import { sortByDay, isDayAfter, utcDay, parseDay } from '../instant.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_ROOT = resolve(HERE, '..', '..')
@@ -84,11 +84,18 @@ export const DUE = 'due'
 export const PENDING = 'pending'
 export const UNREAD = 'unread'
 export const NO_DATE = 'no-date'
-export const VERDICTS = new Set([DUE, PENDING, UNREAD, NO_DATE])
+// Added 2026-11-09, and it is the verdict this tool's own header called a
+// standing finding: "`due` here never discharges and the count only grows."
+// It discharges now, because HQ's exo-centralizer created the field that can
+// discharge it (L-A202, HQ PR #653) after this seat reported that `read` was
+// a value nothing in either register could emit.
+export const READ = 'read'
+export const VERDICTS = new Set([DUE, PENDING, UNREAD, NO_DATE, READ])
 
 // Why the field is missing, for the `no-date` rows only. Not a verdict.
 export const NO_FIELD = 'no-field'          // the entry names no read-date label
 export const FIELD_NO_ISO = 'field-no-iso'  // it has a label and no ISO date in it
+export const RECORD_NO_ISO = 'record-no-iso' // a `**Read.**` line with no ISO date in it
 
 // The label set is EXACT and was measured off this register, not guessed at
 // from a prefix. A prefix match is what the first draft of this file did, and
@@ -101,11 +108,54 @@ export const FIELD_NO_ISO = 'field-no-iso'  // it has a label and no ISO date in
 export const HOUSE_LABEL = 'next measure'
 export const ALT_LABELS = [
   'next', 'next reading',           // the house label, abbreviated
-  'read', 'read on', 'read date',   // the date it is read, rather than the measure
+  'read on', 'read date',           // the date it is read, rather than the measure
   'read instant', 'read this window', 'read next window',
   'when it is read'
 ]
-const KNOWN = new Set([HOUSE_LABEL, ...ALT_LABELS])
+
+/**
+ * THE READING RECORD, WHICH IS A DIFFERENT DIRECTION IN TIME AND WAS THE SAME
+ * SPELLING (added 2026-11-09, measured on both registers).
+ *
+ * Everything in `ALT_LABELS` above is FORWARD: a date the entry is to be read
+ * ON. HQ's exo-centralizer added a sixth labelled line to the format on
+ * 2026-11-09 (L-A202, HQ PR #653, open and draft when this was written) which
+ * is BACKWARD: `- **Read.** <date>, <who>` records that a reading was taken,
+ * and it is the only thing that produces the `read` verdict.
+ *
+ * `'read'` was in `ALT_LABELS` until this edit, as a forward spelling, so the
+ * two senses had one spelling. Measured consequence, probed before the
+ * repair: an entry carrying HQ's new line and no `**Next measure.**` — the
+ * normal shape of a FINISHED experiment — parsed as a forward read date of
+ * `2026-11-09`, which is in the past, and graded **`due`**. `due` is the
+ * accusing verdict. So the field whose whole purpose is to record a reading
+ * produced a debt for the reading it recorded, and the better a seat complied
+ * with the new format the larger its reported debt.
+ *
+ * It bills both sides. HQ took a spelling already in use for the opposite
+ * sense; this tool owned that spelling because its label set was widened by
+ * guessing plausible spellings rather than by measuring the ones in the file.
+ * Three entries in this register used `**Read.**` as a forward date and have
+ * been re-spelled to the house label in the same pull request, because under
+ * the new format a forward date belongs under `**Next measure.**` and the
+ * register cannot hold both senses of one label.
+ *
+ * WHY THIS IS NOT JUST ANOTHER ALT LABEL. An alt label is a different way of
+ * writing the same field. This is a different field, and the tell is that the
+ * two cannot be merged without losing the thing each is for: a forward date
+ * can expire and a record cannot.
+ */
+export const READING_RECORD_LABEL = 'read'
+
+/**
+ * Phrasings on a `**Read.**` line that mean no reading was taken. The
+ * asymmetry is HQ's and it is declared rather than inferred: every negative
+ * phrasing loses, because a false `read` invents a reading nobody took, and
+ * that error is unrecoverable where a missed discharge is merely annoying.
+ */
+export const NOT_READ_PHRASES = ['not read yet', 'not yet', 'nothing', 'none']
+
+const KNOWN = new Set([HOUSE_LABEL, ...ALT_LABELS, READING_RECORD_LABEL])
 
 // ORDERING READ DATES: `sortByDay` from `tools/instant.mjs`, imported above.
 //
@@ -201,6 +251,11 @@ export function readDateField (entry) {
   let offset = 0
   for (const line of lines) {
     const label = labelAtHead(line)
+    // The reading record is a different field in the other direction and is
+    // read by `readingRecord` below. Skipped here, and skipping it is the
+    // repair: counted as a forward field it dated the entry in the past and
+    // graded it `due`.
+    if (label === READING_RECORD_LABEL) { offset += line.length + 1; continue }
     if (label) {
       const d = /\d{4}-\d{2}-\d{2}/.exec(text.slice(offset, offset + 300))
       const hit = { label, canonical: label === HOUSE_LABEL, date: d ? d[0] : null }
@@ -236,7 +291,21 @@ export function readDateField (entry) {
  * it.
  */
 export function nowDay (now) {
-  return utcDay(now) ?? (timestampShape(now) === 'day' ? String(now) : null)
+  // GATED ON `parseDay` AND NOT ON `timestampShape`, which is the correction
+  // this lane made to the merged version (exo, 2026-11-09). `timestampShape`
+  // decides a SHAPE: its `BARE_DAY` is `/^\d{4}-\d{2}-\d{2}$/` and it
+  // answers `'day'` for `'2026-02-30'` and for `'2026-13-99'`. Existence is
+  // decided by `parseDay`, which round-trips through `Date.UTC` precisely so
+  // that a day the calendar does not have is refused. Built on the shape
+  // predicate, this function handed a non-existent day straight through as
+  // `now`, every later `compareDays` against it answered `null`, every
+  // `isDayAfter` answered `false`, and the register graded `due`.
+  //
+  // The general shape, which is this seat's half to carry: REACHING FOR A
+  // MEMBER OF THE REPAIRED FAMILY IS NOT THE SAME AS BEING REPAIRED. The
+  // family added an existence check and this call bypassed it by picking the
+  // one member that does not perform it.
+  return utcDay(now) ?? (parseDay(now) === null ? null : String(now))
 }
 
 /**
@@ -249,20 +318,107 @@ export function nowDay (now) {
  */
 export function gradeEntry (entry, { now, completedSince = null }) {
   const field = readDateField(entry)
-  if (!field.date) {
-    return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null }
+  const record = readingRecord(entry)
+  // THE DISCHARGE, and it is checked first because it is a record and
+  // everything below it is an inference from a date. An entry somebody has
+  // read is `read`, whatever its forward date says: that is the whole point
+  // of HQ's sixth line, and it is what makes `due` a debt that can be paid
+  // instead of a number that only grows.
+  //
+  // A reading record with no date is NOT a discharge. `- **Read.**` with
+  // prose and no ISO date is the same defect as a `**Next measure.**` with
+  // no ISO date, and it is reported the same way, under the same `no-date`
+  // verdict with its own `why`. A record whose date nobody wrote down cannot
+  // be checked against anything.
+  if (record.notRead) {
+    // Declared explicitly not read. Fall through to the date grading below,
+    // because "not read yet" is a statement about the past and the forward
+    // date still decides whether a reading is owed.
+  } else if (record.present && record.date) {
+    return { ...entry, ...field, verdict: READ, why: null, completedSince: null, read: record }
+  } else if (record.present) {
+    return { ...entry, ...field, verdict: NO_DATE, why: RECORD_NO_ISO, completedSince: null, read: record }
   }
-  const future = isDayAfter(field.date, nowDay(now))
+  if (!field.date) {
+    return { ...entry, ...field, verdict: NO_DATE, why: field.label ? FIELD_NO_ISO : NO_FIELD, completedSince: null, read: record }
+  }
+  // CONFLICT RESOLVED HERE, and the resolution is neither side whole.
+  //
+  // Two lanes repaired this one line on 2026-11-09. The engineer's landed in
+  // #758 and reads `isDayAfter(field.date, nowDay(now))`; this seat's lane
+  // read `field.date > dayOf(now)` and threw when `now` could not be placed.
+  // The engineer's note asked for the opposite resolution — "keep your dayOf,
+  // drop my nowDay" — and by the time it was read its own premise had
+  // expired, because #758 merged first and `nowDay` is exported and tested on
+  // the trunk. So the merged function stays and the deleted half comes back:
+  // the REFUSAL AT THE CALL SITE, which is the one thing the trunk lost.
+  //
+  // WHY THE REFUSAL IS NOT OPTIONAL. `isDayAfter` answers `false` for "I will
+  // not place this", documented in `tools/instant.mjs` as "absent, not true".
+  // That is the right convention for that module and it is a verdict here:
+  // `future = false` sends an entry down the graded branch, and `readVerdict`
+  // answers `due`. Measured on the trunk, `--now 'not a time'` grades an
+  // entry whose read date is 2026-12-25 as `due`. `due` is the accusing
+  // verdict — it says a seat owes a reading it has not taken — so an
+  // unplaceable `now` manufactures debt against every dated entry in the
+  // register and exits 0. The count this seat publishes to HQ is that number.
+  const today = nowDay(now)
+  if (today === null) {
+    throw new TypeError(`gradeEntry: \`now\` cannot be placed on a calendar: ${JSON.stringify(now)}. Every verdict below this line is a claim about a date relative to today, so there is no honest grade to return`)
+  }
+  const future = isDayAfter(field.date, today)
   if (!future && completedSince === null) {
-    return { ...entry, ...field, verdict: null, why: 'ungradeable: no run rows, so `due` and `unread` are indistinguishable', completedSince: null }
+    return { ...entry, ...field, verdict: null, why: 'ungradeable: no run rows, so `due` and `unread` are indistinguishable', completedSince: null, read: record }
   }
   return {
     ...entry,
     ...field,
     verdict: readVerdict({ readDate: field.date, now, completedSince: completedSince ?? 0 }),
     why: null,
-    completedSince: future ? null : completedSince
+    completedSince: future ? null : completedSince,
+    // Carried on EVERY return, including the ones that do not discharge. A
+    // census of the new field that could only see the discharges would report
+    // adoption as identical to compliance, and `**Read.** not read yet` is
+    // compliance with no discharge. That is the distinction the field exists
+    // to draw, so it has to survive the grading.
+    read: record
   }
+}
+
+/**
+ * The reading record of one entry: HQ's sixth labelled line, read as a record
+ * and never as an inference.
+ *
+ * Returns `{ present, date, reader, notRead }`. `present` is whether the line
+ * exists at all, which is the thing the old format had no way to say — `read`
+ * used to be decided by whether an Effect line happened to carry a number,
+ * so a seat that looked on the day it promised and found the metric flat left
+ * no mark and the entry stayed due for ever.
+ *
+ * `notRead` wins over a date on the same line, because the asymmetry is
+ * declared: a false `read` invents a reading nobody took.
+ */
+export function readingRecord (entry) {
+  const text = `${entry.heading}\n${entry.body}`
+  const lines = text.split('\n')
+  let offset = 0
+  for (const line of lines) {
+    if (labelAtHead(line) !== READING_RECORD_LABEL) { offset += line.length + 1; continue }
+    const value = text.slice(offset, offset + 300)
+    const lower = value.toLowerCase()
+    if (NOT_READ_PHRASES.some((phrase) => lower.includes(phrase))) {
+      return { present: true, date: null, reader: null, notRead: true }
+    }
+    const d = /\d{4}-\d{2}-\d{2}/.exec(value)
+    // The reader is whatever follows the date on that line, trimmed of
+    // punctuation. Not parsed into a seat name: this register names readers as
+    // "by this seat", "by Ursa/exo" and "by the eighty-ninth window", and a
+    // parser that only accepted one of those would drop the other two.
+    const afterDate = d ? value.slice(d.index + 10).split('\n')[0] : ''
+    const reader = afterDate.replace(/^[\s,.;:-]+/, '').replace(/[\s.]+$/, '') || null
+    return { present: true, date: d ? d[0] : null, reader, notRead: false }
+  }
+  return { present: false, date: null, reader: null, notRead: false }
 }
 
 /** The label census, which is a reading of the format and not of the dates. */
@@ -316,7 +472,14 @@ export function report ({ text, now, rows = null }) {
       dated_only_by_alt_label: graded.filter((g) => g.date && !g.canonical).length,
       no_field: graded.filter((g) => g.why === NO_FIELD).length,
       field_no_iso: graded.filter((g) => g.why === FIELD_NO_ISO).length,
-      ungradeable_no_rows: graded.filter((g) => g.verdict === null).length
+      ungradeable_no_rows: graded.filter((g) => g.verdict === null).length,
+      // The discharge, and its two neighbours. `read` is the count that can
+      // fall; `record_no_iso` is a record nobody dated; `not_read` is the
+      // declared negative, which is a record too and is NOT a discharge.
+      read: graded.filter((g) => g.verdict === READ).length,
+      record_no_iso: graded.filter((g) => g.why === RECORD_NO_ISO).length,
+      not_read_declared: graded.filter((g) => g.read?.notRead).length,
+      with_reading_record: graded.filter((g) => g.read?.present).length
     },
     verdicts: [...byVerdict.entries()].map(([verdict, n]) => ({ verdict, n })),
     dates: sortByDay(
@@ -349,7 +512,10 @@ export function report ({ text, now, rows = null }) {
 export function gateExitCode ({ report: r, rows, offline }) {
   if (offline) return 3
   if (!rows) return 3
-  if (r.counts.dated === 0) return 3
+  // `read` rows are graded without run rows and without a forward date, so a
+  // register in which everything has been read is a real green and not the
+  // empty reading case below. Counted here for that reason.
+  if (r.counts.dated === 0 && r.counts.read === 0) return 3
   return r.due.length > 0 ? 1 : 0
 }
 

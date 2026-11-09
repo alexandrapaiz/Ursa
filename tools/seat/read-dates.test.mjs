@@ -29,7 +29,7 @@ import { compareInstants, isAfter, isBefore, compareDays, parseDay } from '../in
 import {
   splitEntries, labelAtHead, readDateField, gradeEntry, labelCensus, report,
   REGISTER_PATH, HOUSE_LABEL, ALT_LABELS, VERDICTS, NO_FIELD, FIELD_NO_ISO, gateExitCode,
-  nowDay
+  nowDay, readingRecord, READING_RECORD_LABEL, NOT_READ_PHRASES, RECORD_NO_ISO, READ
 } from './read-dates.mjs'
 
 // The capacity rows this organization actually had, which is outage.test.mjs's
@@ -203,20 +203,44 @@ test('live: the committed register parses to something, so a pass over nothing i
   assert.ok(r.counts.dated >= 115, `${r.counts.dated} dated entries; 115 were there on 2026-11-09`)
 })
 
-test('live: twelve dated entries are invisible to a census keyed on the house label alone', () => {
+test('live: nine dated entries are invisible to a census keyed on the house label alone', () => {
   // The finding this tool was built for, measured on the committed file at
   // 2026-11-09T00:48Z: 192 entries, 115 dated, 12 of them dated under a label
   // no previous census looked for. Six of those twelve are dated 2026-11-09,
   // which is why windows 91 and 93 predicted 18 and then 14 entries due today
   // and the true count is 21. Floors, not equalities: the register grows.
+  //
+  // THE FLOOR MOVED DOWN FROM 12 TO 9, which is the one direction the sentence
+  // above says cannot happen, so it carries its cause (exo, 2026-11-09). The
+  // three missing entries are this seat's own, and they were re-spelled from
+  // `**Read.**` to `**Next measure.**` in the same pull request that moved
+  // this number. HQ's exo-centralizer made `**Read.**` the format's sixth
+  // labelled line, a BACKWARD record of a reading taken; those three used it
+  // as a FORWARD date. One spelling, two directions, and the measured cost of
+  // leaving it was that an entry recording its own reading graded `due`.
+  //
+  // So this floor is not a floor over the same population any more, and a
+  // number that moves because its vocabulary narrowed is a different quantity
+  // from one that moves because the register grew. Said here rather than
+  // silently relaxed, because the next window to see 9 where the comment says
+  // 12 would otherwise read it as a parser regression.
   const text = readFileSync(REGISTER_PATH, 'utf8')
   const r = report({ text, now: NOW, rows: ROWS })
-  assert.ok(r.counts.dated_only_by_alt_label >= 12,
-    `${r.counts.dated_only_by_alt_label} dated entries under a non-house label; 12 on 2026-11-09`)
+  assert.ok(r.counts.dated_only_by_alt_label >= 9,
+    `${r.counts.dated_only_by_alt_label} dated entries under a non-house label; 9 on 2026-11-09 after the **Read.** re-spelling, 12 before it`)
+  // And the forward sense of `**Read.**` is gone from the register, which is
+  // the condition that makes the line above safe to lower. If this fails,
+  // somebody has written a forward date under the record label again and the
+  // entry will grade `due` on the day it is read.
+  assert.equal(r.labels.filter((l) => l.label === 'read').length, 0,
+    'no entry may use **Read.** as a forward read-date label; it is the reading record')
   const today = r.graded.filter((g) => g.date === '2026-11-09')
   assert.ok(today.length >= 21, `${today.length} entries dated 2026-11-09; 21 on the day`)
-  assert.ok(today.filter((g) => !g.canonical).length >= 6,
-    'six of those were under a non-house label')
+  // Three, not the six it was, and for the same cause as the floor above: the
+  // three re-spelled entries were all dated 2026-11-09, so they left this
+  // subset and the house-labelled total is unchanged at 21.
+  assert.ok(today.filter((g) => !g.canonical).length >= 3,
+    'three of those were under a non-house label; six before the **Read.** re-spelling')
   for (const g of today) assert.equal(g.verdict, 'due', `${g.heading} is due, not ${g.verdict}`)
 })
 
@@ -302,4 +326,122 @@ test('control: the gate exits 3 on all three ways of establishing nothing, and 0
   // And the control on the control: the only input that yields 0 is the one
   // where a dated entry was actually graded, so a gate stuck at 0 fails here.
   assert.notEqual(gateExitCode({ report: undated, rows: ROWS, offline: false }), 0)
+})
+
+// --- HQ's sixth labelled line: the reading record -------------------------
+
+test('the reading record discharges `due`, which is the standing finding this file opened with', () => {
+  // The whole point. Before the sixth line existed, `read` was a value
+  // nothing in either register could emit, so `due` only grew. Both halves
+  // asserted: the entry WOULD be due on its forward date, and is not.
+  const withoutRecord = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n')
+  assert.equal(gradeEntry(withoutRecord, { now: NOW, completedSince: 40 }).verdict, 'due')
+
+  const withRecord = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n- **Read.** 2026-11-05, by Ursa/exo.\n')
+  const g = gradeEntry(withRecord, { now: NOW, completedSince: 40 })
+  assert.equal(g.verdict, 'read')
+  assert.equal(g.read.date, '2026-11-05')
+  assert.equal(g.read.reader, 'by Ursa/exo')
+  // The forward field is still reported beside the record, because the reader
+  // needs to know which date was promised and which was kept.
+  assert.equal(g.date, '2026-11-01')
+})
+
+test('a reading record is the only thing that produces `read`, and a number in Effect is not', () => {
+  // The mechanism HQ repaired: `read` used to be decided by whether an Effect
+  // line happened to carry a number, which is a side effect of a reading and
+  // not the reading. A seat that looked and found the metric flat left no mark.
+  const flat = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n- **Effect.** No change: 4 before, 4 after.\n')
+  assert.equal(gradeEntry(flat, { now: NOW, completedSince: 40 }).verdict, 'due')
+  const numbered = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n- **Effect.** 52 to 11.\n')
+  assert.equal(gradeEntry(numbered, { now: NOW, completedSince: 40 }).verdict, 'due')
+})
+
+test('every negative phrasing on a Read line loses, because a false `read` invents a reading', () => {
+  // HQ declared the asymmetry rather than inferring it. Asserted as a set, so
+  // that adding a phrase to NOT_READ_PHRASES without a case here fails.
+  for (const phrase of NOT_READ_PHRASES) {
+    const e = entry('x', `- **Next measure.** 2026-11-01 by this seat.\n- **Read.** ${phrase}.\n`)
+    assert.equal(gradeEntry(e, { now: NOW, completedSince: 40 }).verdict, 'due', `"${phrase}" must not discharge`)
+  }
+  // And a negative phrasing WINS over a date on the same line, which is the
+  // direction the asymmetry points: "not read yet, was due 2026-11-01".
+  const both = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n- **Read.** not read yet, it was due 2026-11-01.\n')
+  assert.equal(gradeEntry(both, { now: NOW, completedSince: 40 }).verdict, 'due')
+})
+
+test('a Read line with no ISO date is a record nobody dated, and says so rather than discharging', () => {
+  const e = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n- **Read.** yes, by this seat, last week sometime.\n')
+  const g = gradeEntry(e, { now: NOW, completedSince: 40 })
+  assert.equal(g.verdict, 'no-date')
+  assert.equal(g.why, RECORD_NO_ISO)
+  assert.notEqual(g.verdict, 'read')
+})
+
+test('REGRESSION: the record label is not a forward read-date field, which is the collision it was split out of', () => {
+  // Probed on the trunk before the repair: an entry carrying HQ's new line and
+  // no `**Next measure.**` — the normal shape of a FINISHED experiment —
+  // parsed as a forward read date in the past and graded `due`. The field
+  // whose purpose is to record a reading produced a debt for it.
+  const finished = entry('x', '- **Read.** 2026-11-09, by Ursa/exo.\n- **Effect.** 4 of 4.\n')
+  const g = gradeEntry(finished, { now: NOW, completedSince: 40 })
+  assert.equal(g.verdict, 'read')
+  assert.equal(g.label, null, 'the Read line must not be claimed as the forward field')
+  assert.equal(g.date, null)
+  // The census must not count it as a forward spelling either, or the
+  // alt-label number re-inflates with records.
+  assert.deepEqual(labelCensus([finished]).map((l) => l.label), ['no-field'])
+})
+
+test('`read` is in the closed vocabulary, so the gate and the census can both route it', () => {
+  // This seat reported to HQ that `read` was a verdict nothing could emit.
+  // The other half of that report is that it has to be emittable HERE too.
+  assert.ok(VERDICTS.has('read'))
+  assert.equal(VERDICTS.size, 5)
+})
+
+test('a register of nothing but readings is a real green, not an empty reading', () => {
+  // gateExitCode returns 3 for "established nothing". A fully-read register
+  // has no forward dates left, so the old `dated === 0` test would have
+  // called the best possible state the same as an unparsed file.
+  const text = '### a\n- **Read.** 2026-11-05, by Ursa/exo.\n\n### b\n- **Read.** 2026-11-06, by Ursa/exo.\n'
+  const r = report({ text, now: NOW, rows: ROWS })
+  assert.equal(r.counts.read, 2)
+  assert.equal(r.counts.dated, 0)
+  assert.equal(gateExitCode({ report: r, rows: ROWS, offline: false }), 0)
+  // And a file with neither is still 3, which is the case that must not break.
+  const empty = report({ text: '### a\n- **Merged.** yes.\n', now: NOW, rows: ROWS })
+  assert.equal(gateExitCode({ report: empty, rows: ROWS, offline: false }), 3)
+})
+
+test('the reading record is carried on every grading path, or adoption reads as identical to compliance', () => {
+  // Found by this file's own census three minutes after the field shipped:
+  // `read: record` was attached only on the discharging return, so the two
+  // entries that had adopted HQ's line as `**Read.** not read yet` counted as
+  // zero carriers. A census of a new field that can only see its successes
+  // reports adoption and compliance as one number, and they are the two this
+  // field exists to separate.
+  // A PAST forward date, so the verdict is `due` and the fall-through path
+  // under test is the one that actually grades.
+  const declaredNegative = entry('x', '- **Next measure.** 2026-11-01 by this seat.\n- **Read.** not read yet.\n')
+  const g = gradeEntry(declaredNegative, { now: NOW, completedSince: 40 })
+  assert.equal(g.verdict, 'due')
+  assert.equal(g.read.present, true, 'the record is present even though it does not discharge')
+  assert.equal(g.read.notRead, true)
+
+  // The no-forward-date path and the ungradeable path too, because each is a
+  // separate `return` and each dropped it.
+  const noField = entry('y', '- **Read.** not read yet.\n')
+  assert.equal(gradeEntry(noField, { now: NOW, completedSince: 40 }).read.present, true)
+  const ungradeable = entry('z', '- **Next measure.** 2026-11-01.\n- **Read.** not read yet.\n')
+  const u = gradeEntry(ungradeable, { now: NOW, completedSince: null })
+  assert.equal(u.verdict, null)
+  assert.equal(u.read.present, true)
+
+  // And the report's two counts differ, which is the point of carrying it.
+  const text = '### a\n- **Read.** 2026-11-05, by Ursa/exo.\n\n### b\n- **Next measure.** 2026-11-01.\n- **Read.** not read yet.\n'
+  const r = report({ text, now: NOW, rows: ROWS })
+  assert.equal(r.counts.with_reading_record, 2, 'two entries carry the field')
+  assert.equal(r.counts.read, 1, 'one of them discharges')
+  assert.equal(r.counts.not_read_declared, 1)
 })

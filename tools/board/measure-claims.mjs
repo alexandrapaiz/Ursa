@@ -86,6 +86,7 @@
 // Still a floor even when the walk completes, for the reason the reporting
 // seat put best: the corpus "is not a sample of the input space, it is a
 // sample of what the style guide and a validator leave behind."
+import { utcDay } from '../instant.mjs';
 import { liveTargetFault } from './live-target.mjs';
 import { blockFaults } from './measured-citation.mjs';
 import { pageMessages, ratioFault } from './page.mjs';
@@ -222,7 +223,13 @@ export function measuredBlock(out, readAt, company = {}) {
   });
   const block = {
     read_at: readAt,
-    on: String(readAt).slice(0, 10),
+    // The UTC day of the read, and not `slice(0, 10)` of it. `readAt` is a
+    // board instant today, so the slice agreed; it stops agreeing the moment
+    // a caller hands this an offset-bearing git date, and this block is a
+    // published citation. Null rather than a guess when unplaceable, because
+    // `tools/board/measured-citation.mjs` reads this field and a wrong day
+    // passes its checks while a null does not.
+    on: utcDay(readAt),
     window_hours: out.since_hours,
     coverage: {
       complete: c.complete,
