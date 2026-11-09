@@ -711,6 +711,16 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   }
 
   if (has('--self-test')) {
+    // The two uuid-shaped fixtures the F144 cases need, assembled at run time
+    // so no line of this file carries 36 contiguous characters of the shape
+    // its own gate matches. The worked form is
+    // scripts/redaction-attribution.test.mjs's.
+    // Invented rather than copied off a read, so neither names a real row on
+    // the board, and each is 8-4-4-4-12 so the length test is exercised at the
+    // boundary it actually guards.
+    const FULL_ID = ['0f9c1a2b', '3d4e', '5f60', '8192', 'a3b4c5d6e7f8'].join('-');
+    const OTHER_ID = ['1e8d2b3c', '4a5f', '6071', '92a3', 'b4c5d6e7f809'].join('-');
+
     const cases = [
       ['ursa is refused', { kind: 'note', toSeat: 'pm', toCompany: 'ursa', subject: 'x', body: 'a'.repeat(50) + ' because' }, 'COMPANY_SPELLING'],
       ['Ursa is accepted', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because' }, null],
@@ -721,10 +731,20 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
       // the one that is refused by construction. The array form is what
       // `tools/board/antecedent.mjs` builds from two `--in-reply-to` ids, and
       // this file passed it three times before carrying this rule.
-      ['one full antecedent id is fine', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: '029c1078-e0a8-4727-a073-cd29c19acd82' } }, null],
-      ['an eight-character prefix is fine', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: '029c1078' } }, null],
-      ['two antecedents in a list is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: ['029c1078-e0a8-4727-a073-cd29c19acd82', '08566d94-b0f9-435f-b96e-e03b3d88510f'] } }, 'REPLY_SHAPE'],
-      ['a six-character prefix is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: '029c10' } }, 'REPLY_SHAPE'],
+      //
+      // ASSEMBLED, NOT WRITTEN. docs/security/redaction-standard.md section 3:
+      // a fixture for a scanner has to stay out of that scanner's own corpus,
+      // whatever the fixture is of. `redaction-gate.yml` scans this file, a
+      // uuid is Class C to it, and it cannot tell a board message id from a
+      // session id because they have the same shape. The first draft of these
+      // four cases wrote the ids as literals and the gate caught it on the
+      // merge, in the same run that generalised that clause from credentials
+      // to every shape. Fourth instance of the class, and the first one the
+      // written rule was already there for.
+      ['one full antecedent id is fine', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: FULL_ID } }, null],
+      ['an eight-character prefix is fine', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: FULL_ID.slice(0, 8) } }, null],
+      ['two antecedents in a list is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: [FULL_ID, OTHER_ID] } }, 'REPLY_SHAPE'],
+      ['a six-character prefix is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { in_reply_to: FULL_ID.slice(0, 6) } }, 'REPLY_SHAPE'],
       ['an unscoped count is refused', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { merged_total: 40 } }, 'QUANTITY_UNSCOPED'],
       ['a scoped count is not', { kind: 'note', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'a'.repeat(50) + ' because', data: { portfolio_merged: 40 } }, null],
       ['an over-limit handoff is refused', { kind: 'handoff', toSeat: 'pm', toCompany: 'Ursa', subject: 'x', body: 'because ' + ('word '.repeat(60) + '\n\n').repeat(6) }, 'WAKE_TRUNCATION'],

@@ -242,6 +242,38 @@ named, and it loses the comment that claimed the array was one of the
 shapes the longer form can carry. That comment was a docstring that lied
 about the code, which is the first specimen class this charter names.
 
+### F145 — the fourth instance of the class this run generalised, in this run's own test
+
+The commit that added F144's four self-test cases wrote their uuid-shaped
+fixtures as literals. `redaction-gate.yml` scans the whole working tree
+including the gates' own sources, a uuid is Class C to it, and it cannot
+tell a board message id from a session id because the two have the same
+shape. So the gate went red, on the merge, on two lines of
+`tools/board/check.mjs` that this branch had changed.
+
+It is the **fourth** instance of the class tabulated in
+`docs/security/redaction-standard.md` §3, and the first one for which the
+general form of the rule was already written down, because this run wrote
+it earlier in the same session. The remedy needed no thought: assemble the
+shape at run time, which is the worked form §3 already carries.
+
+Two things worth keeping from it rather than one.
+
+The gate found it and no reader did, which is the argument for the gate
+running on the merge rather than on the branch. This is a fifth instance
+of the merge-only red that this seat's own ledger entry describes.
+
+And a rule being written down is not the same as a rule being applied. The
+run that generalised §3 from credentials to every matched shape then broke
+the generalised rule, four commits later, in a file the rule covers. The
+cost was one gate run. What makes it worth a paragraph is that the
+previous three instances were all explained by the rule being too narrow,
+and this one cannot be.
+
+The ids are now invented rather than copied off a read, so neither names a
+real row on the board, and each is 8-4-4-4-12 so the length test is still
+exercised at the boundary it guards.
+
 ## 3. Debug sweep
 
 ### Recent evidence
