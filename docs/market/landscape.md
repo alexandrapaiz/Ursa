@@ -329,6 +329,37 @@ Mercor after a data
 breach](https://www.aol.com/articles/meta-paused-ai-training-startup-042644659.html),
 BigGo Finance, "Mercor's annualized revenue tops $2 billion" (2026-06-25; link omitted here because the article's URL slug is itself UUID-shaped and trips the redaction gate's private-session-UUID check, see docs/market/briefs/2026-10-26-message-24.md).
 
+Update 2026-11-09 (message, 17th run): the same $614M H1 2026 figure
+already on file (2026-10-05 update) has a sharper number attached to
+it, found this run via a different outlet covering the same underlying
+disclosure. BigGo Finance (2026-07-22, citing The Information's
+2026-07-09 report) states that approximately 91% of that H1 revenue
+came from AI foundation-model companies specifically (OpenAI,
+Anthropic, Google DeepMind named, alongside smaller labs Reflection AI
+and Thinking Machines Lab and a short enterprise list — Ramp, Blue Owl,
+Citigroup). The article's own framing is blunt: this concentration is
+"a sword of Damocles hanging over its head," citing Meta's indefinite
+contract pause after the 2026-03-31/04-04 breach (already tracked in
+this entry's 2026-10-26 update) as the demonstrated downside case, and
+reports Mercor's own stated mitigation target of reducing foundation-
+model-company revenue to "less than one-third" of the total by 2030.
+
+So what: this is the category's largest-by-growth vendor publicly
+naming, and setting a multi-year target against, the exact customer-
+concentration structure CLAUDE.md §4 predicts for Minor itself ("one
+or two of them accounting for most of revenue... standard shape for an
+enterprise data infrastructure business"). Read as a comp rather than
+a warning, it is confirmation that the predicted shape is real and
+that frontier labs are in fact willing to be that concentrated a buyer.
+Read as a risk, it is the incumbent closest to Minor's own target
+market stating in its own words that the identical structure is
+dangerous enough to need a decade-long diversification plan, not a
+hypothetical a smaller or newer vendor could dismiss. Positioning
+consequence in docs/market/positioning.md. Last observed 2026-11-09:
+[BigGo Finance: AI Data Factory Mercor's H1 Revenue Surges Past $615
+Million, With 90% Fueled by OpenAI and Other
+Giants](https://finance.biggo.com/news/865c23cb%2D3e0d-4c21-aa0d-6bf2a7fc8d1a).
+
 ### Prolific
 
 What it is: an academic-research participant marketplace that has
