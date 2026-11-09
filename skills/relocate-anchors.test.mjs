@@ -31,10 +31,10 @@
 // repository so `git show` is exercised for real rather than stubbed.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, copyFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, readFileSync, copyFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { fixtureDir } from './tmp-fixture.mjs'
 import { citedRanges, locate, fingerprint, refUnreadable } from './relocate-anchors.mjs'
 
 const skill = (evidence, body) => `---
@@ -94,7 +94,7 @@ test('a relocated range fingerprints to the value the lock already held', () => 
 })
 
 test('end to end: relocates on a unique match, refuses on two, reports a real change', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'relocate-'))
+  const dir = fixtureDir('relocate-')
   const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
   git('init', '-q', '-b', 'main')
   git('config', 'user.email', 'test@example.invalid')
@@ -177,7 +177,7 @@ test('a wrong old-ref is reported as a wrong old-ref, not relocated anyway', () 
   // The failure mode that cost this run twenty minutes: pointing the tool at a
   // plausible but wrong ref. It must say so rather than search a tree whose
   // lines were never the cited ones.
-  const dir = mkdtempSync(join(tmpdir(), 'relocate-ref-'))
+  const dir = fixtureDir('relocate-ref-')
   const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
   git('init', '-q', '-b', 'main')
   git('config', 'user.email', 'test@example.invalid')
@@ -223,7 +223,7 @@ test('a chain, where one range relocates onto the key another is vacating', () =
   // The second half is the write: delete every old key before writing any new
   // one, or the vacating range's delete erases what the arriving one wrote and
   // the surviving fingerprint depends on iteration order.
-  const dir = mkdtempSync(join(tmpdir(), 'relocate-chain-'))
+  const dir = fixtureDir('relocate-chain-')
   const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
   git('init', '-q', '-b', 'main')
   git('config', 'user.email', 'test@example.invalid')
@@ -290,7 +290,7 @@ test('two ranges of one ref relocating onto the same key still needs a person', 
   // The vacancy rule must not swallow a genuine conflict. Two cited lines whose
   // text became identical have one destination between them, and no vacancy
   // explains that, so it goes to a reader rather than silently losing one.
-  const dir = mkdtempSync(join(tmpdir(), 'relocate-conflict-'))
+  const dir = fixtureDir('relocate-conflict-')
   const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
   git('init', '-q', '-b', 'main')
   git('config', 'user.email', 'test@example.invalid')
@@ -339,7 +339,7 @@ test('two ranges of one ref relocating onto the same key still needs a person', 
 // not this tool's paraphrase of it.
 
 const scratch = (prefix) => {
-  const dir = mkdtempSync(join(tmpdir(), prefix))
+  const dir = fixtureDir(prefix)
   const git = (...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
   git('init', '-q', '-b', 'main')
   git('config', 'user.email', 'test@example.invalid')
@@ -412,7 +412,7 @@ test('a shallow clone is named as the cause, because it is the clone every seat 
 
   // Clone it at depth 1. The old ref is a real commit of this repository and
   // is simply not in this copy, which is exactly the seat's situation.
-  const shallow = mkdtempSync(join(tmpdir(), 'relocate-shallow-'))
+  const shallow = fixtureDir('relocate-shallow-')
   execFileSync('git', ['clone', '-q', '--depth', '1', `file://${dir}`, shallow],
     { encoding: 'utf8' })
   assert.equal(execFileSync('git', ['rev-parse', '--is-shallow-repository'],
@@ -462,7 +462,7 @@ test('refUnreadable names the clone, not the citations, when the ref is beyond a
   // it as a limitation rather than a repair is what let the wrong answer
   // stand. `tools/ensure-full-clone.sh` is the repair, and this test is the
   // refusal that points at it.
-  const origin = mkdtempSync(join(tmpdir(), 'relocate-origin-'))
+  const origin = fixtureDir('relocate-origin-')
   const git = (dir, ...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
   git(origin, 'init', '-q', '-b', 'main')
   git(origin, 'config', 'user.email', 'test@example.invalid')
@@ -475,7 +475,7 @@ test('refUnreadable names the clone, not the citations, when the ref is beyond a
   writeFileSync(join(origin, 'src', 'f.ts'), 'header\nalpha\n')
   git(origin, 'add', '-A'); git(origin, 'commit', '-q', '-m', 'second')
 
-  const shallow = mkdtempSync(join(tmpdir(), 'relocate-shallow-'))
+  const shallow = fixtureDir('relocate-shallow-')
   execFileSync('git', ['clone', '-q', '--depth', '1', '--single-branch', '--branch', 'main',
     `file://${origin}`, shallow])
   assert.equal(git(shallow, 'rev-parse', '--is-shallow-repository').trim(), 'true')
@@ -498,7 +498,7 @@ test('the precondition exits 2, which is neither the clean nor the needs-a-perso
   // Exit 1 already means "ranges need a person" and exit 0 means "nothing
   // does". An environment fault that borrowed either one is the defect, so the
   // code is asserted here rather than left to the caller's reading.
-  const origin = mkdtempSync(join(tmpdir(), 'relocate-exit-origin-'))
+  const origin = fixtureDir('relocate-exit-origin-')
   const git = (dir, ...args) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' })
   git(origin, 'init', '-q', '-b', 'main')
   git(origin, 'config', 'user.email', 'test@example.invalid')
@@ -522,7 +522,7 @@ test('the precondition exits 2, which is neither the clean nor the needs-a-perso
   writeFileSync(join(origin, 'src', 'f.ts'), 'header\nalpha\n')
   git(origin, 'add', '-A'); git(origin, 'commit', '-q', '-m', 'second')
 
-  const shallow = mkdtempSync(join(tmpdir(), 'relocate-exit-shallow-'))
+  const shallow = fixtureDir('relocate-exit-shallow-')
   execFileSync('git', ['clone', '-q', '--depth', '1', '--single-branch', '--branch', 'main',
     `file://${origin}`, shallow])
 

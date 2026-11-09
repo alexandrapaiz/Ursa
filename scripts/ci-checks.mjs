@@ -495,6 +495,106 @@ export const CHECKS = [
     argv: () => ['bash', 'tools/ensure-full-clone.sh', '--check'],
     passExit: [0],
   },
+
+  // ------------------------------------------------------------------------
+  // The skills library's own guards, registered 2026-11-09 by Ursa/skill.
+  //
+  // WHY THESE SIX ARRIVE AS A BLOCK, AND WHY THEY ARRIVE BEFORE THE SWEEP
+  // THAT WOULD HAVE FOUND THEM. `gateCandidatePaths` in
+  // tools/gates/enumerate-verdicts.mjs defaults `roots` to tools and scripts,
+  // so `gate-registry` above has never swept `skills/` and this library's
+  // guards were reached by nothing without being counted as unreached either.
+  // Ursa/exo measured the gap from the other side: widening that default takes
+  // the candidate set from 58 to 64 on origin/main, and the six new candidates
+  // are these. It declined to widen it in the same window, because a
+  // whole-tree gate that goes red names whichever branch is tested next rather
+  // than the one that caused it, and one commit cost 17 reds across 5 seats
+  // that way today.
+  //
+  // So registration comes first and the root widens second, and these entries
+  // are the first half. Each was run against origin/main and against the
+  // branch carrying it, offline, in the time noted. None writes to the tree.
+  //
+  // THE SEVENTH FILE, because a count that disagrees with another seat's is
+  // worth settling in the file rather than in a message. Ursa/exo measured six
+  // and this seat measured seven using the SAME discriminator; the difference
+  // is the tree, not the criterion. `skills/bare-refs.mjs` is new on this
+  // seat's branch and absent from the tree exo swept. It is registered below,
+  // so the widening absorbs seven and not six.
+  //
+  // THE ONE THAT IS NOT HERE. `skills/relocate-anchors.mjs` has no invocation
+  // that renders a verdict about the tree: with no argument it prints usage and
+  // exits 2, and its working mode takes `--write`. It is a repair tool, so it
+  // wants a `write-action` entry in tools/gates/gate-registry.baseline.json
+  // instead -- and that entry CANNOT land before the root widens, because
+  // `decide()` reports a baseline entry whose path is not a discovered
+  // candidate as `stale-entry`. Measured, not assumed; see
+  // skills/gate-registration.test.mjs. That is the one row the widening commit
+  // has to carry with it, and its text is in the ledger entry "The registry's
+  // two registration routes have opposite orderings".
+  // ------------------------------------------------------------------------
+  {
+    id: 'skill-evidence',
+    scope: 'tooling',
+    title: 'Skill evidence (every citation resolves and still says what it said)',
+    // The receipt half of "skills with receipts": path exists, range in bounds,
+    // cited lines still hash to what they hashed to. 1.2s, offline.
+    argv: () => ['node', 'skills/check-evidence.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-relevance',
+    scope: 'tooling',
+    title: 'Skill relevance (every verdict is bound to the lines it was read against)',
+    // The reading half. A range can pass check-evidence and still fail to
+    // support the sentence citing it, which shipped once in this library.
+    // `--stale` is the gate mode; the bare command prints a queue and exits 0,
+    // so registering that would register nothing. 3.7s, offline.
+    argv: () => ['node', 'skills/relevance-sweep.mjs', '--stale'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-triggers',
+    scope: 'tooling',
+    title: 'Skill triggers (every skill meets the near-miss budget of §5c)',
+    // The budget is one near miss per adjacent skill, so landing one skill puts
+    // every sibling short in files that run's diff never touched. Arithmetic,
+    // not forgetfulness, which is why a reader cannot hold it. 1.1s, offline.
+    argv: () => ['node', 'skills/trigger-coverage.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-bare-refs',
+    scope: 'tooling',
+    title: 'Skill bare refs (no evidence identifier is cited outside the tag form)',
+    // A bare `E33` in prose is on no guard's path: not a tag, so refsIn skips
+    // it, no range, so no lock row, not frontmatter, so declaredRefs cannot see
+    // it. 0.5s, offline.
+    argv: () => ['node', 'skills/bare-refs.mjs'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-forge-citations',
+    scope: 'tooling',
+    title: 'Skill forge citations (every cited pull request is locked with a disposition)',
+    // `--check` reads the lock and reaches nothing; `--refresh` is the mode
+    // that needs the forge and a token, and it is not what is registered here.
+    // About half of all rows this repository has had were closed unmerged and
+    // so never acquire a sha, which is why the lock exists at all.
+    argv: () => ['node', 'skills/forge-citations.mjs', '--check'],
+    passExit: [0],
+  },
+  {
+    id: 'skill-grep-dialect',
+    scope: 'tooling',
+    title: 'Skill grep dialect (a receipt\'s grep means the same thing to every reader)',
+    // `--scan` is the branch-facing mode and fails on a call site whose result
+    // is dialect-dependent. `--engine` is deliberately NOT registered: its
+    // verdict is about the host rather than the branch, so two runners would
+    // answer differently about an unchanged tree. 0.9s, offline.
+    argv: () => ['node', 'skills/grep-dialect.mjs', '--scan', 'skills', 'prompts'],
+    passExit: [0],
+  },
 ]
 
 export function toolingSuites() {

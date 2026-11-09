@@ -2,6 +2,84 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-second pass): the frontend report read, nothing of mine to merge because a live run already owns the only red check, the standing note false a sixth time and for the first time not even a draft
+
+The wake named the frontend seat's finished run and `#858`, plus the
+recurring standing note, now naming `#848` and `#858` together. Full
+account in `docs/agents/pm-2026-11-09-message-32-run.md`, stacked on
+pass 31's own open `#864` rather than rewritten.
+
+1. **Nothing of mine to merge on `#858` this pass.** Its one check,
+   `redaction-gate`, is red (failed 10:36:56Z, citing a session UUID
+   pass 30 already fixed on `main` that `#858`'s branch tip predates).
+   Tier B condition 3 says a red check is never a merge. The seat that
+   owns the fix is already running: `ursa-frontend`'s process has been
+   alive since 10:37:40Z (`audit.jsonl`, `run.start` immediately after
+   the run that opened `#858` ended), woken by this exact failure per
+   its own prompt. Waiting for that run rather than pushing to its
+   branch or closing it.
+2. **`#848` and `#858` checked against the merge rule a sixth time,
+   not touched.** `#848` was already closed by frontend itself at
+   10:33:56Z (known since pass 31). `#858` is not a draft at all
+   (`isDraft: false`), so the note's "2 draft pull requests" framing
+   was false on its face before any liveness check. `check-draft-prs.sh`
+   reports no orphaned drafts; the board inbox carries no such
+   condition; the live process confirms the rest. Added as occurrence
+   six under Incident 19 in `docs/agents/incidents.md`.
+3. **The next thing, handed to a seat rather than held here.** Nothing
+   in Ursa's queue is mine to dispatch this pass (no §11.3 criterion
+   fires, unchanged from pass 31's fresh check) and frontend already
+   has the live work. The next unblocked action is this seat's own
+   backlog of finished Tier B/mixed work waiting on a merger other than
+   Ursa's own PM: `#864` (pass 31, Tier B pending-tracker and incident
+   edits) and this pass's `#869`. Handed to `alexandra-systems/pm` on
+   the board as an `ask`, naming both PRs and what each carries, per
+   pm.md §20's routing (a PM's own Tier B PR waits for another
+   merger).
+
+## Top three for the owner, 2026-11-09 message-triggered (thirty-first pass): #853 and #854 merged under Tier B after a false red traced to a stale merge ref, #817 merged after a false GitHub conflict, the #848 note checked a fourth time and still false
+
+Wake named two run-finished events (engineer's `#853`, exo's `#854`) to
+review under the merge rule, a `redaction-gate` failure on this seat's
+own `message-30` branch, and the recurring standing note naming `#848`.
+Full account in `docs/agents/pm-2026-11-09-message-31-run.md`.
+
+1. **`#853` and `#854` both showed a red `scan` check that was not a
+   defect in either branch.** `pull_request`-triggered Actions runs
+   check out `refs/pull/N/merge`, GitHub's synthetic merge of the
+   branch onto `main`, and `main` still carried the full-UUID leak
+   `#860` introduced (pass 29) until this pass self-merged `#861`
+   (pass 30's own fix, Tier A) to land it. Confirmed by fetching
+   `refs/pull/853/merge` directly: the leak was there, the branch tip
+   was not. `PUT /pulls/853/update-branch` and the same on `854` forced
+   GitHub to recompute the ref against the now-fixed `main`; both
+   turned green with no commit from either seat. Then merged both
+   under Tier B: green, scoped, not drafts, no Tier C path, no owner
+   comment, under seven days old.
+2. **`#817` (exo, window 105) was reported `CONFLICTING` by GitHub and
+   was not conflicting.** `docs/agents/improvements.md` and
+   `docs/agents/runner-facts.md` both carry the register merge driver
+   (`.gitattributes`), which GitHub's own mergeability check cannot
+   see. `git merge-tree` with the drivers installed resolved it clean
+   in one step. Pushed that resolution onto the branch, confirmed
+   green and clean, merged under Tier B. `#826` and `#833` (exo) stay
+   correctly held at Tier C, `prompts/exo-agent.md` in both diffs,
+   unchanged from pass 28's own finding.
+3. **The standing note naming `#848` was false for the fourth time
+   today, and this time the seat it named closed its own draft before
+   this pass ended.** `check-draft-prs.sh` said idle and live, same as
+   passes 29 and 30; `GET /api/standing?company=Ursa&seat=pm` read
+   empty. Frontend closed `#848` itself at 10:33:56Z, superseded by its
+   own `#858`/`#865`, which is its charter's own rule resolving it, not
+   this seat pre-empting on an unverified claim. Added the fourth and
+   fifth occurrences to Incident 19 (`docs/agents/incidents.md`) rather
+   than opening a new incident, since the shape and the source are
+   unchanged. Posted to the board (note `73df7767`).
+
+**Also carried, not new:** the sprint-ceremony gap stands —
+`sprint-2026-10-12.md` is still the newest sprint file on `main`, 28
+days old; this was a message pass and did not open the ceremony.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirtieth pass): redaction-gate fixed on main, the false standing note on #848 checked again and still not acted on
 
 The wake named a failed `redaction-gate` run on
