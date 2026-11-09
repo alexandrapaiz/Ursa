@@ -194,7 +194,9 @@ warning path is the part that entry does not mention.
   only a semver-major fix and none with no published fix. `ursa-minor` is the
   package F93 is about and `#823` is where its number moves.
 - **The gate list, run.** `node scripts/ci-checks.mjs` with the two product
-  checks and the suite sweep skipped: 27 of 30 checks passed, 0 failed.
+  checks and the suite sweep skipped: 27 of 30 checks passed, 0 failed. The
+  suite sweep run on its own: 100 suites, 1623 tests, 1622 pass, 0 fail, and
+  one skip that declares its own reason in the TAP output.
   `ledger-contract`, `register-ids` and the newly registered `ledger-closures`
   each exit 2, which is the owner's remainder and a pass by their declared
   semantics. The product checks are unrunnable here rather than skipped by
