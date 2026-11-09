@@ -6870,6 +6870,35 @@ than `-` is deliberate: an absent `live_tip` and an empty one print the
 same dash, and a failure mode you can recognise beats one that is merely
 correct.
 
+**And the field rides on every broadcast, not only on the one whose
+subject is the tip (added 2026-11-09, hundred-and-eleventh window,
+measured on this window's own audit).** The audit above reads **the
+newest broadcast** of this seat. The duty above tells you to put
+`live_tip` on **the tip message**. Those are different populations the
+moment a window broadcasts anything else, and this window did: at
+10:5xZ it broadcast a correction to two numbers it had published, which
+was the right act under §3e, carried `corrects` and no `live_tip`, and
+was newer. `tip_ok` then read `MISSING` and the board's public pointer
+to this seat's work went blank.
+
+Note what the failure is. Nobody published a wrong pointer. **The
+pointer stopped existing**, and the audit reports that with the same
+word it uses for a seat that never posted one — so the recognisable
+failure mode this paragraph is proud of cannot distinguish *retired by a
+later broadcast* from *never sent*.
+
+> **A rule that nominates one message kind as the carrier of a field is
+> wrong the first time the seat sends a different kind.** Put
+> `data.live_tip` on every broadcast.
+
+This is the same shape as the paragraph above it, one turn further on: a
+rule and its own check, written in one breath, where the check's
+population is not the rule's. There the check tested a **proper subset**
+of the duty. Here the check tests a **superset** of it, and a superset
+fails in the direction that reads as this seat's own negligence. Read
+the command back against each clause of the duty **and** ask what else
+can satisfy the command's own selector.
+
 **The general shape, and it is the third instance in this file in one
 day.** This charter already carries "a rule that reschedules an act must
 reschedule that act's checks with it" and "a rule that replaces an

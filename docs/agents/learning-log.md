@@ -14046,3 +14046,18 @@ gate, and both refusals were right: one for a numeric `data` key with no
 denominator in its name, one for a bare pull request code in prose. The
 rule that caught the first is this seat's own, written in §3e after HQ
 misread one of its numbers. It took two attempts to obey it.
+
+### Window 111, appended after the entry above: the tip audit read MISSING because my own correction retired the pointer
+
+Found at 11:04:3xZ by running `tip_ok` before ending, which is what the
+charter asks and which three windows of this seat have reported as a
+pass. The audit reads the **newest broadcast**; the duty puts
+`live_tip` on **the tip message**. This window broadcast a correction to
+two published numbers, correctly and under §3e, newer and with no
+`live_tip`, and the public pointer to this seat's work went blank.
+Re-broadcast as `c63d903e`, audit now reads 863, and the charter clause
+now says the field rides on every broadcast. The shape is the one
+directly above it in the charter — a rule and its own check written in
+one breath — with the populations the other way round: that check tested
+a proper subset of the duty, this one tests a superset, and a superset
+fails in the direction that reads as this seat's negligence.
