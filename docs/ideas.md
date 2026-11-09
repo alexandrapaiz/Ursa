@@ -23704,6 +23704,68 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (market, 22nd run) — Cite Memobase's $9/$29-per-month consumer memory tiers as the first direct paid comp for Major's "free forever" claim, paired with why the comparison is structural and not just a lower number
+
+- Trigger: docs/market/positioning.md's new 2026-11-09 (22nd run)
+  section, built on the new Memobase entry in landscape.md (Category
+  3, 27th). Memobase (memobase.ai) sells a cross-model, persistent
+  personal-memory layer directly to consumers at $0/500 credits,
+  $9/5,000 credits, and $29/unlimited credits per month — the same
+  kind of product Major gives away free by design.
+- What: every prior Category 3 entry in this file either prices B2B
+  (Mem0, Letta, Zep sell to developers, not end users) or doesn't
+  price the memory feature at all (bundled into an existing
+  subscription). Memobase is the first entry that prices the exact
+  consumer-facing thing Major's "free forever" claim (CLAUDE.md §0,
+  load-bearing constraint #1) is made against, giving Major's
+  trust/pricing copy a real number instead of an unopposed assertion.
+  The claim still needs the structural half stated alongside the
+  number: Memobase's free tier is a lever a profit-seeking vendor can
+  tighten later, and Major's cannot, because Major's business model
+  has no consumer revenue switch behind it to flip (CLAUDE.md §2,
+  Major "never monetizes the user directly"). Citing the price gap
+  alone invites the rebuttal "so raise it later too"; citing the
+  revenue-model difference does not.
+- Why it is not actioned by this run: Major's user-facing trust and
+  pricing copy is a product surface, not this seat's charter
+  (read-only market research, no code or copy).
+- First step: whoever owns Major's consumer-facing trust/pricing copy
+  decides whether to name Memobase specifically or use it as an
+  unnamed category example, and pairs any price comparison with the
+  structural (revenue-model) argument above rather than the number
+  alone.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (market, 22nd run) — Two more open-source projects independently named "AMP" surfaced this week; cite the acronym collision as sharper evidence against waiting for a portability standard before Major ships
+
+- Trigger: docs/market/landscape.md's cross-cutting note on
+  memory-portability standards (open since 2026-10-05, ten-plus
+  tracked attempts, none clearing the independent-implementation
+  bar) gained a new update this run: a Show HN post for an
+  open-source conversation-portability tool called "AMP" led to two
+  more, completely unrelated open-source projects already using the
+  same name (`agentmemoryprotocol/agentmemoryprotocol` and
+  `akshayaggarwal99/amp`), neither aware of the other.
+- What: this file's standing argument for Major has been "ship the
+  owned, portable profile now rather than wait for industry
+  convergence." A category that cannot even converge on what to call
+  the standard it is trying to build is the sharpest evidence yet
+  that near-term convergence is not coming, strengthening (not just
+  repeating) that argument for whoever next makes Major's "why not
+  wait for a standard" case to a skeptical user, partner, or
+  investor.
+- Why it is not actioned by this run: this is evidence for a
+  pitch/copy argument, not a landscape or pricing change; the seat's
+  charter is read-only market research.
+- First step: whoever next drafts Major's "why build this now instead
+  of waiting" argument (consumer trust copy, investor materials, or a
+  partner-facing deck) can cite the acronym collision as a concrete,
+  dated example rather than a general claim that the space is
+  fragmented.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (skill) — Fifteen of sixteen drifted ranges are re-recorded at the anchor they already had, and the gate that now says so still allows it
 
 - Trigger: shipping the gone-or-moved split in `check-evidence.mjs`
