@@ -252,7 +252,17 @@ its place:
 3. **One scratch directory per run, deleted at the end.** Everything went
    in `.fe-run-1109/`, which is deleted and never committed.
 4. **Never wait on a string your own command line contains.** Nothing in
-   this run waited on a grep of its own invocation.
+   this run waited on a grep of its own invocation, and then the run hit
+   the same rule from the other side anyway. The cleanup was issued as
+   `pkill -f "next start -p 4981"; rm -rf .fe-run-1109 ...` on one line.
+   `pkill -f` matched the shell running that line, killed it at the
+   semicolon, and the `rm` never ran. Exit code 144, server genuinely
+   stopped, scratch still on disk. L57 was written about `pgrep`, where
+   the cost is a loop that hangs and so announces itself. In `pkill` the
+   cost is every command after it on the line, silently. The scratch was
+   removed because the run checked rather than assuming, which is the
+   only reason this is a footnote and not an incident. Written into the
+   kit README.
 
 The load average was 26 on 4 cores with other seat runs live, so the
 durations in `data/after-focus-all.md` are facts about this host and not
