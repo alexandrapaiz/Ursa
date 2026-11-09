@@ -13009,3 +13009,95 @@ charter clause stating why §2's three surfaces are the three is a
 `improvements.md`; its lane is `#730`. Whichever window holds the
 charter lane next owes it, and the read date for whether it landed is
 **2026-11-15**.
+
+## 2026-11-09 — Window 92, resident host (message trigger: `#743` merged, plus a done from Ursa/pm and a note from Ursa/security): the baseline recorded which commit it described and nothing ever read the field
+
+**What I took.** The next item in my lane on the board, which the
+security seat's note put there: five new trunk reds billed to this seat,
+with the claim that my other open row (`#730`) already pays them.
+
+**I re-derived it instead of taking it, and the state claim had
+expired.** The charter's own rule — a message's state claims expire,
+re-derive them before you act — earned its keep in the first three
+turns. The trunk is **green**: `scripts/ci-checks.mjs` passes 14 of 14
+runnable checks on `fd0ed558`, `tooling-suites` among them. Security
+measured at 23:45:00Z on `613fc803`. At **23:47:12Z**, two minutes and
+twelve seconds later, `fd0ed558` merged `#743` and **deleted** the three
+test files all five rows name, because that merge moved those tools onto
+the charter lane. The debt was paid by removal, not by the merge the
+note expected. Had I acted on the note as written, I would have spent
+this window arguing for an owner merge that was no longer the thing
+unblocking anything.
+
+**The finding is not that the note was stale. It is that nobody could
+have known.** `tools/seat/suite-baseline.json` has recorded
+`measuredOn` since it was written, and **no code in this repository had
+ever read it**. So every verdict `suite-baseline.mjs` renders compares
+one commit's measurement against a different commit's tree, with the
+drift invisible to the tool and to its reader alike. Security wrote
+their note in good faith off a file that was accurate when taken and
+could not say when that was.
+
+**The tool already asked the question. I wrote the half that answers
+it.** On a row no longer collected, `suite-baseline.mjs` prints *"a
+deleted or renamed test is not a paid debt. Say which it was."* It
+addresses that to the human reading it, because the TAP stream cannot
+know. The commits between `measuredOn` and the tip do know and are in
+the clone already. `tools/seat/baseline-drift.mjs` reads them.
+
+**Both of `GONE`'s two names were live in one file on one afternoon.**
+Security's branch baseline, 11 commits behind: **5 of 6** rows
+`UNPAYABLE`, with `965a4554` named as the commit that deleted them, and
+1 `MOVED`. The trunk's committed baseline, 103 commits behind: **1 of 1**
+`RENAMED` by `f19ab0f1`. Seven rows across two baselines, six of them
+not debts, and before this file no tool here could tell any of them
+apart.
+
+**The tool corrected me mid-run, which is the part worth keeping.** I
+wrote the header asserting the trunk row was untouched after 103
+commits — a clean story in which distance was the variable. The tool
+said `MOVED`, then `RENAMED`, and the file showed the test renamed from
+*"the real queue: measured on a complete clone, or skipped with the
+reason named"* to *"the real queue: every open head is measurable on a
+complete clone"*. My own previous window had already found that rename
+and written it into `improvements.md` in prose. So the instrument
+reproduced a prose finding of my own seat's that I had not read yet,
+from a different direction, in one call. That is the whole argument for
+mechanising a finding instead of registering it: the register needed me
+to have read it, and the tool did not.
+
+**Why the verdict does not key on distance.** Two minutes was wrong
+about six of six rows. 103 commits is wrong about one, for a reason the
+distance does not express. Distance is printed because a reader wants
+it; each row is graded on whether its **own subject** moved. That is
+this org's standing rule — a guard over a duty whose failure mode is
+paying twice keys on the artifact, not on its position — and it was
+already the reason the baseline keys on `file+name` rather than on the
+TAP number. The same rule, one level up.
+
+**What the previous window asked for, and why this is a different
+answer.** `improvements.md` asked, with a read date of 2026-11-15, for
+each baseline row to carry the query that flips it. That is one authored
+query per row, forever, and a sibling seat's rename outdates a query as
+easily as it outdates a key. This answers the same question in one tool
+for all rows, so the marginal provenance cost of the next row went from
+one authored query to zero. Both answers are right; only one compounds.
+
+**Compounding.** The tool applies to **11 of 11** seats: it takes no
+seat argument, reads one data file and the trunk's history, and the
+question it answers is asked by whichever seat a row names. Five of the
+seven rows it graded today named a seat other than the one that wrote
+them. **Files: 2 written by this window**, plus three registers and this
+record, and the small number is deliberate — both of this seat's open
+rows already edit the three baseline files, so editing them again would
+have bought the same instrument plus a three-way conflict.
+
+**What I did not do, named with its lane.** `#744` is security's row and
+its baseline carries six rows the trunk does not owe. I did not edit it;
+I reported the reading to that seat on the board, because a baseline's
+`owner` field is how this repository decides whose row it is and five of
+those rows naming me is exactly the mistake I am describing. `#730`
+still needs the owner for eleven charter edits; it is no longer what
+unblocks the trunk, which changes the urgency of that ask and not the
+ask. And the charter clause window 91 left owed is still owed on `#730`,
+with its read date of **2026-11-15** unchanged.
