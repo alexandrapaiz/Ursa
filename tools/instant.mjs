@@ -90,6 +90,16 @@
 //
 //     compareDays(utcDay(gitDate), utcDay(apiDate))
 //
+// AND A SIXTH, `calendarDay`, ADDED 2026-11-09 FOR THE CALLER WHO DOES NOT
+// KNOW WHICH OF THE TWO IT IS HOLDING. The symmetry above is a property of
+// this module and a burden on a caller whose field carries both shapes, and
+// two of this repository's producers do: the host's capacity rows are keyed by
+// bare UTC day while the board stamps instants. Two seats each assembled the
+// join out of `utcDay` and a day predicate on one night, and the two
+// assemblies had already drifted when they were found. See `calendarDay` at
+// the foot of the day family for the measurement and for which half of each
+// copy survived.
+//
 // WHY `compareDays` PARSES RATHER THAN COMPARING TEXT. Text order IS day order
 // for a zero-padded `YYYY-MM-DD`, so a string compare would have been correct
 // and is why `tools/seat/outage.mjs` compares `r.day` as text and passes this
@@ -213,10 +223,62 @@ export function parseEpochSeconds (value) {
   return n * 1000
 }
 
-/** The UTC instant as a `Z` string, which is the only form safe to compare as text. */
+/** The oldest instant this repository's producers can honestly emit, as epoch
+ *  milliseconds: 1990-01-01T00:00:00Z, which predates git itself by fifteen
+ *  years. It is a floor on the NUMBER door of `toUtcInstant` only, and the
+ *  reason is the unit slip documented there rather than any wish to refuse old
+ *  dates. A string spelling an instant in 1970 is still accepted. */
+const MILLIS_FLOOR = Date.UTC(1990, 0, 1)
+
+/**
+ * The UTC instant as a `Z` string, which is the only form safe to compare as
+ * text. Null for anything this module will not place.
+ *
+ * TWO DOORS, AND UNTIL TODAY THE SECOND ONE CARRIED NO UNIT (engineer,
+ * 2026-11-09). A string goes through `parseInstant`. A number is read as
+ * EPOCH MILLISECONDS, because the one composition this function was written
+ * for is `toUtcInstant(parseEpochSeconds(ct))` and `parseEpochSeconds`
+ * returns milliseconds. That branch was never named in prose: the only place
+ * its unit was written down was one assertion in `tools/instant.test.mjs`.
+ *
+ * WHAT THE UNNAMED UNIT COST, measured on this module rather than imagined.
+ * It has exactly two functions that accept a number and they disagreed about
+ * that number's unit by a factor of 1000. `parseEpochSeconds(1794182400)` is
+ * 2026-11-09; `toUtcInstant(1794182400)` was `1970-01-21T18:23:02Z`. And
+ * 1794182400 is precisely what `git log --format=%ct` prints, which makes it
+ * the single most likely number a caller in this repository is holding, so
+ * the caller who reached for the wrong door got a 56-year error at exit 0
+ * instead of a refusal. Reached through `utcDay`, that error was a
+ * day-shaped string: `utcDay(20261109)` answered `'1970-01-01'`.
+ *
+ * THE FLOOR IS NOT A HEURISTIC AND IT IS NOT NEW HERE. `parseDay` below
+ * already refuses `0000-01-01` because `Date.UTC(0, 0, 1)` is a legacy
+ * two-digit mapping that would otherwise return "a placeable day 1900 years
+ * from where it was written". This is the same refusal for the same reason:
+ * an epoch-SECONDS value for any date after 2001 is above 1e9, and every
+ * number below `MILLIS_FLOOR` read as milliseconds lands before 1990, so a
+ * number in that range is a unit slip rather than a date this repository has.
+ * A non-integer is refused on the same ground, exactly as `parseEpochSeconds`
+ * refuses `'1793594097.5'`, because `new Date` truncates it and says nothing.
+ *
+ * THE ASYMMETRY WITH `timestampShape` IS DELIBERATE AND STAYS.
+ * `timestampShape` answers `'invalid'` for every number, because it reads a
+ * STRING's spelling and a number has none. A caller who wants one predicate
+ * covering both doors wants `toUtcInstant(value) !== null`, which is what
+ * `utcDay` is built on.
+ */
 export function toUtcInstant (value) {
-  const ms = typeof value === 'number' ? value : parseInstant(value)
+  const ms = typeof value === 'number' ? epochMillis(value) : parseInstant(value)
   return ms === null ? null : new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z')
+}
+
+/** Epoch milliseconds, or null for the two ways a number reaches that door by
+ *  mistake: a non-integer, and a value small enough that it must have been
+ *  seconds. Private, because the door is `toUtcInstant` and a second exported
+ *  number-taking function is the problem this is closing, not the fix. */
+function epochMillis (n) {
+  if (!Number.isInteger(n)) return null
+  return n < MILLIS_FLOOR ? null : n
 }
 
 /**
@@ -277,6 +339,10 @@ export function sortByInstant (rows, key) {
 // because the lint above caught a real textual sort over a field holding bare
 // days and prescribed three functions that all refuse that value. See this
 // file's header, "THE FOURTH VALUE CLASS".
+//
+// Plus `calendarDay` at the foot of the section, which is the only member that
+// is NOT one shape narrower: it takes either shape and is the projection two
+// seats wrote for themselves on 2026-11-09 because it was missing here.
 
 /**
  * Milliseconds at UTC midnight of a bare calendar day, or null.
@@ -376,6 +442,67 @@ export function sortByDay (rows, key) {
       return a.ms === b.ms ? a.i - b.i : a.ms - b.ms
     })
     .map((e) => e.row)
+}
+
+/**
+ * The calendar day a value names, as `YYYY-MM-DD`, for a caller holding
+ * EITHER an instant or a day already. Null for anything this module will not
+ * place on a calendar.
+ *
+ * WHY THE DAY FAMILY NEEDED A SIXTH MEMBER, which is a measurement and not a
+ * preference (engineer, 2026-11-09). Two seats wrote this projection
+ * independently on one night, because the module offered both halves and not
+ * the join: `nowDay` in `tools/seat/read-dates.mjs` and `dayOf` in
+ * `tools/seat/outage.mjs`. Same signature, same two branches, same job. Ursa's
+ * ExO seat routed the collapse to this file in a board note the same night, on
+ * the ground that `utcDay` lives here, and declined to perform it because
+ * moving another seat's exported API inside a pull request that had to merge
+ * that night is how the night's one merge conflict had just been made.
+ *
+ * THE TWO COPIES HAD ALREADY DRIFTED, which is the argument for collapsing
+ * now rather than when it is convenient. Across fourteen input classes they
+ * disagree on two, and each disagreement is a different author's accident:
+ *
+ *   '  2026-11-09  '   nowDay null, dayOf '2026-11-09'      dayOf trims
+ *   20261109           nowDay '1970-01-01', dayOf null      nowDay guessed
+ *
+ * This function answers null to both, and each refusal is a decision rather
+ * than an omission:
+ *
+ *   NO TRIM. `parseDay` and `parseInstant` are both anchored and neither
+ *   trims, so a `calendarDay` that trimmed would hand back a day for a string
+ *   `parseDay` itself refuses. That is the exact spelling-versus-existence
+ *   split that produced the defect this function exists to end, re-created one
+ *   layer up. `dayOf`'s trim is the one behaviour the collapse drops, and no
+ *   producer in this repository emits a padded day wrapped in whitespace: the
+ *   registers write `2026-11-15` and `--now` arrives through argv, which a
+ *   shell has already split.
+ *
+ *   NO NUMBER READ AS A DAY, and `nowDay`'s `1970-01-01` was never `nowDay`'s
+ *   own bug. It inherited it from `toUtcInstant`'s unnamed millisecond door,
+ *   repaired above in this same pass, so `calendarDay(20261109)` is null
+ *   because `utcDay(20261109)` is now null.
+ *
+ * GATED ON `parseDay` AND NEVER ON `timestampShape`, which is the correction
+ * the ExO seat made to the merged `nowDay`. `timestampShape` decides a
+ * SPELLING: its `BARE_DAY` is `/^\d{4}-\d{2}-\d{2}$/`, so it answers `'day'`
+ * for `'2026-02-30'` and for `'2026-13-99'`. Existence is `parseDay`'s job and
+ * nothing else in this family does it. Built on the spelling predicate, a call
+ * site hands a day the calendar does not have straight through as a real one;
+ * every later `compareDays` against it answers null, every `isDayAfter`
+ * answers false, and a register grading dates against it reports every dated
+ * entry as overdue while exiting 0. `tools/instant-day.test.mjs` sweeps the
+ * tree for that bypass, so a third instance of it is a red test rather than a
+ * third hand repair.
+ */
+export function calendarDay (value) {
+  const projected = utcDay(value)
+  if (projected !== null) return projected
+  // Returns the argument and not a coercion of it, because `parseDay` refuses
+  // every non-string, so `value` is already a string wherever this line is
+  // reached. `nowDay` wrote `String(now)` here; on this branch that call could
+  // only ever rebuild a string it was already holding.
+  return parseDay(value) === null ? null : value
 }
 
 // --- the lint, because a rule nobody can grep for is not enforced --------
