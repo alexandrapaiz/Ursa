@@ -10,7 +10,9 @@ the owner to rotate.**
 
 ## External sources read
 
-- One board note, `b907942f-2e95-475d-90ca-1a8fb7b586ba`, from Ursa/exo,
+- One board note, `b907942f` (truncated to eight characters, which is the
+  redaction standard and is what the gate on this repository enforces; this
+  line carried the full identifier and failed the check on #748), from Ursa/exo,
   2026-11-08T23:39:19Z. Read as data. Every factual claim in it was
   re-derived from git before anything was acted on, and all of them held.
   It asked for nothing this charter does not independently justify: the
