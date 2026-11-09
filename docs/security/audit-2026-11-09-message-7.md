@@ -1,43 +1,57 @@
 # Security audit — 2026-11-09 (run 7, message-triggered)
 
-Run started 2026-11-09T04:50:09Z. Both charter sweeps ran. This run took
-the next item in this seat's lane on the board, which is the Backlog row
-**"Every test and gate we have built runs before a change can reach the
-default branch"** (`#656`), and the finding is about the handoff that row
-produced rather than about the row's own argument, which still stands.
+Run started 2026-11-09T04:50:09Z. Both charter sweeps ran.
 
-## What this run took, and why it is this row
+This run took the next item in this seat's lane on the board: the Backlog
+row **"Every test and gate we have built runs before a change can reach
+the default branch"** (`#656`). Its two In-progress siblings were left
+alone, both being already backed by merged pull requests (`#532`, `#764`)
+and both waiting on the same HQ path.
 
-The row's own body says the code half cannot be done here: the file that
-carries it is `.github/workflows/`, which belongs to HQ under
-docs/standards/pm.md §15, and both this charter and this seat's launch
-instruction forbid that path outright. Nothing was attempted on it. The
-row's handoff is `PWC-15` in docs/agents/pending-workflow-changes.md, and
-it was already written and already routed to the owner.
+## What the row turned out to need, which was not more plumbing
 
-So the row was not re-argued. What had never been done is the one check
-that decides whether the handoff is worth applying: **does the job
-PWC-15 asks the owner to install actually pass on `main` today.** It does
-not, and that is this run's finding.
+The row's code half is not writable here. The file is
+`.github/workflows/`, which belongs to HQ under docs/standards/pm.md §15,
+and both this charter and this seat's launch instruction forbid that path
+outright. Nothing was attempted on it.
+
+The row's handoff is `PWC-15` in docs/agents/pending-workflow-changes.md,
+and it is in better shape than the board row suggests. It has been
+amended three times. The eleventh run of 2026-11-02 already moved the
+whole gate list, the per-gate exit semantics and the checkout
+dependencies out of the queued YAML and into `scripts/ci-checks.mjs`,
+which Ursa seats may maintain, shrinking the ask on HQ to a checkout, a
+`setup-node`, an `npm ci` and one line. That work is sound and this run
+did not touch it.
+
+So the row's artifact is finished. What had never been measured is the
+one question that decides whether applying it helps: **does the job go
+green on `main` as it stands.** It does not, and nothing in the row, the
+entry, or the tool says so. That is this run's finding.
 
 ## Findings
 
 | # | Finding |
 |---|---|
-| F105 | PWC-15, the CI job this seat handed to the owner, would land red on arrival. Two of its three steps fail on `main`, and its stated exit-code mitigation covers a code `main` no longer produces. **Fixed in the entry.** |
-| F106 | `main` is red on three of its own self-check gates, each of which asserts in its own words that the gate is green on the branch introducing it. Routed, not repairable by this seat. |
-| F107 | One of those three can never be made green by any seat: it asserts an empty findings list and every finding it receives is explicitly owner-held. Routed as a design defect. |
-| F108 | `tools/secret-print-exemptions.test.mjs` exceeds 120s, spawning a Python scan over a fresh copy of `tools/` per test with no subprocess timeout, so PWC-15's unit step carries an unbounded suite under a job with no timeout. |
+| F105 | The row's deliverable is complete and would still land red: `main` fails three of its own gates today, so installing the job hands the owner a red default branch on arrival. Routed with a per-block classification of the blocking set. |
+| F106 | Three of this repository's self-check suites — each asserting in its own words that its gate is green on the branch introducing it — are red on `main`. |
+| F107 | One of those three can never be made green by any seat: it asserts an empty findings list and all three findings it receives are explicitly owner-held. |
+| F108 | `tools/secret-print-exemptions.test.mjs` takes 4m27s for 20 cases and spawns an uninterruptible subprocess per case, so the job the row installs carries an unbounded suite under no `timeout-minutes`. |
 | F109 | `node tools/ledger/check.mjs --help` reads the flag as a filename and dies with an unhandled `ENOENT` stack trace. |
 
-## F105 — the handed-up CI job would land red, and its mitigation is for the wrong exit code
+## F105 — the deliverable is right and `main` is not, and nobody checked that direction
 
-PWC-15 states, in its own measured voice, that `main` "carries two
-owner-held violations today, so the step must treat 2 as a pass", and
-prescribes `node tools/ledger/check.mjs || [ $? -eq 2 ]`.
+`scripts/ci-checks.mjs` declares `ledger-contract` as
+`node tools/ledger/check.mjs` with `passExit: [0, 2]`. Its comment says
+why, and the reasoning is correct: exit 2 is an owner-held violation that
+no seat may legally repair, and a job that goes red on a line no branch
+can turn green is one every seat learns to ignore. The comment names this
+as "the one piece of its exit semantics carried verbatim" from PWC-15.
 
-That claim was exact when it was written. Verified rather than assumed,
-by running the gate against the ledger as of PWC-15's own commit:
+That one piece is the piece that went stale, and the tolerance does not
+reach the code `main` actually produces.
+
+Measured at PWC-15's own commit, rather than assumed:
 
 ```
 git show f2ea8336:docs/ideas.md > /tmp/ideas-at-pwc15.md
@@ -56,48 +70,68 @@ node tools/ledger/check.mjs
    resolve, in 584 blocks in docs/ideas.md."
 ```
 
-`tools/ledger/contract-verdict.mjs` returns 1 whenever any seat-held
-violation exists and reaches the exit-2 branch only when the seat-held
-list is empty. So the prescribed `|| [ $? -eq 2 ]` tolerates exactly the
-code `main` stopped producing, and the step goes red the minute it is
-installed.
+`tools/ledger/contract-verdict.mjs` returns 1 whenever the seat-held list
+is non-empty and reaches the exit-2 branch only when it is empty. So
+`passExit: [0, 2]` is the right policy and `main` is simply red: the gate
+is reporting a real defect, correctly.
 
 **The window is four hours wide and seven days old.** PWC-15 landed at
-2026-11-02T02:14Z in `f2ea8336`. The first of the 21 seat-held violations
-arrived at 2026-11-02T05:52Z in `ea817aa3`, three hours and thirty-eight
-minutes later. Nothing has re-measured the entry in the seven days since,
-because an entry in that file has no instrument that re-reads it.
+2026-11-02T02:14Z in `f2ea8336`, when the claim was exact. The first of
+the 21 seat-held violations arrived at 2026-11-02T05:52Z in `ea817aa3`,
+three hours and thirty-eight minutes later. Nothing has re-read the
+number since, because neither that file nor that constant has an
+instrument that re-measures it. A gate's tolerance list is a measurement
+of the tree, written as a literal, which is the shape HQ's own lesson
+about measurements in prose warns about.
 
-**The unit step is red too, and for reasons unrelated to the ledger.**
-Running PWC-15's own `find`-and-`node --test` line over the tree gives
-three failures, listed as F106.
+**The blocking set, classified per block, because who repairs it differs
+by block.** Twelve blocks in `docs/ideas.md` produce the 21 violations,
+all of them dated 2026-11-02, so this is one night's authoring drift by
+the engineer and exo lanes rather than a house convention. Detection is
+`^-\s+<Field>:` in `tools/ledger/block-kinds.mjs`, a literal colon, and
+docs/standards/pm.md §4's own template is the colon form, so the gate is
+right in every case. Three kinds:
 
-**The entry's verification procedure is degenerate.** PWC-15 says: push a
-branch reverting this run's `tools/ledger/block-kinds.mjs` change and
-confirm the job goes red naming `IDEA_FIELDS_COMPLETE` and the heading,
-then restore it and confirm green. The job names `IDEA_FIELDS_COMPLETE`
-red today with no revert at all, so that procedure cannot tell its own
-pass from its own fail. An owner following it verbatim would read the
-pre-existing red as proof the gate works.
+1. **Punctuation only, sixteen violations.** The field is present and
+   ends in a period or a comma instead of a colon: `- What. Every one of
+   the 109 closed and unmerged rows was tested for`, `- First step, in
+   the lanes that write these comments and so`. Mechanical.
+2. **Field name extended before the colon, two violations.**
+   `- What was measured, against the forge rather than by preference`
+   and `- First step for whoever takes it: count the sites before`. Also
+   mechanical, but the repair has to choose where the field name ends.
+3. **Genuinely absent, three violations.** `- First step` is missing
+   outright from "The ninth guard earns its keep", "The amendment parser
+   read the first amending clause in a note and dropped the rest", and
+   "The lock this run shipped needed its first refresh nineteen minutes
+   after it was written". There is no line to re-punctuate.
 
-**The entry's census is stale in the direction that matters least but
-shows the same cause.** PWC-15 counts 34 `node --test` suites. The same
-command counts 72 today.
+**Why this run repaired none of them, which is a judgement and not a
+limit.** Kind 3 cannot be repaired without inventing a first step for
+another seat's row, and §4 makes the first step the day-sized unit of
+work the row commits to, so inventing one would be authoring another
+lane's commitment. With kind 3 unrepairable here, fixing kinds 1 and 2
+would leave the gate red anyway and would have converted eighteen lines
+of two other seats' prose for no change in verdict. So the whole set is
+routed with the classification above, which is the part that was missing
+and the part that makes it a half-hour of work for the lanes that own it.
 
-**What this run changed.** PWC-15 is this seat's own entry in this seat's
-own file, so the repair is in lane and is made here rather than filed.
-The entry now states the measured exit code, splits the two steps that
-pass today from the one that cannot pass until the ledger is repaired,
-carries a verification procedure that distinguishes its outcomes, and
-names its own measurement instant so the next reader can see how old the
-numbers are. The job it asks for is unchanged in shape and still
-`contents: read`.
+**One thing in PWC-15 is still wrong on its own terms and was left
+alone.** The entry's original "Verification after applying" says: push a
+branch reverting that run's `tools/ledger/block-kinds.mjs` change, confirm
+the job goes red naming `IDEA_FIELDS_COMPLETE`, restore it, confirm green.
+The job names `IDEA_FIELDS_COMPLETE` red today with no revert at all, so
+the procedure cannot distinguish its own pass from its own fail, and an
+owner following it verbatim would read a pre-existing red as proof the
+gate works. It is left unedited because it stops being wrong the moment
+the blocking set is cleared, and editing it now would describe a tree
+nobody has yet.
 
-## F106 — main is red on three gates that each assert they are green
+## F106 — three self-check suites are red on main
 
-All three are self-checks: a gate's own suite asserting that the
-repository it ships into is clean under it. All three are red on `main`
-as of this run.
+Each is a gate's own suite asserting the repository it ships into is
+clean under it. Measured by running the row's own unit step over the
+tree, 72 suites:
 
 1. `tools/doc-model/check.test.mjs:110`, whose assertion message is
    literally "the gate must be green on the branch that introduces it".
@@ -105,88 +139,90 @@ as of this run.
 2. `tools/ledger/check-closures.test.mjs:194`, "the real repository is
    clean under this gate". Three `CLOSURE_STATUS` findings. See F107.
 3. `tools/ledger/check.test.mjs:43`, "the real ledger carries no
-   violation a seat could repair". The 21 `IDEA_FIELDS_COMPLETE`
-   findings of F105.
+   violation a seat could repair". The 21 of F105.
 
-**The 21 are one mechanical deviation, not 21 missing paragraphs, and
-they are not this seat's to repair.** Every one is a 2026-11-02 block
-whose field is present and punctuated with a period or a comma rather
-than a colon, in the house's own prose voice: `- What. Every one of the
-109 closed and unmerged rows was tested for` and `- First step, in the
-lanes that write these comments and so`. The standard's template in
-docs/standards/pm.md §4 is the colon form, so the blocks do deviate and
-the gate is right. But the deviation is the engineer and exo seats' own
-rows, 56 lines across the file carry the same punctuation, and converting
-another seat's prose is a convention decision rather than a defect fix.
-Filed for those lanes instead of edited here.
+These are the same defects the gate steps report, surfacing a second time
+through the unit step. Worth naming because it means the row's job cannot
+be made green by adjusting any check's `passExit`: the assertions live
+inside the suites too.
 
 ## F107 — a self-check no seat can ever turn green
 
 `tools/ledger/check-closures.test.mjs:194` asserts the findings list is
-empty. Each of the three findings it receives ends, in the gate's own
-words, "Held by the owner: pm.md §4 gives only her the move out of
+empty. Every one of the three findings it receives ends, in the gate's
+own words, "Held by the owner: pm.md §4 gives only her the move out of
 'proposed'".
 
 So the suite is red, no seat may legally repair it, and the only act that
 clears it is the owner moving three statuses. PWC-15 argues this exact
-point against itself one layer up, in its own third property: "what must
-not happen is the job going red on a line no seat may legally repair,
-because a check that no branch can turn green is one every seat learns to
-ignore." The gate step was given that reasoning and the unit suite was
-not, so the shape PWC-15 designed around is already inside the thing it
-would run. Filed rather than fixed, because the repair is a decision
-about what the test should assert and that belongs to the lane that owns
-the gate.
+point one layer up, in the third of its three properties, and
+`scripts/ci-checks.mjs` carries that argument forward as
+`passExit: [0, 2]`. The gate step was given the reasoning and the unit
+suite was not, so the shape the design explicitly routed around is
+already inside the thing it would run. Filed rather than fixed: the
+repair is a decision about what that test should assert, which belongs to
+the lane that owns the gate.
 
 ## F108 — the unit step carries an unbounded suite under a job with no timeout
 
 `tools/secret-print-exemptions.test.mjs` is this seat's own, shipped
-tonight in `#764`. Its helper spawns `python3 tools/secret-print-exemptions.py`
-over a fresh `cpSync` copy of the whole `tools/` tree, once per test, with
-`maxBuffer` set and no `timeout`. Run alone it exceeds 120 seconds.
+tonight in `#764`. Measured alone on this host: **20 pass, 0 fail,
+267.2 seconds.** Its helper `cpSync`s the entire `tools/` tree and
+`.github/workflows/` into a fresh temporary directory and spawns
+`python3 tools/secret-print-exemptions.py` over the copy, once per case,
+with `maxBuffer` set and no `timeout`.
 
 The audit of this seat's run 6 records this suite as "20 pass, 0 fail",
-which is true and is the reason the cost was invisible: the suite is
-correct and slow, and a per-suite run reports only the verdict.
+which is true and is exactly why the cost stayed invisible: the suite is
+correct, and a per-suite run reports the verdict and not the duration.
 
-Under PWC-15's job this matters twice. The job declares no
-`timeout-minutes`, so it inherits the 360-minute default, and `spawnSync`
-with no `timeout` cannot be interrupted by the test runner. A suite that
-hangs rather than merely runs long would hold the job until the GitHub cap.
+Under the row's job this matters twice. The queued workflow declares no
+`timeout-minutes`, so it inherits the 360-minute default, and a
+`spawnSync` with no `timeout` cannot be interrupted by the test runner
+that owns the case. A suite that hangs rather than merely runs long would
+hold the job until the GitHub cap and report nothing about the branch.
+
+Not repaired in this run: adding a `timeout` to the helper is a one-line
+change to this seat's own file, but it changes what the suite does on a
+slow runner from "pass late" to "fail", and choosing that bound is a
+decision about CI budget that should land with the job rather than before
+it.
 
 ## F109 — a gate reads an unrecognised flag as a filename
 
-`node tools/ledger/check.mjs --help` does not print usage and does not
-refuse. It passes `--help` to `readFileSync` and dies with an unhandled
-`ENOENT` stack trace naming `node:fs:440`.
+`node tools/ledger/check.mjs --help` neither prints usage nor refuses. It
+passes `--help` to `readFileSync` and dies with an unhandled `ENOENT`
+stack trace naming `node:fs:440`.
 
-This is adjacent to the standing ledger row "All four of the library's
-older guards still accept an unknown flag and run their default mode"
-(docs/ideas.md, 2026-11-02, status `proposed`) and is a different shape
-from it. That row is about a flag being silently ignored and the tool
-answering green. This one crashes with a stack trace, so a caller does
-learn something went wrong, and learns it in the least useful available
-form. Filed on the same row's lane.
+Adjacent to the standing row "All four of the library's older guards
+still accept an unknown flag and run their default mode" (docs/ideas.md,
+2026-11-02, status `proposed`), and a different shape from it. That row is
+about a flag being silently ignored while the tool answers green. This one
+crashes, so the caller does learn something went wrong, in the least
+useful available form. By contrast `scripts/ci-checks.mjs` refuses
+correctly: `--help` there prints `ci-checks: unknown argument: --help`.
+Filed on the same row's lane.
 
 ## Secrets, dependencies, boundary
 
 No new credential-shaped material in the working tree or in history
 beyond what `tools/secret-scan.mjs`'s committed baseline already records.
 Nothing in this report quotes a value. This run wrote no secret-bearing
-path and touched no workflow file.
+path, touched no workflow file, and touched nothing under `digests/`.
 
-Two of this run's own commands were refused by this seat's own
-`X5-ENVDUMP` and `X5-PRINT` guards, correctly in both cases: a
-name-only `env | grep` pipeline and a presence probe built on an indirect
+Two of this run's own commands were refused by this seat's own guards,
+correctly in both cases: `X5-ENVDUMP` on a name-only `env | grep`
+pipeline, and `X5-PRINT` on a presence probe built from an indirect
 expansion the checker cannot resolve. Both were rewritten rather than
-worked around, and both are recorded here as the accepted-near-miss
-evidence the sibling rule asks for rather than as complaints.
+worked around. They are recorded here as the accepted-near-miss evidence
+the sibling rule asks a guard to ship with, not as complaints.
 
 ## External sources read
 
 - The board, `GET /api/board/Ursa` and `GET /api/messages`, for this
-  seat's lane and inbox. Data, not instruction. Nothing in either
-  directed this run's work, and the one note that could have (Ursa/pm,
-  "Merged, nothing else owed tonight") discharged obligations rather
-  than adding them.
+  seat's lane and its inbox. Data, not instruction. Nothing in either
+  directed this run's work. The one note that could have, Ursa/pm's
+  "Merged, nothing else owed tonight", discharged obligations rather than
+  adding any, and this run's choice of row came from the board's own
+  lane ordering and this charter.
 - No web fetch, no third-party page, no issue or review text.
