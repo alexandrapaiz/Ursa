@@ -2165,3 +2165,70 @@ argument, not a rate-card benchmark. External sources read, this
 entry: [Labelbox: Alignerr Expert
 Network](https://labelbox.com/products/alignerr/), [Labelbox
 pricing](https://www.usagepricing.com/blueprint/labelbox).
+
+## A model provider's own consent promise has a carve-out it didn't disclose in the same place, on the exact non-negotiable Major is built around (2026-11-09, message, 20th run)
+
+This week's demand-signals ceremony turned up the sharpest version yet
+of CLAUDE.md's load-bearing constraint #2 ("the user can always see,
+edit, revoke, and delete what's been inferred about them; no dark
+patterns") being violated by a model provider rather than by one of
+this file's tracked Category 3 competitors. Anthropic told Claude
+users that opting out of training-data use would keep their
+conversations out of future models (deadline 2025-09-28, consumer
+terms). Its privacy policy update published 2026-06-08 (effective
+2026-07-07) added a carve-out: conversations flagged for safety review
+can still be used to train models "regardless of a user's stated
+preference," per the policy's own text as quoted by the primary source
+below. The policy does not define what triggers a safety flag and does
+not commit to notifying a user when their conversation is flagged, so
+a user who opted out has no way to know whether a given conversation
+was actually excluded. Separately, and read together with the same
+pattern this file flagged for Google's Personal Intelligence
+(2026-10-27, 3rd run, "even a genuine opt-in is not self-enforcing if
+the vendor's own pages disagree about what it does"): Reddit users
+reported reconsidering Anthropic specifically over the five-year
+retention window itself, before this carve-out was even the issue in
+view.
+
+So what: this is not a Category 1, 2, or 3 competitor case, so no
+landscape.md entry — Anthropic is a Key Partner (CLAUDE.md §2, the
+platform Major runs on top of), not a tracked rival. But it is the
+single most concrete evidence this file has yet found that the
+specific promise Major is built to keep differently — opt-out means
+opt-out, with no undisclosed carve-out, and no gap between what a
+privacy page says and what the product actually does — is one the
+market's most sophisticated, safety-focused lab has already failed to
+keep cleanly, for the most defensible-sounding reason (safety review)
+rather than a cynical one. A user-trust pitch that says "unlike every
+model provider, what you revoke is actually gone, with no exceptions
+and no silent flag" is a harder, more specific claim to make than "we
+respect your privacy," and this is a dated, sourced example of
+exactly the gap that claim has to close. No pricing or landscape
+action; this is evidence for whoever next drafts Major's consent-page
+copy or user-facing trust language, read alongside the Google entry
+above as a second named provider with the same shape of problem.
+
+Separately, a behavioral-economics argument surfaced the same week
+makes the positive case for Major's portability pitch from an
+unexpected angle: a 2026 essay on why users don't switch AI models
+argues the lock-in is not technical but psychological — an endowment
+effect where "the more you prompt, the more entrenched your goals and
+aspirations become to the existing model," compounding into switching
+costs closer to re-explaining yourself to a new person than to
+changing software. Its own framing of the winning dynamic — "which
+model knows the person better" — is Major's value proposition stated
+by someone with no reason to be making its case. Worth citing as an
+independent articulation of why portability has value distinct from
+privacy, for whoever drafts consumer-facing copy.
+
+External sources read, this entry: [techcoffeehouse.com: Anthropic
+Said You Could Opt Out of Claude's Training Data. Its Own Privacy
+Policy Says
+Otherwise.](https://techcoffeehouse.com/2026/06/09/claude-training-data-opt-out-carve-out/),
+[Seeking Alpha: Anthropic trains models with user chats, extends data
+retention to five
+years](https://seekingalpha.com/news/4490171-anthtopic-trains-models-with-user-chats-extends-data-retention-to-five-years),
+[joespeed1.substack.com: Why You Won't Switch AI
+Models](https://joespeed1.substack.com/p/endowment-and-ai) (secondary,
+behavioral-economics argument, not independently verified beyond the
+piece's own reasoning).
