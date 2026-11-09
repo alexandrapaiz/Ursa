@@ -4,21 +4,31 @@ Message-triggered run. Four notes arrived with the trigger and two of them
 hand this seat rows about its own tools, which is what this run took.
 
 Branch `ursa-security/2026-11-09-message-14`, opened on top of this seat's
-own `#851` rather than on `main`, because `#851` touches
-`tools/board/bypass.mjs` and one of the notes is about that file. `#851` is
-not subsumed and still needs reading on its own.
+own `#851` rather than on `main`, because `#851` touched
+`tools/board/bypass.mjs` and one of the notes is about that file. The owner
+merged `#851` at 09:52:35Z while this run was working, so that is settled:
+`origin/main` is merged back in here and nothing in this branch needs `#851`
+read first. Exo's `bypass.mjs` row is answered by F125 inside it and is now
+on `main`.
 
-**Nothing severe. No secret found, nothing to rotate.** Six findings. Four
-are one class: an instrument whose output cannot distinguish its own inability
-to answer from its verdict. Three are fixed here. The fourth, F129, is
-filed for the owner because its repair changes merge identity in the
-busiest register this repository has. The fifth and sixth, F130 and F131, are
-reds the gates were already carrying on `main`, found by running them.
+**Nothing severe. No secret found, nothing to rotate.** Six findings, five
+fixed here and one filed.
+
+F126 through F129 are one class: an instrument whose output cannot
+distinguish its own inability to answer from its verdict. Three of those are
+fixed; F129 is filed for the owner, because its repair changes block
+identity under the merge driver of the busiest register this repository has.
+
+F130 and F131 are a different thing and worth separating: two reds the gates
+were **already carrying on `main`**, both found by running the gates rather
+than by reading anything, and both the same shape — a file reaches `main`
+and becomes some gate's candidate with nothing in any seat's checklist
+pointing at it.
 
 ## The class, stated once
 
-Each finding below is a gate that answers when it should refuse. The reason
-they are one finding class and not three bugs is that a gate's exit code is
+F126 through F129 are each a gate that answers when it should refuse. The
+reason they are one finding class and not four bugs is that a gate's exit code is
 a two-way channel carrying a three-way fact: clean, defective, and *could
 not establish the facts*. Where the third has no code of its own it borrows
 one of the other two, and both borrowings are harmful in different
@@ -140,37 +150,6 @@ site already catches it. `refuse` ended the process before that catch could
 run. A refusal scoped one call too wide converts a finding into a
 non-answer, which is the same defect pointed the other way.
 
-## F130 — the doc-model gate was red on `main` on this seat's own ledger entry
-
-**Fixed in this run.** `tools/doc-model/models.mjs`.
-
-Found by running the gates rather than by reading anything.
-`node tools/doc-model/check.mjs` exits 1 with one error:
-`UNREGISTERED_SITE docs/ideas.md:24728`, against **this seat's own run 12
-entry**, "one tooling suite went red inside the full gate list and green
-twice on its own". It is an error rather than one of the 28 warnings
-because `docs/ideas.md` is a surface this seat may edit, so the finding is
-not downgraded to another seat's mail.
-
-Pre-existing on `main`, not introduced here: with `main`'s own
-`docs/ideas.md` in place the same finding appears at that file's line
-24657. This branch's two ledger entries moved the line and nothing else.
-
-Registered `mentions-only`, which is one of the two remediations the
-finding itself prescribes, and it is the honest one. The only wake-cut text
-in that entry is the *name* of a case it quotes as having failed,
-`transcribed: the wake limit is still 1500 in the live runtime`, cited as
-evidence that the suite reads a live file. The entry asserts nothing about
-where the cut lands.
-
-The registry's own comment above the insertion point records the same thing
-happening a week ago: the gate was red on `main` from 2026-11-02 to
-2026-11-09 on three skill-seat entries nobody had read against it. This is
-a fourth from the same cause, and the cause is that an entry appended to
-`docs/ideas.md` becomes a doc-model candidate the moment it merges, with
-nothing in any seat's checklist pointing at it. Gate 0 errors, 28 warnings,
-exit 0 now; the suite is 19 of 19.
-
 ## F129 — twenty-seven ledger entries written today are at a heading level the ledger's parser does not read
 
 **Not fixed in this run, filed for the owner.** `docs/ideas.md`.
@@ -210,6 +189,37 @@ What this run did fix is its own two entries, which are in the contract
 form. That had an immediate payoff worth recording: the gate rejected the
 first of them for a malformed `- What:` label within seconds of its
 becoming visible. The 27 never got that scrutiny.
+
+## F130 — the doc-model gate was red on `main` on this seat's own ledger entry
+
+**Fixed in this run.** `tools/doc-model/models.mjs`.
+
+Found by running the gates rather than by reading anything.
+`node tools/doc-model/check.mjs` exits 1 with one error:
+`UNREGISTERED_SITE docs/ideas.md:24728`, against **this seat's own run 12
+entry**, "one tooling suite went red inside the full gate list and green
+twice on its own". It is an error rather than one of the 28 warnings
+because `docs/ideas.md` is a surface this seat may edit, so the finding is
+not downgraded to another seat's mail.
+
+Pre-existing on `main`, not introduced here: with `main`'s own
+`docs/ideas.md` in place the same finding appears at that file's line
+24657. This branch's two ledger entries moved the line and nothing else.
+
+Registered `mentions-only`, which is one of the two remediations the
+finding itself prescribes, and it is the honest one. The only wake-cut text
+in that entry is the *name* of a case it quotes as having failed,
+`transcribed: the wake limit is still 1500 in the live runtime`, cited as
+evidence that the suite reads a live file. The entry asserts nothing about
+where the cut lands.
+
+The registry's own comment above the insertion point records the same thing
+happening a week ago: the gate was red on `main` from 2026-11-02 to
+2026-11-09 on three skill-seat entries nobody had read against it. This is
+a fourth from the same cause, and the cause is that an entry appended to
+`docs/ideas.md` becomes a doc-model candidate the moment it merges, with
+nothing in any seat's checklist pointing at it. Gate 0 errors, 28 warnings,
+exit 0 now; the suite is 19 of 19.
 
 ## F131 — the gate registry went red on `main` on a file that merged during this run
 
