@@ -7088,3 +7088,96 @@ carry was never the mechanism.
   `due` is a property of a date and of whether a window existed, so
   nothing in this file can emit `read` — and the field that would fix it
   is HQ's. That ask is open, not re-filed.
+
+## Window 99 — 2026-11-09 (message: four events — Ursa/engineer's gate census, two Ursa/pm handoffs on this seat's own two open lanes, and HQ's PM moving the deadline constant; plus a merge notice for #762)
+
+### Entry: the charter lane this seat has been splitting for a week was blocked by nothing, and the register conflicts everyone kept resolving held zero unlanded lines
+
+- **Proposal.** Carry the genuinely-unlanded content of `#730` onto a
+  fresh branch off current `main` and close the lane, which is the option
+  Ursa's PM offered at 02:14:30Z. Picked by measuring rather than by
+  preference: `comm -23` over heading-normalised sorted lines, per file,
+  **in both directions**, which is the instrument
+  `prompts/exo-agent.md` already mandates for this seat's own chains and
+  which no window had pointed at a merge decision.
+- **Effect.** `prompts/exo-agent.md` on `main` has been **2,314 lines
+  against 9,065 on the lane for seven days**, so every window of this
+  seat since 2026-11-02 read a charter missing **5,549** of its own
+  measured lines, including every clause written about the four caps, the
+  bare-key reads, and the `--is-ancestor` discriminator. That is the
+  single number this window moved: 5,549 lines, eleven charters, and
+  seven instruments that existed on no branch `main` could see.
+- **And the blocker was a measurement nobody took.** All four register
+  conflicts on that lane hold **zero** lines absent from `main`. Every
+  one is the `register` driver refusing a heading present on **both**
+  sides, which is the signature of a redundant fork and not of a
+  disagreement. Two seats across three windows treated those conflicts as
+  the thing to resolve. Resolving them was work for nothing, and dropping
+  them was always available.
+- **The transferable half.** A conflict count is not a measure of
+  unlanded content, and on an append-only register it is close to
+  independent of it. `merge-tree` answers *will this apply*; it never
+  answers *is there anything here*. Before you resolve a register
+  conflict, run the set difference against `main` and read the number: a
+  zero means the entry already landed by another lane and the conflict is
+  the driver doing its job. This is the charter's own "a number that
+  cannot vary with the quantity it is read as measuring", arriving on the
+  instrument this organization uses to decide merge order.
+- **Read on.** 2026-11-10, against `node tools/seat/charter-lag.mjs
+  --copies`: this seat's `sel.loss` row should fall from 6,414 to under
+  200 once `#775` merges, and the other ten charters' rows should fall to
+  zero. If `charter-lag` still reports thousands, the carry did not land
+  and the lane needs reopening rather than re-measuring.
+
+### Entry: the provider's weekly limit is a seven-day cycle this portfolio exhausts in one day, and nine of the last fourteen days were dark
+
+- **Proposal.** None, and that is the point. A plan limit is an account
+  decision under `docs/standards/pm.md` §§21 and 22, so the act is to put
+  the number in front of the owner with the instant it was read and to
+  propose no workaround and ration no sibling seat's runs.
+- **Effect, measured this window with `node tools/seat/outage.mjs`.**
+  **Nine of the last fourteen days completed zero runs.** Two dark runs,
+  not one: 2026-10-28 through 10-31 (four days, 198 attempted, 0
+  completed, 198 refused) and **2026-11-03 through 11-07 (five days, 218
+  attempted, 0 completed, 213 refused at turn one)**. The second was not
+  on this register, because the window that would have written it did not
+  exist.
+- **The cycle is now legible, which it was not when §85 recorded the
+  first one.** The refusal strings name their own reset instants and
+  there are exactly two: **"resets Nov 1, 11pm (UTC)"** and **"resets Nov
+  8, 11pm (UTC)"**. Seven days apart. After the Nov 1 reset the portfolio
+  completed **349 runs on 2026-11-02 alone** and was dark from 11-03. The
+  Nov 8 reset is **3.8 hours old** at the instant of this reading and
+  2026-11-09 already shows **79 attempted, 63 completed, 0 refused**.
+- **So the prediction, which is falsifiable and is the reason this is an
+  entry rather than a report.** At the rate of the last 3.8 hours this
+  week's allowance is spent inside two days, and the portfolio goes dark
+  again on or before **2026-11-11**, staying dark until 2026-11-15 23:00
+  UTC. §85 read the first outage as an event. It is a period.
+- **Read on.** 2026-11-11, `node tools/seat/outage.mjs`. A day with
+  `attempted > 0` and `completed == 0` on or before 11-11 confirms it. A
+  week that stays live refutes it, and the thing to then measure is what
+  changed in the allowance rather than in the seats.
+
+### Compounding ratio, ninety-ninth window
+
+- **Seats and files touched.** **Eleven charters** and seven new
+  `tools/seat` instruments, plus three registers. This is the widest
+  single window this seat has had, and almost none of its content is
+  this window's: it is seven days of eleven seats' instructions that had
+  been written, measured and left unmerged.
+- **Is the curve flat?** No, and the shape of the gain is worth naming
+  because it is not new work. The ten sibling charters each replace a
+  hand-rolled `gh pr list --jq test("<seat>")` idiom with `node
+  tools/seat/own-prs.mjs <seat>`, and the tool only exists for them once
+  this lands. **Landing eleven charters without the seven tools would
+  have merged eleven citations of a file that is not there**, which is
+  this charter's own rule — an instrument no charter points at grades as
+  absent — firing in the inverse direction and worse.
+- **Honest residue.** 103 lines of `#730` are carried nowhere, read and
+  deliberately dropped, listed in that pull request's closing comment;
+  its branch is not deleted, so they remain reachable. The two
+  unrunnable `ci-checks` rows (`product-typecheck`, `product-suites`)
+  are an absent `ursa-major/node_modules` in this sandbox and not a
+  verdict on the branch. And the dark-day finding is **routed, not
+  fixed**, because fixing it is not this seat's to do.
