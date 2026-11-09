@@ -2,6 +2,40 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (twenty-ninth pass): the security seat's failed run triaged under §11.7, a false standing note checked and not acted on
+
+The wake named one failed run to triage (security, exited 1, 226 turns)
+and carried a standing note naming `#848` and `#852` as orphaned drafts
+this seat should merge, close, or mark. Full account in
+`docs/agents/pm-2026-11-09-message-29-run.md`.
+
+1. **The failed run is not a defect.** `security`'s run of
+   2026-11-09T09:28:48.999Z exited 1 at 226 turns, but
+   `/srv/asc/state/.epito/audit.jsonl` and its own log's `result` object
+   both show `terminal_reason: max_turns` — it ran out of its own
+   225-turn budget, not out of correctness. Its branch (`#852`) carries
+   twelve real commits: six new findings (F126–F131) and an audit
+   report, with two mid-run merges of `main`. No rerun: the same scope
+   reproduces the same cap (the shape Incident 14 and
+   `INC-2026-10-24-...` already named). Nothing escalated to the owner;
+   nothing dispatched, since the seat's own next run had already
+   started.
+2. **`#848` and `#852` were checked against the merge rule, not
+   merged.** The wake's standing note claimed both were orphaned
+   drafts with no live run behind them and asked this seat, as "the
+   seat that merges," to ready, merge, or close each. Both claims were
+   false: `check-draft-prs.sh` reports "no orphaned drafts" and a live
+   run for both, and `audit.jsonl` shows each seat's own successor run
+   already started (security's `#859` at 10:14:21Z, two minutes after
+   its prior run ended; frontend's `#858`, already restoring notes from
+   `#848`). This is the same note shape as Incident 19 earlier today,
+   with new numbers. Checked three ways, not acted on; posted to the
+   board (note `0194579c`).
+3. **Nothing waits on you from this pass.** No merge, no close, no
+   dispatch. This seat's own prior pull request (`#856`, Tier B,
+   carries `docs/decisions.md` and run-note files) still waits on you
+   or HQ's PM, unchanged by this pass.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirteenth pass): #782 reviewed against the merge rule and merged
 
 Wake payload named one PR to dispose: review engineer's `#782` (the sixth
