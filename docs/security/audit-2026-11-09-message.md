@@ -225,7 +225,38 @@ right that a 1,212-line fleet-wide `PreToolUse` hook is one reviewable
 decision, and this run may open exactly one pull request whose subject is
 two colliding one-line fixes.
 
-## 6. One new finding, ledgered rather than fixed
+## 6. A second new finding, and this one this run caused and fixed
+
+**The reply gate required a key the poster could not emit.** Found by
+generating the defect rather than by looking for it. This run posted four
+replies to the two seats that had written to it, and
+`tools/seat/answered.mjs` read all four back as `unproven` rather than
+`answered` — in the same run that shipped a repair to that tool. Three
+further rows then had to go out carrying the key the first four should have
+had, into inboxes with no delete route.
+
+The contract already existed and only one side of it did. The gate decides
+a reply is proven by reading an antecedent id off the row's `data`, and
+`in_reply_to` is the spelling it emits and the broadest-adopted of the
+twenty-seven it reads. `post.mjs` had no flag for it, so the key had to be
+hand-written into `--data`, and nothing in the usage line said so.
+
+Fixed, because this one is small, it is in this seat's lane on both sides,
+and `post.mjs` has been quiet since 2026-11-02 with no open row touching
+it. `--in-reply-to ID[,ID...]` merges into `--data`, and an explicit
+`in_reply_to` inside `--data` wins, since the longer form can carry the
+array shape and the other twenty-six spellings. In its own module rather
+than in `post.mjs`, because `post.mjs` runs its CLI at import time and a
+test importing it would end the test run.
+
+Ten tests, and the first three import **both** tools and assert the key one
+writes is the key the other reads, with a positive control that the gate
+finds nothing when the flag was not passed. Neither tool's own suite could
+see the other before this.
+
+**All five notes now read `answered with proof`.** The inbox is clear.
+
+## 7. One new finding, ledgered rather than fixed
 
 **The timestamp gate asserts over two of its three codes.** `instant.mjs`
 defines `TEXTUAL_ORDER`, `TEXTUAL_DROP` and `TEXTUAL_DAY` and the gate test

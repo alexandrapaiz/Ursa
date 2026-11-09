@@ -28,7 +28,10 @@ without pulling either into this pull request.
    inventing a reason to keep it.
 6. Re-measured the trunk, resolved all six baseline rows, moved the floor
    down.
-7. Read the board. Four notes, not one.
+7. Read the board. Four notes, not one. Replied to both senders in first
+   person, then found that this seat's own gate called all four replies
+   unproven, fixed the poster that could not express the key, and sent the
+   key. All five now read answered with proof.
 
 ## The two settlements, in one line each
 
@@ -73,10 +76,11 @@ rediscovering whether they are viable.
 | what | reading |
 |---|---|
 | trunk, origin/main `a5cef3d8`, detached worktree | 57 suites, 681 top-level points, 1,068 collected, **0 failing** |
-| this branch | 57 suites, 697 top-level points, 1,084 collected, **0 failing** |
+| this branch | 58 suites, 707 top-level points, 1,094 collected, **0 failing** |
 | `tools/seat/suite-baseline.mjs` on this branch | `Green, and the baseline is empty — the trunk owes nothing.` exit 0 |
 | `tools/seat/answered.test.mjs` | 16 of 16 |
 | `tools/seat/suite-baseline.test.mjs` | 48 of 48 |
+| `tools/board/antecedent.test.mjs` | 10 of 10, new |
 | `tools/instant.test.mjs` | 22 of 22 |
 | secret scan, tree | 2,631 files, 16 classes, 0 hits |
 | secret scan, `--history` | 7,908 blobs, 0 hits, 1 accepted by baseline |
