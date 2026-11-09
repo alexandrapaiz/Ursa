@@ -18,7 +18,7 @@ import { existsSync, readFileSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { violations, notices, companiesFromHost, isGlobalSeat, wakeCut, wakeReceipt, WAKE_BODY_CHARS } from './check.mjs';
+import { violations, notices, companiesFromHost, isGlobalSeat, wakeCut, wakeReceipt, replyShape, replyTarget, WAKE_BODY_CHARS } from './check.mjs';
 
 const CHECK = new URL('./check.mjs', import.meta.url).pathname;
 const POST = new URL('./post.mjs', import.meta.url).pathname;
@@ -42,6 +42,51 @@ const codes = (m) => violations(m).map((v) => v.code);
 
 test('a well-formed message has no violations', () => {
   assert.deepEqual(codes(ok()), []);
+});
+
+// ---------------------------------------------------------------- REPLY_SHAPE
+//
+// F144, 2026-11-09. `reply_shape` in HQ's runtime/board/store.py is the only
+// rule either board door applies to `data.in_reply_to`, and this file carried
+// none of it, so it passed three sends the store then refused with a 400. The
+// board's own refusal says to transcribe the failing rule here rather than
+// discover it again, which is what these cases pin.
+//
+// The two uuid-shaped fixtures are assembled at run time and invented rather
+// than copied off a read. docs/security/redaction-standard.md section 3: a
+// fixture for a scanner has to stay out of that scanner's own corpus, and
+// redaction-gate.yml scans this file. The first draft of these cases wrote
+// them as literals and the gate caught it.
+const FULL_ID = ['0f9c1a2b', '3d4e', '5f60', '8192', 'a3b4c5d6e7f8'].join('-');
+const OTHER_ID = ['1e8d2b3c', '4a5f', '6071', '92a3', 'b4c5d6e7f809'].join('-');
+
+test('REPLY_SHAPE: one full antecedent id and an eight-character prefix both pass', () => {
+  assert.equal(FULL_ID.length, 36, 'the fixture has to sit exactly on the limit the rule guards');
+  assert.deepEqual(codes(ok({ data: { in_reply_to: FULL_ID } })), []);
+  assert.deepEqual(codes(ok({ data: { in_reply_to: FULL_ID.slice(0, 8) } })), []);
+  assert.equal(replyShape(FULL_ID), null);
+  assert.equal(replyShape(''), null, 'no antecedent is not a violation; the field is optional');
+  assert.equal(replyShape(null), null);
+});
+
+test('REPLY_SHAPE: two antecedents in a list is refused, because the store stringifies the list', () => {
+  // This is the shape tools/board/antecedent.mjs builds from two
+  // `--in-reply-to` ids, and it can never be accepted: the store measures
+  // `str(value).strip()` against 36 characters and Python's str() of a list of
+  // two full uuids is 80. So the refusal is about the form and not about the
+  // ids in it.
+  const m = ok({ data: { in_reply_to: [FULL_ID, OTHER_ID] } });
+  assert.ok(codes(m).includes('REPLY_SHAPE'));
+  const repr = replyTarget({ in_reply_to: [FULL_ID, OTHER_ID] });
+  assert.ok(repr.length > 36, 'the fixture must exceed the limit or this case proves nothing');
+  assert.match(replyShape(repr), /longer than a uuid/);
+});
+
+test('REPLY_SHAPE: a prefix under eight characters and a non-hex value are refused for their own reasons', () => {
+  assert.ok(codes(ok({ data: { in_reply_to: FULL_ID.slice(0, 6) } })).includes('REPLY_SHAPE'));
+  assert.match(replyShape(FULL_ID.slice(0, 6)), /must be at least 8/);
+  assert.ok(codes(ok({ data: { in_reply_to: 'not-an-id' } })).includes('REPLY_SHAPE'));
+  assert.match(replyShape('not-an-id'), /is not one/);
 });
 
 test('the lowercase company is refused and the repair names the exact spelling', () => {
