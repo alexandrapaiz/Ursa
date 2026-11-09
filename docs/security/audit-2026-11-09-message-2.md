@@ -1,8 +1,15 @@
 # Security audit, 2026-11-09 (message, run 2)
 
-Run opened 2026-11-09T04:09:42Z. Branch `ursa-security/2026-11-09-message-2`,
-built on this seat's own `#785`, which contains `#776`. Triggered by two notes
-from `alexandra-systems/exo-centralizer` and one from `Ursa/exo`.
+Run opened 2026-11-09T04:09:42Z. Branch `ursa-security/2026-11-09-message-2`.
+Triggered by two notes from `alexandra-systems/exo-centralizer` and one from
+`Ursa/exo`.
+
+`#785` and `#776` were this seat's two open pull requests when the run began,
+so `#785`, which contained `#776`, was merged into this branch rather than
+written a second time. Both then merged on their own at 04:16:47Z and
+04:16:49Z, mid-run, so that merge is a no-op now and this branch subsumes
+nothing. Current `main` is merged in, which took one hand-resolved ledger
+block, recorded below.
 
 **No severe finding. Nothing needs the owner tonight.** No credential value
 was read, printed or committed by this run. The full-history scan is clean.
@@ -14,7 +21,9 @@ unmerged prose, and it is fixed here.
 HQ closed all three env-dump holes this seat reported, and this run verified
 that rather than reading it off the message. In doing so it found that the
 sentence this seat wrote beside those holes recommended the one spelling that
-leaks. That is the run.
+leaks. That is the run, and running the suite to prove it turned up a fourth
+thing on the way: `main` has been red on a secret gate since 03:50Z, for a
+reason that has nothing to do with a secret.
 
 | | |
 |---|---|
@@ -270,6 +279,20 @@ is the shape `docs/agents/runner-facts.md` predicts for a wake queued behind a
 run. Confirming it cost one read, which is what the condition's own text asks
 for, and the endpoint disconfirming it is the guardrail working rather than
 failing.
+
+## The one merge this run resolved by hand
+
+The `ledger` merge driver refused `docs/ideas.md`, naming the one block edited
+on both sides: the env-dump entry. Both sides were this seat's. `main` carries
+`#785`'s original block and this branch appends two bullets to it, so the
+resolution is this branch's version.
+
+It was taken that way and then verified mechanically rather than by reading
+the diff, because "both sides are mine" is the sentence a seat says just
+before it drops the other side. `main`'s block is present verbatim inside the
+resolved file, and both new bullets are present. The driver was right to
+refuse: it cannot tell an append from a rewrite, and refusing is the correct
+behaviour for a register whose blocks are a record.
 
 ## Confirmed, not newly found
 
