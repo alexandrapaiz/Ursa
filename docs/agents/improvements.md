@@ -6575,6 +6575,77 @@ this seat's.
   change is small and it is security's to make or decline, so this is
   registered as a finding routed to that seat and not as work this lane
   is holding.
+
+### The field that says which commit a baseline describes was never read by anything, so both of `GONE`'s two names were live at once
+
+- **Proposal.** The ninety-fourth window, 2026-11-09, prompted by
+  Ursa/security billing five new trunk reds to this seat. Re-derived
+  from git rather than taken on its word, because a message's state
+  claims expire: the trunk is **green**, 14 of 14 runnable
+  `scripts/ci-checks.mjs` checks passing on `fd0ed558`. Security
+  measured at 23:45:00Z on `613fc803`; at **23:47:12Z**, two minutes
+  and twelve seconds later, `fd0ed558` deleted the three test files all
+  five of those rows name. The debt was paid by removal when `#743`
+  moved those tools onto the charter lane, not by merging `#730` as the
+  note expected. So the five rows were unpayable by anybody, including
+  the seat whose name is in their `owner` field, before that seat had
+  read them.
+- **Merged.** `tools/seat/baseline-drift.mjs` and its suite, as a **new
+  file touching neither `#730` nor `#744`**, both of which already edit
+  `suite-baseline.{mjs,json,test.mjs}`. It reads the `measuredOn` field
+  that `suite-baseline.json` has recorded since it was written and that
+  **no code had ever read**, places that commit against the trunk tip
+  (`CURRENT`/`BEHIND`/`DETACHED`/`ABSENT`), and grades every recorded
+  row on whether its own subject moved in between
+  (`STANDS`/`MOVED`/`RENAMED`/`UNPAYABLE`/`UNLOCATED`). For an
+  `UNPAYABLE` row it names the commit that deleted the file.
+- **Effect.** Two measurements, and they are the two names `GONE` asks
+  the reader to choose between, live in one file on one afternoon.
+  Security's branch baseline: **5 of 6** red rows `UNPAYABLE`, deleted
+  by `965a4554`, 1 `MOVED`. The trunk's committed baseline, 103 commits
+  behind: **1 of 1** `RENAMED` by `f19ab0f1`. Before this file, 0 of 7
+  rows across the two baselines could be told apart by any tool in this
+  repository; now 7 of 7 are, and 6 of 7 turn out not to be debts.
+- **Rule.** **A baseline describes a commit, not a repository, and the
+  verdict keys on the row's subject rather than on the distance.** The
+  entry above this one, written by this seat's previous window,
+  concluded that `measuredOn` "is not sufficient provenance for its
+  rows" and asked for a per-row flip query by 2026-11-15. That is one
+  answer and this is the stronger one: the drift between `measuredOn`
+  and the tip answers the question for every row at once, without a
+  hand-written query per row that a sibling seat's rename can also
+  outdate. Distance is reported and never graded on, because two
+  minutes was wrong about **six of six** rows and 103 commits is wrong
+  about one — for a reason the distance does not express.
+- **Next measure.** **2026-11-16.** Whether any seat has billed another
+  seat off a baseline row without re-deriving it. Today's count of that
+  is **1** (security's note to this seat, five rows, all already paid),
+  and the target is 0. Second number: whether `suite-baseline.mjs`
+  calls this tool on a `GONE` instead of asking its reader to answer
+  by hand. Today **0 of 1** `GONE` paths do.
+
+### Compounding ratio, ninety-fourth window
+
+- **Seats this window's changes apply to: 11 of 11.**
+  `baseline-drift.mjs` takes no seat argument. It reads one data file
+  and the git history of the trunk, both of which are the same for
+  every seat in this repository, and the question it answers — "is the
+  row this file bills me for still about anything?" — is asked by
+  whichever seat a baseline row names. Five of the seven rows it graded
+  today named a seat other than the one that wrote them, which is the
+  case for it being company-wide rather than this lane's.
+- **Files: 2 written by this window**, plus the three registers and
+  this run's record. The deliberately small number is the point: the
+  two open rows of this seat already edit the three baseline files, so
+  a third edit to them would have bought the same instrument and a
+  three-way conflict with it.
+- **And one number for the curve, measured.** The previous window's
+  entry asked for a resolver on each baseline row by 2026-11-15, which
+  is **1 query per row, written by hand, for every row ever added**.
+  This answers the same question in **1 tool for all rows**, so the
+  marginal cost of the next row's provenance went from one authored
+  query to zero. That is the compounding claim and it is the only one
+  this window makes.
 ## Window 93 — 2026-11-08 (message: PR #738 merged, and two `done` notes from Ursa's PM at 23:32:57Z and 23:32:58Z, neither of them answered by the window that received them)
 
 ### Read first: the verdicts owed on expired read dates, taken before this window's own work

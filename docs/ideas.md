@@ -18351,6 +18351,67 @@ the owner to accept or reject.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-02 (market, message, 15th run) — Update prompts/market-agent.md §0 and §1 to describe Ursa's actual business and seed set, not alexandria's
+- Trigger: docs/market/positioning.md, this run's entry "This file's
+  own living map was seeded by an OKR, not by the charter's literal
+  seed set." Checking this seat's own charter (prompts/market-agent.md)
+  against three months of actual landscape.md content found that §0
+  ("a $10 digest and $30 full-library subscription... the business")
+  and §1's named seed set (Elicit, Consensus, Semantic Scholar, Exa;
+  TLDR AI, Import AI, The Batch, AlphaSignal, Last Week in AI, Latent
+  Space, The Pragmatic Engineer; Anthropic's skills ecosystem, prompt
+  and skill marketplaces) are alexandria's business model and
+  competitive set, carried over verbatim at activation and never
+  edited to Ursa's. None of the seed set's names appear anywhere in
+  landscape.md (grep confirms zero hits); the file was instead
+  correctly seeded by O2 KR2.3's three categories (preference-data
+  vendors, evaluation/arena products, memory/personalization layers),
+  which are the right three for a company where Minor sells enterprise
+  RLHF-adjacent data contracts and Major competes with memory layers,
+  and has no consumer price at all (CLAUDE.md §4).
+- What: three months of runs already did the right thing in practice
+  and ignored the stale text, so this is not urgent, but a charter
+  whose literal §0 misstates its own company's revenue model is a
+  landmine for whichever future run (or human reader) takes it at face
+  value instead of checking landscape.md first the way this run did.
+  Charters are outside this seat's writable surface, so whoever owns
+  prompts/market-agent.md edits (the owner, or PM/HQ acting within a
+  standard) should replace §0's "$10 digest and $30 full-library
+  subscription" framing with Minor's actual zero-consumer-revenue,
+  six-to-seven-figure-enterprise-contract model (CLAUDE.md §2/§4), and
+  replace §1's seed set with the three KR-derived categories
+  landscape.md has actually used since 2026-09-26.
+- First step: a short diff to prompts/market-agent.md §0 and §1 only,
+  checked against docs/vision.md and CLAUDE.md §2/§4 for the correct
+  framing, with no other charter section touched.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-02 (market, message, 15th run) — Narrow the "no verifier" pitch to "no audit mechanism," not "no flaws," before a lab's own researcher finds the counterexample first
+- Trigger: docs/market/positioning.md, this run's entry on arXiv
+  2607.11022 ("When the Reward Suite Is Leaky"), a preregistered study
+  finding unit-test RLVR reward suites themselves reward wrong code
+  close to half the time a false positive fires, on MBPP.
+- What: CLAUDE.md §1's pitch draws a clean line between verified
+  domains (math, code — "a real verifier exists") and open-ended ones
+  (no verifier, so labs fall back on preference proxies). This paper
+  shows the clean half of that line is not actually clean: even a unit
+  test, the simplest verifier there is, leaks false positives that
+  nobody catches without auditing the suite itself. A lab's own
+  research team is exactly the audience likely to know this paper or
+  one like it, and a pitch that implies verified domains are flawless
+  is a weaker, more easily punctured version of the argument than one
+  that concedes the real distinction: verified domains have *some*
+  audit mechanism for reward errors (a leakiness check, a human suite
+  audit); open-ended domains structurally have none, which is the gap
+  an outcome record fills.
+- First step: whoever drafts the next lab-facing methodology document
+  states the narrower claim explicitly and keeps this paper on hand as
+  the citation for why, the same way the 14th run's MemPalace proposal
+  keeps a gamed-benchmark example on hand.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-02 (engineer, message, 15th run) — Gate that a merge result still loads, because git resolved two correct edits into a module ESM refuses
 - Trigger: this run's merge of `origin/main` into `#716`. Git reported
   five conflicts and resolved everything else silently. One of the

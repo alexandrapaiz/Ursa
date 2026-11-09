@@ -1996,3 +1996,171 @@ given install than "warm" suggests, then L55's "a warm shared cache is
 near-instant" is unearned and the private cache buys its safety for
 almost no extra time. That changes how the trade above reads, so it is
 worth a measurement by whichever run next has a reason to install.
+
+---
+
+## L57 — An exit status describes the process that exited, and the install was not it
+
+**measured**, 2026-11-02 (run h). `reviews/2026-11-02-message-h/NOTES.md` §1.1.
+
+This seat reproduced L51, two installs in one tree, from a direction
+L51's remedy does not cover. The remedy is "do not run two installs in
+one tree". The gap is that a run cannot obey it without a reliable
+answer to "is one running", and the answer it was handed was wrong.
+
+The install was launched as `bash install.sh` backgrounded inside an
+already-backgrounded shell. The wrapper exited at 08:11:30 and the run
+was told the task had **completed, exit code 0**. The `npm ci` inside it
+was orphaned to init and ran for another two minutes. Believing the tree
+was free, the run started a second `npm ci` at 08:11:49; it died at
+08:11:56 on `ENOTEMPTY: rmdir '…/node_modules/has-proto/test'`, and the
+first install's log filled with `TAR_ENTRY_ERROR ENOENT` as it unpacked
+into directories the second had just removed. Both trees were discarded.
+
+**The check that works, and it is not an exit status.** A process's own
+working directory says which tree it is in, and the kernel publishes it:
+
+```bash
+for pid in $(pgrep -f "npm (ci|install)"); do
+  [ "$(readlink -f /proc/$pid/cwd 2>/dev/null)" = "$PWD" ] &&
+    echo "REFUSING: npm $pid is live in this tree"
+done
+```
+
+**The same mistake twice in one run, which is why this is an entry
+rather than a line in a review.** Forty minutes later the same run wrote
+a wait-loop, `while pgrep -f "[c]heck-focus"; do sleep 10; done`, to hold
+a measurement until a selftest finished. It never finished. `pgrep -f`
+matches against full command lines, the `[c]` bracket trick is a `grep`
+idiom that `pgrep`'s regex reads as the literal class "c", and two
+earlier shells that were themselves watching for the same string carried
+it in their own command lines. The loop was waiting on the watchers. In
+both cases the run asked "is that thing still alive" and got an answer
+about something else.
+
+**this seat's judgement.** Any wait in this seat's runs names the thing
+it is waiting for by a property of that thing, a pid or a working
+directory, and never by a string that the waiter's own command line
+contains.
+
+---
+
+## L58 — The page was still scrolling when the shutter opened
+
+**measured**, 2026-11-02 (run h). `reviews/2026-11-02-message-h/NOTES.md` §3.
+
+`ursa-minor/app/globals.css` declares `html { scroll-behavior: smooth }`.
+Nothing in the kit's freeze touches it. It is not driven by
+`requestAnimationFrame` callbacks the page owns, so pinning rAF's
+timestamp does not stop it, and Playwright's `animations: 'disabled'`
+does not reach it either. It had never mattered, because every
+instrument before `measure-focus.mjs` photographs a page it has not
+asked to move.
+
+`measure-focus.mjs` asks it to move. It takes a control's box, then
+drives `Shift+Tab` and `Tab` to put a keyboard focus on it, which makes
+the browser scroll two controls into view, and then photographs the
+rectangle it computed before any of that. With a smooth scroll in
+progress the two frames of one stop come from two different offsets.
+
+**What that produced, on the real site, at 820x1180.** The `mini-fixture`
+link on `/record` was reported `BELOW_FLOOR` at 49% of 655 indicator
+pixels with a median of 2.87. The magnified frames show the focused
+shutter on a passage reading `no_generation_pro…` and the blurred one on
+a different row of the page entirely. Neither frame contains the link.
+The 655 pixels were page text that had slid, and a contrast ratio was
+printed from them. The same cause produced two `UNSTABLE` verdicts, a
+`NO_INDICATOR` on a header link that measured 11.99 one viewport over,
+and the crash in the next entry.
+
+**The repair, in two halves.** `lib/freeze.mjs` takes a `scroll` option
+that pins `scroll-behavior: auto` for the document, opt-in on the same
+reasoning as `now`. And `measure-focus.mjs` re-reads the bounding box
+**after** the keyboard focus has landed rather than before it, because
+the pin makes the scroll instant and the re-read is what makes the
+rectangle right.
+
+**The general shape, which is the part worth keeping.** This tool already
+refuses to measure a stop it could not give a keyboard focus to, with
+the comment that "measuring whatever Chromium focused and labelling it
+with this element's name is the failure mode that produces confident
+nonsense". It had the identical hazard one line down in space rather
+than in focus and did not see it. An instrument that moves the page it
+is measuring has to re-establish **where** as carefully as it
+establishes **what**.
+
+---
+
+## L59 — The one tab stop where focus moves and the screen does not
+
+**measured**, 2026-11-02 (run h), `/record` at 1440x900 and 820x1180.
+
+"Open a record" is a `<label class="cta">` wrapping an
+`<input type="file" class="sr-only">`. That is the ordinary way to give
+a file picker a styled trigger. Its consequence had never been looked at:
+the focusable element is the input, the input is clipped to **1x1**, and
+the site's global `:focus-visible` ring is therefore drawn correctly,
+around a single pixel, behind the label.
+
+Tab stop 4 of 6 on that page. **Zero pixels** differ between the focused
+frame and the blurred one, at both viewports, on a page where every
+other stop reports 11.99:1. A keyboard user tabs onto the control and
+nothing on the screen changes.
+
+**Why six reviews missed it and this one did not.** `measure-hit-areas.mjs`
+sees the label's full box and a pointer finds the control fine, so the
+instrument that would normally catch a control this size reports it as
+healthy. Reading the stylesheet finds a global focus rule that is
+correct and applies here. The defect exists only in the join between the
+two, and the only way to see it is to put a keyboard on the control and
+photograph what happens.
+
+The fix forwards the ring to the label with `:has(> input:focus-visible)`,
+same token, same weight, same offset, so it introduces no new value into
+the design system. `:has()` rather than `:focus-within`, because the
+label also contains text and `:focus-within` would fire for a focus the
+user did not give the input.
+
+**this seat's judgement.** Any control on this site whose visible box and
+whose focusable element are different elements is a focus defect until
+somebody has photographed it. There is one today. The rule is for the
+next one.
+
+---
+
+## L60 — A share of the indicator assumes the indicator is only the ring
+
+**measured**, 2026-11-02 (run h), the 404 page at 1440x900 and 820x1180.
+
+`measure-focus.mjs` defines the focus indicator as every pixel that
+differs between the focused frame and the blurred one, which is what
+makes it robust to how an indicator is drawn, and then judges it by the
+**share** of those pixels clearing 3:1. The share's floor of 60% was
+calibrated on fixtures whose indicator is an outline and nothing else.
+
+`.quiet-link` answers focus with three things at once: the site ring at
+about 11:1, a brightened border, and a 6% background wash across the
+control's whole interior. On the 404 page's only control that is 11,319
+changed pixels, of which roughly 566 are the ring and the rest are the
+wash at about 1.12:1. The share came out at **5%** and the tool printed
+`BELOW_FLOOR`. The magnified frames, committed with this run, show a
+bright unbroken ring. The verdict was wrong and the site was right.
+
+**What makes this worth an entry rather than a tuned constant.** The
+share is not a bad statistic, it is a statistic with an unstated
+assumption, and the assumption is that the indicator is the ring. Every
+focus treatment that layers a quiet wash under a loud ring inverts it,
+and the louder the ring the worse the dilution, because the wash's area
+is the control and the ring's area is its edge.
+
+**The second question, which needs no new constant.** A stop that fails
+the share is now asked whether the pixels that *do* clear 3:1 cover at
+least a 1 CSS px perimeter of the control on their own, `(w+2)(h+2) - wh`.
+That is the ring this site declares, taken off the control's own box, and
+it is the same yardstick as the 2.4.11 column one weight down. The 404's
+566 clearing pixels against a 558 pixel perimeter clear it, and the stop
+is reported `COMPOSITE` rather than failed. A ring along one edge only
+does not clear it, since one edge of that control is 230 pixels. A ring
+drawn in its own backdrop's colour has no clearing pixels at all. Both of
+those stay `BELOW_FLOOR`, and the second is the selftest's fixture 4,
+which still fails as it should.
