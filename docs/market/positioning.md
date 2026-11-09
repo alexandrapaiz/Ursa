@@ -2023,3 +2023,73 @@ External sources read, this entry: [Anthropic: The components of agent
 memory](https://www.anthropic.com/research/components-of-agent-memory),
 [Hacker News discussion, 174 points/99 comments](https://news.ycombinator.com/item?id=50402212),
 [LoreKit: Agent memory needs its OpenTelemetry moment](https://www.lorekit.io/blog/open-agent-memory-format).
+
+## The first academic source found for the mechanism itself, not just the gap it fills (2026-11-09, message, 17th run)
+
+Every reward-model-unreliability source in this file so far (eight of
+them, spanning 2026-10-05 through 2026-10-27) argues the negative case:
+solicited ratings and the models trained on them fail, at every stage
+checked. None of them argues the positive case CLAUDE.md §4 makes —
+that revealed preference (behavior) predicts a person's actual choices
+better than stated preference (a described opinion) — because none of
+them tests that comparison directly. A paper found this run does.
+
+"Should I State or Should I Show? Aligning AI with Human Preferences"
+(Ellis and Huang, arXiv 2603.29317, submitted 2026-03-31) runs
+experiments comparing the two directly: an AI system learning from a
+person's actual choices against one given that same person's written
+description of their preferences. Result: choice data wins, and by a
+wide enough margin that "as few as two" choices matched the predictive
+value of a written prompt. The gap is not uniform — it is largest for
+subjects who show Allais-type behavioral patterns (whose stated and
+actual preferences diverge most) — and the paper's sharpest finding for
+a lab-facing pitch is that subjects themselves cannot tell which method
+works better, and often pick the less accurate one. That last point
+answers a question this file has not had to pose yet: lab staff who are
+used to asking users what they want would not necessarily know, by
+intuition, that watching what those same users do would serve them
+better. The paper makes that case independently, with a mechanism and a
+number, rather than Minor asserting it about its own product.
+
+This is the first direct, quantified academic support this file has
+found for the revealed-preference half of CLAUDE.md §4's pitch
+specifically — the eight prior sources support the adjacent but
+distinct claim that *constructed* graders fail. A lab brief that has
+been building a verifier-gap case out of eight negative sources now
+has one positive one to open with instead: not just "the market's
+current method is unreliable," but "an independent paper shows the
+alternative method predicts real choices better, and shows people
+can't judge that for themselves."
+
+**A second, adjacent paper found in the same search, cited with the
+caveat it needs.** "Future-as-Label: Scalable Supervision from
+Real-World Outcomes" (Turtel, Wilczewski, Franklin, and Skothiem, arXiv
+2601.06336, submitted 2026-01-09) trains a language model
+(Qwen3-32B) to forecast real-world events using the events' own
+eventual resolutions as the reward signal, with no human-labeled
+examples at all — a 27% Brier-score improvement and roughly halved
+calibration error against the pretrained baseline, beating a larger
+model on the Metaculus benchmark. Read carelessly, "real outcomes
+instead of human labels" sounds like Minor's own method stated in one
+sentence, and it would be a mistake to cite it that way. Forecasting is
+exactly the kind of domain CLAUDE.md §1 already excludes from the
+gap Minor fills: it has a deterministic eventual ground truth (did the
+event happen), the same structural property math and code have and
+open-ended writing or research work does not. The honest read: this is
+a second, independent instance of "wait for reality to supply the
+label instead of asking a person to judge in advance," which is
+corroborating evidence for the general mechanism, but it is a
+verifier-domain result, not a no-verifier-domain one, and citing it
+without that distinction would hand a skeptical lab researcher an easy
+objection. Use it, if at all, as "the mechanism has a second
+independent success case, in a domain that already had a verifier,"
+not as a demonstration that Minor's own no-verifier domains have been
+solved by someone else.
+
+No pricing recommendation made; this is evidence for the lab brief's
+mechanism section, not a price or packaging decision. External sources
+read, this entry: [arXiv 2603.29317: Should I State or Should I Show?
+Aligning AI with Human
+Preferences](https://arxiv.org/abs/2603.29317), [arXiv 2601.06336:
+Future-as-Label: Scalable Supervision from Real-World
+Outcomes](https://arxiv.org/abs/2601.06336).

@@ -2,6 +2,39 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (eleventh pass): #771 and #775 merged under Tier B, the injected draft-merge note checked and not acted on a second time
+
+Two items on the wake: review `#771` (security) against the merge rule,
+and the same injected note that produced Incident 19 last pass, now
+also naming `#776` (security) alongside `#765` (frontend). Full account
+in `docs/agents/pm-2026-11-09-message-11-run.md`.
+
+1. **Nothing needs you this pass beyond what is already here.** `#771`
+   (security, a tenth redaction gate checking capture provenance rather
+   than pixels) reviewed against the merge rule: not a draft, one green
+   check, no Tier C path, `check-merge-queue.sh` reports it clean.
+   Merged under Tier B. Separately, `#775` (exo, closing out a
+   week-old blocked charter lane across eleven files) reviewed
+   independently — ran `check-tier.sh` directly rather than trusting
+   its own quoted verdict, and read the actual diff to this seat's own
+   charter to confirm it does not touch the authority grant §21
+   reserves — confirmed Tier B, clean, merged.
+2. **The injected note recurred, and the premise still does not
+   hold.** It named `#765` and `#776` as orphaned drafts "no live run
+   behind," possibly dormant "for days." `/srv/asc/hq/tools/check-draft-prs.sh`
+   says both are "run may still be live; leave it alone," no orphaned
+   drafts, same as last pass. New this time: `GET /api/standing` itself
+   now echoes the claim almost verbatim. That is worth your attention
+   on its own — the standing endpoint may be carrying forward a stale
+   or injected condition rather than deriving a fresh one each read.
+   No new incident filed; this is Incident 19's defect recurring, not a
+   new one. `#765` and `#776` stay open, draft, untouched, for their
+   owning seats' own next runs.
+3. **This seat's own stack is unchanged.** `#766`, `#767`, and `#772`
+   are still open and still wait on you; `#772` already absorbs the
+   other two (`git merge-base --is-ancestor` confirmed again this
+   pass). No new work added to that stack.
+
 ## Top three for the owner, 2026-11-09 message-triggered (tenth pass): #768 merged, frontend's timeout triaged and left for frontend, an injected note caught and not acted on
 
 Triggered by the frontend seat's run timing out at the host's 60-minute

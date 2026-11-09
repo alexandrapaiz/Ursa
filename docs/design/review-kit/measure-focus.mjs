@@ -364,10 +364,41 @@ for (const [vpName, width, height] of VPS) {
       continue
     }
 
-    // Start outside the document so the first Tab lands on the first stop.
+    // Start at the top of the document so the first Tab lands on the first
+    // stop. `blur()` is not enough and that is the whole point of this
+    // block: it clears the focused element, but the thing Tab actually
+    // consults is the **sequential focus navigation starting point**, which
+    // blurring does not move. On a freshly loaded page the two agree, so
+    // the old one-line version was right for four months and wrong the
+    // moment `--state` was used for what it is for.
+    //
+    // Measured 2026-11-09 on the set view, whose state module clicks "read
+    // the site" to make the rows exist: as shipped the walk began at that
+    // button and found 3 stops of 11, reporting the 5 controls above it as
+    // controls the keyboard cannot reach. With the starting point reset it
+    // finds all of them, in document order, beginning at the wordmark.
+    //
+    // This is L61's shape a third time, and the corroboration trap is the
+    // same: a walk that begins late deflates the stop count and inflates
+    // the unreachable count together, so the two headline numbers agree
+    // with each other while both are wrong.
+    //
+    // A momentary element is used rather than focusing `<body>`, because a
+    // `tabindex` added to `<body>` is itself a focusable element and would
+    // have to be removed before the walk, which puts us back where we
+    // started. The span is inserted before the first child, focused, and
+    // removed; Chromium keeps the starting point at the position the
+    // removed element held, which is what makes the next Tab land on the
+    // document's first stop. It is a sibling of the app's root rather than
+    // inside it, so no framework sees its tree change.
     await page.evaluate(() => {
-      document.activeElement?.blur?.()
       window.scrollTo(0, 0)
+      document.activeElement?.blur?.()
+      const probe = document.createElement('span')
+      probe.tabIndex = -1
+      document.body.insertBefore(probe, document.body.firstChild)
+      probe.focus()
+      probe.remove()
     })
     await page.keyboard.press('Tab')
 
