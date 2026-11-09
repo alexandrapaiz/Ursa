@@ -16837,6 +16837,37 @@ the owner to accept or reject.
   shape and the test suite to extend. No new exit code: a breaking repair is
   still a violation, it just stops being described as if someone could do it
   today.
+- **Corrected 2026-11-09 (engineer, twelfth message wake), on Ursa/security's
+  reading.** The trigger sentence above is false and is left standing so the
+  error is legible rather than edited away. `fixAvailable` has been read by
+  `scripts/dep-floor.mjs` since the commit that created the gate, `810323cc`
+  on 2026-09-29, and `isSemVerMajor` with it, inside the `fix` string of the
+  object pushed onto `violations`. `grep -n fixAvailable scripts/dep-floor.mjs`
+  matches those four lines and always did, so whatever produced "matches
+  nothing" was not that command against that file.
+  What is true is narrower and was worth fixing: the field is read on ONE of
+  the four paths an advisory can take, and it is the path this repository's
+  own advisories do not take. A dev-scope advisory below critical becomes a
+  `warnings` record, an allowed one becomes a `warnings` record with its
+  expiry, an elapsed exception becomes an `expired` record, and none of those
+  three built a `fix` field. All eight advisories behind this entry were
+  dev-scope and below the floor, so all eight took the discarding branch. The
+  defect was never a field nobody read. It was a hint reachable from one
+  kind of finding out of three.
+  A second omission sat beside it and is the one that cost a reader something:
+  the report filter was `sev === 'high' || sev === 'moderate'`, so a `low`
+  entry fell through a bare `continue`, and the per-package count line printed
+  three of the five severities its input carries. On 2026-11-09, after the F93
+  bump, `ursa-minor` carried three low advisories each with
+  `fixAvailable:{"name":"shadcn","version":"1.0.0","isSemVerMajor":true}`, and
+  `node scripts/dep-floor.mjs` printed `low` nowhere, a count line of zeros,
+  and `Dependency floor holds`.
+  Both omissions are repaired in `scripts/dep-floor-classify.mjs`, with the
+  classification made total and tested. **The proposal in `First step` above
+  is NOT built**: `summaryLine()` is untouched, no verdict line splits on
+  breaking-versus-in-range, and this entry's status stays the owner's to move.
+  What shipped is the existing behaviour made honest, which is a break-fix and
+  not this entry.
 - Cost: $0
 - Status: proposed
 
@@ -24486,3 +24517,150 @@ same conflation inside it.
   run paid by hand, which was two minutes per gate.
 - Cost: $0
 - Status: proposed
+
+### 2026-11-09 (engineer, twelfth message wake) — The dependency gate's own printed output is asserted by nothing, so its numbers can disagree with the tool they summarise
+
+- Trigger: this run's repair. Before the change, `node scripts/dep-floor.mjs`
+  printed `ursa-minor (ursa-minor-site): all critical=0 high=0 moderate=0` and
+  `Dependency floor holds`, while `npm audit --json` in that directory in the
+  same minute returned
+  `{"info":0,"low":3,"moderate":0,"high":0,"critical":0,"total":3}`. Two
+  numbers about one tree, read from the same process, disagreeing. The
+  classification branches were fixed and tested this run, so the *decisions*
+  are now covered. The *rendering* is not: the loop that prints the count
+  line, the `FAIL` lines, the `warn` lines and the GitHub `::error::`
+  annotations still lives at module scope in a script that shells out to the
+  network before it can be reached, so no test has ever read a line it prints.
+- What: the gate has two halves and this run only closed one. Give the
+  rendering half the same treatment: a pure `report({packages, violations,
+  expired, warnings, annotate})` that returns an array of lines instead of
+  calling `console.log`, with `dep-floor.mjs` printing what it returns. Then
+  assert the one property that would have caught this class without anybody
+  guessing at it — a **reconciliation**: for each package, the severities the
+  count line prints equal `metadata.vulnerabilities` key for key, and every
+  entry in the audit's `vulnerabilities` object appears on exactly one
+  rendered line. Drive it from a captured real `npm audit --json` payload
+  committed as a fixture, so the assertion runs offline in under a second and
+  the gate stops being a tool whose output only a network run can see. The
+  fixture is also the first thing this repository would have to replay against
+  a future npm whose schema moved, which is the risk the 2026-11-01 craft scan
+  on this same output contract named and nothing acted on.
+- First step: capture `npm audit --json` from `ursa-minor` into
+  `scripts/fixtures/npm-audit-ursa-minor-2026-11-09.json`, extract the
+  `else` branch of `dep-floor.mjs` into `reportLines()` in
+  `scripts/dep-floor-classify.mjs` beside the classifier it already feeds,
+  and add the reconciliation assertion to
+  `scripts/dep-floor-classify.test.mjs`. One day, no new files beyond the
+  fixture.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, twelfth message wake) — A seat citing another seat's tool cannot tell whether it can import it, and both seats paid for that in one window
+
+- Trigger: Ursa/security corrected this seat with the host fact
+  `authorship-is-not-visibility`, correctly, in the same window in which its
+  own gate list became the next thing that rule applied to.
+  `tools/gates/gate-registry.mjs` and the `gateCandidatePaths` export its
+  census depends on exist on `origin/ursa-security/2026-11-09-message-11` and
+  on no other ref, confirmed by `git branch -r --contains b8296e0b`. This run
+  had to read both with `git show` from that branch instead of importing them,
+  and `git merge-base --is-ancestor b8296e0b origin/main` answered `NOT ON
+  MAIN`. Two seats, one window, the same rule, neither repair visible to the
+  other.
+- What: the rule is known and written in `node tools/seat/env-facts.mjs`, and
+  knowing it does not answer the question a seat actually has, which is "can I
+  build on this today". That question is mechanical and nobody has made it one
+  command. A `node tools/seat/visibility.mjs <path>...` that, per path, prints
+  whether `origin/main` carries it, which remote refs do, and which open pull
+  request each of those refs belongs to, with a verdict of `importable`,
+  `branch-only` or `absent`. Exit non-zero only on `absent`, since
+  `branch-only` is a true state of the world and not a defect. The value is
+  not the git plumbing, which is three commands. It is that the answer arrives
+  before a seat writes a paragraph deferring to a tool it could have read, or
+  spends a window rebuilding one it could have cherry-picked. Note the
+  prerequisite from the host facts: every one of those commands answers
+  wrongly on the clone this host hands a seat, so the tool runs
+  `tools/ensure-full-clone.sh`'s check first and refuses rather than reporting
+  `absent` for a ref it simply cannot see.
+- First step: `tools/seat/visibility.mjs` plus its test, keyed on
+  `git cat-file -e origin/main:<path>` for the main answer and
+  `git ls-remote --heads` joined to `gh pr list --json headRefName` for the
+  branch answer, with the shallow-clone refusal first. One day.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, twelfth message wake) — A field present on one of a tool's finding kinds and absent on its siblings is a defect class this repository has now hit twice
+
+- Trigger: Ursa/security's framing of this run's bug, which is sharper than
+  the bug. The remediation hint in `scripts/dep-floor.mjs` was not a field
+  nobody read. It was a field read on one of the four paths an advisory can
+  take, and the three paths without it are the three this repository's own
+  advisories actually use. So the gate was correct about the case it was
+  tested on and silent about every case it meets. The same shape is already
+  recorded one layer up in `scripts/dep-floor-summary.mjs`'s header, where one
+  message served two conditions with different owners, and in
+  `docs/design/verdict-lines.md` §1.
+- What: make the shape findable instead of waiting for a third instance. A
+  census over this repository's verdict-producing tools that, for each tool
+  pushing records into two or more sibling output arrays, compares the key
+  sets of the records it builds and reports any key present on some kinds and
+  absent on others with nothing declaring the difference. The honest version
+  is static and conservative: read the object literals passed to `.push()` on
+  arrays declared in the same module, which is exactly the shape
+  `dep-floor.mjs` had and which `tools/gates/code-census.mjs` already
+  demonstrates is tractable by reading sources rather than running them. A
+  declared difference is legitimate and common, so the output is a baseline
+  file with a written reason per entry, the pattern
+  `tools/gates/import-effects.baseline.json` already uses, rather than a
+  demand that every kind carry every field.
+- First step: run the detector as a one-off read over `tools/` and `scripts/`
+  and count the instances before building the gate, because a census whose
+  population turns out to be one instance is a finding and not a gate. If the
+  count is above three, build it as `tools/gates/record-shape.mjs` with its
+  baseline. The measurement is half a day and gates the rest.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 — Craft scan: `npm audit`'s human renderer answers "whose repair is this" in two lines, and our gate that parses the same data answered it in none
+
+- Product scanned: the npm CLI's own `audit` reporter, version 10.9.8, run
+  first-hand in this sandbox against `ursa-minor`. Chosen because this run
+  spent its day inside `npm audit --json`, and the JSON contract was last
+  run's scan while the thing npm *shows a human* was not. No web page, no
+  search, no vendor documentation. The comparison is two renderers over one
+  byte-identical input.
+- What is worth stealing. npm spends two of its sixteen output lines on the
+  question of who can act, and spends them before it spends any on severity:
+
+  ```
+  fix available via `npm audit fix --force`
+  Will install shadcn@1.0.0, which is a breaking change
+  ```
+
+  Both facts are in the JSON as `fixAvailable.name`, `.version` and
+  `.isSemVerMajor`. Our gate parsed all three and, until this run, rendered
+  them on one of its four paths. npm also puts the *dependency chain* in the
+  output, indented, so a reader sees that `shadcn` is the direct dependency
+  and `deepmerge` and `@shadcn/registry` are consequences of it. That is the
+  difference between three advisories and one decision, and it is the single
+  most useful thing in npm's output that ours does not have: we print three
+  `warn` lines with the same `Fix:` phrase on each, where npm prints one tree
+  with one repair at its root. `vuln.effects` and `vuln.via` carry the edges
+  needed to group them, and we already read `via` for the GHSA ids and throw
+  the structure away. Candidate ledger entry once the rendering half of the
+  gate is testable, which is this day's first entry above.
+- What we do better, and it is not cosmetic. npm's reporter has no floor. It
+  prints `3 low severity vulnerabilities` and a `--force` command, and the
+  decision about whether that blocks anything is left entirely to the reader,
+  which is why `npm audit` cannot be a gate without a wrapper. Ours encodes
+  the decision — critical anywhere and high in production fail, everything
+  else is reported — and crucially encodes who may *accept* an exception, in
+  `dep-floor.allow.json`, with an expiry on every entry so an accepted risk
+  comes back and asks again. npm has `--audit-level`, which is a threshold and
+  not a policy: it cannot express "high is fatal in production and reportable
+  in a dev tree", which is the distinction our entire floor rests on, and it
+  has no concept of an owner-approved exception at all, let alone one that
+  expires. npm also reports a `--force` repair as if the reader were empowered
+  to run it; our seat charters are explicit that a semver-major dependency
+  decision is not a seat's to take, which is exactly why `(semver-major)`
+  belongs in the rendered hint rather than being collapsed into "a fix exists".
