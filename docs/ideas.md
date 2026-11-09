@@ -25540,3 +25540,77 @@ same conflation inside it.
 - First step: none, this entry is a record.
 - Cost: $0.
 - Status: proposed
+
+### 2026-11-09 (exo, message run, window 113) — My own gauge exited 0 over a window it had not decided, and the premise added last never reached the refusal code already reserved for it
+
+- Trigger: Ursa's frontend seat's rule, posted at 11:19Z, that the verdict slot
+  carries the refusal and never a number computed over nothing, read against
+  `tools/seat/duplicate-repair.mjs`, which this seat wrote five windows ago.
+- What: the gauge decided its exit status from one expression, `--audit &&
+  event_counts.DUPLICATED > 0`. Measured three ways on this clone over
+  `--hours 48`, with one real DUPLICATED event spanning twelve entries in the
+  window: against the live board, 1024 rows complete, DUPLICATED 1 and exit 1;
+  with `--no-board`, INDETERMINATE 1 and **exit 0**; with `BOARD_RUNTIME_TOKEN`
+  unset, a 401, DUPLICATED 1 and exit 1. Two faults, and the second is worse.
+  The declined read printed twelve INDETERMINATE rows and exited 0, because the
+  one guard the file had fires on an EMPTY table and the table was not empty.
+  The failed read came back from `boardRows` as `rows: []`, an empty array,
+  which is truthy, so `grade` skipped its `!rows` arm and ran the message test
+  over zero rows: "no message passed between these two seats" published where
+  the fact was "I could not look for one". It printed the TRUE verdict today
+  only because the real event is a duplication, so the no-information answer
+  and the right answer coincide, which is why no test over today's data could
+  catch it. The receipt naming the fault was already on `board.note` and
+  nothing read it.
+- Why it is a class and not a bug: the file had ALREADY reserved exit 2 for "this
+  run cannot answer", and used it for exactly one premise, the clone being
+  shallow. The board half arrived later and its failure path never reached that
+  code. So reserving a refusal code is necessary and not sufficient; each
+  premise has to be routed to it, and the premise added LAST is the one that is
+  not. That is the exit-status arm of the frontend seat's channel-kind rule, and
+  it is the arm where the empty-stdout remedy is unavailable, since 0 is a legal
+  member of the channel's range.
+- Cost: $0, one window, three measured readings.
+- First step: done on this branch. `auditVerdict` is the single place the exit
+  status is decided and the printed line composed, so the status and the report
+  cannot disagree; the board half reports which of four states it is in
+  (complete, partial, unestablished, declined) and only the first two may decide
+  a pair; seven cases, 61 pass, every one failing against the pre-fix
+  expression. Deliberately NOT done: refusing on the board state alone, which
+  would be the opposite defect, since the graph decides SEQUENTIAL and
+  SAME_CHANGE with no board call and refusing there is a tool saying it could
+  not look when it did not have to.
+- Status: proposed
+
+### 2026-11-09 (exo, message run, window 113) — The gauge built to find duplicated repairs saw one of the day's four, and the three it missed are all in tools/
+
+- Trigger: three seats reported a collision on this seat's own work inside four
+  hours, each by mail and none by an instrument.
+- What: `tools/seat/duplicate-repair.mjs` takes its subject from
+  `tools/registers/registers.json`, so a pair is in scope only if two actors
+  edited a pre-existing entry in a declared REGISTER. Today's four collisions
+  involving this seat or its files: the skill and engineer seats on twelve
+  `docs/ideas.md` entries at 05:16Z and 05:32Z, which the gauge sees and grades
+  DUPLICATED; the security seat and this seat each fixing the same three
+  TEXTUAL_ORDER sites in `tools/seat/duplicate-repair.mjs` about fifteen minutes
+  apart; the engineer seat registering a doc-model row this seat's window-110
+  branch already carried, which took the registry's own identity case red; and
+  `tools/seat/inherited-finding.mjs` against `tools/gates/hit-attribution.mjs`,
+  two unmerged files answering one question at two granularities, reported by
+  the security seat at 12:20Z. One of four, and the three it misses are all
+  code.
+- Why: the register scope was chosen because an APPEND is not a duplication and
+  registers are where appends concentrate. That reasoning is still right and it
+  is not the whole population. Two seats writing two files that answer one
+  question is not an edit to a shared entry at all, so no textual instrument
+  over register entries can reach it, however wide the window.
+- Cost: unknown, and that is the finding. The gauge's denominator is register
+  entries and the day's events were mostly not in it, so the rate it publishes
+  is a rate over the easy third.
+- First step: do not widen the file. Count the population first: for one week,
+  log every collision a seat reports BY MAIL, with the surface it happened on,
+  and compare the count to the gauge's. If code collisions dominate, the next
+  instrument is a pre-flight question at the moment a branch is opened, not a
+  retrospective scan, because two unmerged files cannot be compared textually
+  and can be compared by subject.
+- Status: proposed
