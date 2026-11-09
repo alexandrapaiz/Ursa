@@ -18,11 +18,20 @@
 // --no-run reports the extraction without executing any probe, so a reader can
 // see which entries are checkable at all without paying for the test runs.
 // Under it every entry classifies `unverifiable`, which is honest: nothing ran.
+//
+// An entry may name the command that decides it, which this tool then runs in
+// preference to anything it could infer from the entry's prose:
+//
+//   - Recheck: `node tools/secret-scan.mjs --history`
+//
+// The grammar that line must satisfy, and the reason it is narrower than a
+// shell command rather than wider, is in `./urgent-verdict.mjs`. A declaration
+// that fails it is printed as refused with its reason, never dropped.
 import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { parseLedger } from './ledger.mjs'
 import { statusOf } from './block-kinds.mjs'
-import { classifyEntry, probesIn, report } from './urgent-verdict.mjs'
+import { classifyEntry, probePlan, report } from './urgent-verdict.mjs'
 
 const args = process.argv.slice(2)
 const noRun = args.includes('--no-run')
@@ -49,14 +58,20 @@ function trackedPaths() {
 }
 
 /**
- * Run one probe. `node --test <path>` with the argument vector passed
- * directly, never through a shell, because the path came out of a prose file.
- * @param {string} path a path already matched against urgent-verdict's
- *   PROBE_SHAPE allowlist and confirmed tracked
+ * Run one probe. The argument vector is passed to `spawnSync` directly and
+ * never through a shell, because every token in it came out of a prose file.
+ * Two vector shapes reach here and both are built by `probePlan`, not here:
+ * `['--test', '<a tracked .test.mjs under tools>']` for a probe this tool
+ * inferred from a path the entry mentioned, and `['<a tracked .mjs under tools
+ * or scripts>', '--bare-flag', ...]` for the command the entry declared on a
+ * `- Recheck:` line. Nothing else is accepted by either allowlist, so this function does no
+ * validation of its own and must not start doing any: a check here would be a
+ * second, weaker copy of a rule that belongs in one place.
+ * @param {string[]} argv what follows the interpreter
  * @returns {boolean} whether it exited 0
  */
-function runProbe(path) {
-  const out = spawnSync(process.execPath, ['--test', path], {
+function runProbe(argv) {
+  const out = spawnSync(process.execPath, argv, {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
     timeout: 300_000,
@@ -95,14 +110,20 @@ function headingDate(text) {
   return text.match(/^###\s+(\d{4}-\d{2}-\d{2})/)?.[1] ?? null
 }
 
+/** Keyed on the probe's identity string, which is the test path for an
+ *  inferred probe and the whole command line for a declared one, so two
+ *  entries that declare the same command pay for it once. */
 /** @type {Map<string, boolean>} */
 const probeResults = new Map()
 if (!noRun) {
-  const wanted = new Set()
-  for (const e of urgent) for (const p of probesIn(e.text, isTracked)) wanted.add(p)
-  for (const p of [...wanted].sort()) {
-    process.stderr.write(`recheck-urgent: running ${p}\n`)
-    probeResults.set(p, runProbe(p))
+  /** @type {Map<string, string[]>} identity -> argv */
+  const wanted = new Map()
+  for (const e of urgent) {
+    for (const probe of probePlan(e.text, isTracked).probes) wanted.set(probe.path, probe.argv)
+  }
+  for (const key of [...wanted.keys()].sort()) {
+    process.stderr.write(`recheck-urgent: running ${key}\n`)
+    probeResults.set(key, runProbe(wanted.get(key)))
   }
 }
 
