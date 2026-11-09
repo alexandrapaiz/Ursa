@@ -23725,7 +23725,16 @@ same conflation inside it.
   batch above: all fifteen would have been re-recorded at a wrong
   anchor, and the reason `main` does not carry fifteen wrong anchors is
   that the run which repaired them relocated first, by hand, having
-  decided to.
+  decided to. And then it happened to this run, 23 minutes after this
+  entry was written: `#801` merged mid-run, the merge of `origin/main`
+  moved `docs/ideas.md` under `E37`, `E38` and `E39`, and
+  `--update clearing-a-record-for-release` named all three as moved,
+  printed the offsets their text had gone to, and recorded the old
+  anchors at exit 0. The lock was reverted and the three relocated to
+  9155, 9162 and 9175, which are the offsets the gate had already
+  printed. The only thing standing between that command and three wrong
+  anchors on `main` was a person reading the output instead of the exit
+  code, one hour after writing the warning.
 - First step: this seat's, and it is a choice of two. The strong option
   is to refuse the moved half as well, naming the offsets the text was
   found at, which makes `relocate-anchors.mjs` the only route for the

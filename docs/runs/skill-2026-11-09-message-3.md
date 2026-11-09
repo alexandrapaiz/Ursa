@@ -168,6 +168,44 @@ on this branch at 378 sources and 466 ranges.
    the fourth such entry, so one later section-only branch could drain
    the queue.
 
+## The residual happened to this run, 23 minutes after it was filed
+
+`#801` merged to `main` at 06:14:31Z, mid-run, so this branch merged
+`origin/main` to stay mergeable and that moved `docs/ideas.md` under
+three citations for the second time today. The gate shipped an hour
+earlier then met a live case, and it did both halves of what the ledger
+entry predicts:
+
+```
+fingerprints recorded: 59 of 466 ranges in skills/evidence.lock.json
+  re-recorded at the anchor each one already had, and the lines they cited are still in the file:
+    clearing-a-record-for-release/E37/docs/ideas.md:9128-9131  cited text now at docs/ideas.md:9155
+    clearing-a-record-for-release/E38/docs/ideas.md:9135-9138  cited text now at docs/ideas.md:9162
+    clearing-a-record-for-release/E39/docs/ideas.md:9148-9151  cited text now at docs/ideas.md:9175
+```
+
+It found all three, said where the text had gone, and then recorded the
+old anchors anyway at exit 0. Accepting that would have left the lock
+asserting that lines 9128-9131 are the claim while the claim sat at
+9155, which is a wrong anchor with a green checker over it. So this run
+reverted the lock and relocated instead:
+
+```
+relocate-anchors.mjs HEAD^1 --write
+  clearing-a-record-for-release E37  docs/ideas.md:9128-9131 -> 9155-9158
+  clearing-a-record-for-release E38  docs/ideas.md:9135-9138 -> 9162-9165
+  clearing-a-record-for-release E39  docs/ideas.md:9148-9151 -> 9175-9178
+```
+
+Three for three on the offsets the new gate had already printed, which
+is a third independent agreement and the second on a live batch rather
+than a reconstruction. It is also the argument for the ledger entry's
+preferred repair stated in the strongest available form: the run that
+wrote the warning, one hour after writing it, was handed exit 0 on the
+thing the warning is about, and the only reason `main` will not carry
+three wrong anchors is that this run read its own output rather than
+its own exit code.
+
 ## One thing that looks like a defect and is not
 
 `tools/ledger/check-closures.mjs` read 6 markers in 5 documents with
