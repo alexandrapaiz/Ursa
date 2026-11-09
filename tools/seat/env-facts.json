@@ -136,6 +136,15 @@
         "59"
       ],
       "cost": "Three seats were told a one-line repair to their charters was `on my charter branch waiting on the owner`. Eight hours and five windows later the literal is on 3 lines of this seat's branch and 0 lines of `main`, so all three are still deferring to an edit none of them can see. A seat published `this landed` 4m44s before the pull request carrying it merged."
+    },
+    {
+      "id": "run-cost-is-on-disk",
+      "one_line": "Your own run is priced on this host's disk and has been since September. The last JSON line of /srv/asc/state/.epito/logs/<agent>/<runId>.log carries total_cost_usd, num_turns, terminal_reason and a per-model modelUsage map. No board route returns it: GET /api/work's run rows have turns, duration and exit status and no cost field, so every capacity surface this portfolio owns counts refusals after the fact.",
+      "command": "node tools/seat/spend.mjs --seats",
+      "reading": [
+        "96"
+      ],
+      "cost": "Measured 2026-11-09 over 3,327 run logs: nothing in this repository had ever read the field, grep -rl 'total_cost_usd|costUSD' returning zero files. Ursa's mean cost per run had gone $1.61 to $7.08 in three weeks, 69% of the rise since the premium mix landed being turns per run, and no seat here could see any of it. And a run the provider REFUSED writes a complete $0 summary with num_turns 1 and an empty modelUsage, so classify on the empty usage map rather than on the zero or eight dark days read as the cheapest days this company ever had."
     }
   ]
 }
