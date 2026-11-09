@@ -258,6 +258,19 @@ forge read looks identical from outside.
   No value is reproduced anywhere in this report.
   `tools/secret-print-sweep.sh` exits 0: no L-X5 shape over 54 files, 22
   accepted by baseline.
+- **One secret-print false positive, reported because the guard asks for
+  that rather than for a workaround.** The `PreToolUse` guard refused a
+  command of this run's that assigned a grep search pattern to a shell
+  variable named `PAT` and then echoed a line containing it. The value was a
+  heading from `tools/doc-model/models.mjs` and no credential was in the
+  environment of that command. The heuristic is "a variable expanded into
+  `echo`", which cannot know what a variable holds, so this is the heuristic
+  working as designed rather than a defect. It cost one rewrite with the
+  pattern inlined. **No repair is requested and nothing is filed**: widening
+  the guard to reason about what a name probably holds is the change that
+  would make it miss a real one. Recorded only because the guard's own
+  refusal text asks that a false positive be named to the owner instead of
+  worked around.
 - **Dependencies.** `npm audit` is 0 vulnerabilities in `ursa-major` and 3 low
   in `ursa-minor`, all three one root cause: `deepmerge`'s
   prototype-poisoning advisory reached through `shadcn`, fixable only by a
