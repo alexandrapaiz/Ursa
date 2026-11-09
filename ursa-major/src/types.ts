@@ -1078,14 +1078,16 @@ export type ExclusionReason =
    * path an import.
    *
    * Why the reason exists at all, rather than the skip staying a `continue`.
-   * Between 2026-09-18 and 2026-11-09 the ceiling was silent: a path over it
+   * Between 2026-09-19, when `MAX_BLOB_CHARS` arrived with M0 in commit
+   * `02df68a8`, and 2026-11-09 the ceiling was silent: a path over it
    * left no row, no exclusion and no sentence, so a record over an episode
    * that touched one was indistinguishable from a record over an episode
    * that did not. On 2026-11-09 ten paths at this repository's own `main`
-   * were over the ceiling, `docs/ideas.md` at 1,674,304 characters being 5.6
-   * times it, which means the ledger this organization keeps its own ideas
-   * in had never once appeared in an outcome record and nothing anywhere
-   * said so. A refusal is a claim; a silent skip is an absence, and
+   * were over the ceiling, eight of them paths the resolver would otherwise
+   * have read, and the largest — `docs/ideas.md`, the ledger this
+   * organization keeps its own ideas in — was 1,671,449 characters, 5.57
+   * times it. That ledger had therefore never once appeared in an outcome
+   * record and nothing anywhere said so. A refusal is a claim; a silent skip is an absence, and
    * `src/apparatus.ts` states the rule this follows — the honest claim is
    * "this path was declined", never "nobody asked".
    */

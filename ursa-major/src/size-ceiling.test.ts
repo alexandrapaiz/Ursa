@@ -2,7 +2,7 @@
 //
 // Why integration tests over `resolveEpisode` rather than a unit test of the
 // comparison: the comparison is `genText.length > MAX_BLOB_CHARS`, which has
-// never been wrong. What was wrong for fifty-two days is what the resolver
+// never been wrong. What was wrong for fifty-one days is what the resolver
 // did NEXT, which was `continue`. A path over the ceiling left no span, no
 // `stats.perFile` row and no sentence anywhere, so a record over an episode
 // that touched one was byte-indistinguishable from a record over an episode
@@ -10,9 +10,10 @@
 // one of those days.
 //
 // The scale is this repository's own, measured 2026-11-09: ten paths at
-// `main` were over the 300,000-character ceiling, `docs/ideas.md` at
-// 1,674,304 characters being 5.6 times it. The ledger this organization
-// keeps its own ideas in had therefore never appeared in an outcome record.
+// `main` were over the 300,000-character ceiling, eight of them paths the
+// resolver would otherwise have read, the largest being `docs/ideas.md` at
+// 1,671,449 characters, 5.57 times it. The ledger this organization keeps its
+// own ideas in had therefore never appeared in an outcome record.
 
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, writeFileSync } from 'node:fs'

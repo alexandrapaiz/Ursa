@@ -133,7 +133,8 @@ export function resolveEpisode(
     // record over an episode that touched one was byte-indistinguishable from
     // a record over an episode that did not. The cost was not hypothetical:
     // ten paths at this repository's own `main` were over the ceiling that
-    // day, `docs/ideas.md` at 1,674,304 characters being 5.6 times it.
+    // day, eight of them paths this check would reach, the largest being
+    // `docs/ideas.md` at 1,671,449 characters, 5.57 times it.
     //
     // `relation: 'refused'` rather than one of the three import relations,
     // and `sha` the episode's own final commit rather than a rival: there is
