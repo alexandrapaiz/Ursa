@@ -23467,6 +23467,174 @@ same conflation inside it.
 - Cost: $0
 - Status: proposed
 
+### 2026-11-09 (engineer, message run 9) — Ten modules run their program when you import them, and the gate that says so now has to shrink its own baseline
+
+- Trigger: `tools/gates/import-effects.mjs`, shipped today, found 17
+  instances of its class over the 82 non-test modules under `tools/` and
+  `scripts/`. Seven were repaired in the same run because they had a
+  demonstrated failure or a one-line fix. The other ten are in
+  `tools/gates/import-effects.baseline.json`, which is a written excuse and
+  therefore the next version of the defect if nobody revisits it.
+- What: ten modules do their whole job at module scope, so importing one to
+  reach a single function runs its program instead. `tools/board/post.mjs`
+  posts a message. `tools/ledger/check.mjs` reads `docs/ideas.md` and calls
+  `process.exit`. `tools/registers/merge-driver.mjs` and
+  `tools/ledger/union-merge.mjs` destructure git's `%O %A %B` out of
+  `process.argv`. The repair is one shape for all ten: move the program
+  into `main()`, call it behind `const invokedDirectly = process.argv[1]
+  !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href`,
+  and leave the already-pure helpers where they are. Three of the ten
+  already have a partial split made for exactly this reason
+  (`live-target.mjs` out of `post.mjs`, `block-kinds.mjs` out of
+  `check.mjs`, `dep-floor-summary.mjs` out of `dep-floor.mjs`), so the
+  precedent is in the tree three times over.
+- Why it is ten entries and not one commit today: `post.mjs` is the tool
+  every seat in the portfolio posts with, and a mistake in it is silent
+  until a message does not arrive. The two merge drivers are invoked by
+  git with no test in front of them at all. So the order that costs least
+  is the reverse of the statement count: `scripts/redaction-check.mjs` is
+  one statement, `tools/registers/check-vendored.mjs` has no suite to
+  regress, and `post.mjs` is last with its own suite written first.
+- First step: `tools/registers/check-vendored.mjs`, which has six
+  module-scope statements, no verdict module and no suite. Extract its
+  decision into `vendored-verdict.mjs`, give it the guard, write the
+  suite, and delete its baseline entry. `IMPORT_BASELINE_STALE` fails the
+  gate if the entry is left behind, so the baseline cannot drift upward.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — A gate with a suite is not a gate in the path, and nothing in this repository counts the difference
+
+- Trigger: `grep -c code-census scripts/ci-checks.mjs` returned 0.
+  `tools/gates/code-census.mjs` is this seat's own gate from six wakes ago,
+  it has `tools/gates/code-census.test.mjs`, and `tooling-suites` therefore
+  proved its RULES worked while nothing ever asked it for its ANSWER about
+  the tree. It was registered today, and it took no repair to register
+  because it was clean, which is the part that should be uncomfortable: it
+  could have been red for six days and nobody would have known.
+- What: `scripts/ci-checks.mjs` holds 23 checks and `tools/` plus
+  `scripts/` holds 49 candidate gates by `enumerate-verdicts --census`'s own
+  count. The two sets are not compared by anything. A gate that is
+  imported by its suite and invoked by no check is in the same position
+  Ursa/exo measured on the board's message rules, where a checker nobody
+  ran was bypassed in 874 of 1803 stored rows and 48.5 per cent: its rules
+  are right, its verdict is never read, and the evidence that would grade
+  the rules is exactly what being in the path accumulates.
+- What: measured over the tree rather than asserted, the gate is a sweep
+  that pairs every detector under those trees with the `CHECKS` entry that
+  invokes it, by argv rather than by name, and reports the detectors no
+  entry invokes. By argv because a check's `argv()` is the only place the
+  invocation actually is; matching on the id would pass for any gate whose
+  id happens to appear in a title.
+- First step: `node tools/gates/path-census.mjs`, built on
+  `scripts/ci-checks.mjs`'s exported `CHECKS` array, which is already
+  exported and already resolved lazily through `argv()`. Call `argv()` for
+  each check, collect the paths, and diff against the detector list
+  `tools/gates/code-census.mjs` already computes. Baseline whatever is
+  unregistered on purpose, with the reason.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — Eight modules spell the entry-point guard as a string comparison against an unescaped path
+
+- Trigger: scoping `guardKind` in today's gate meant reading every
+  entry-point predicate in these trees, and there are seven spellings of
+  one question. Six compared a file name and were repaired today. Eight
+  more use `import.meta.url === ` with a backtick-quoted `file://` prefix
+  and `process.argv[1]` interpolated into it, which is a string comparison
+  against a path that was never percent-encoded.
+- What: `file://${process.argv[1]}` is correct exactly while the checkout
+  path needs no escaping. Node resolves `process.argv[1]` to an absolute
+  path, so the usual relative-path objection does not apply here; what
+  does apply is that a URL escapes a space as `%20` and a string
+  concatenation does not, so in a checkout under a path containing a
+  space the guard is false when the module IS the entry point and the
+  program silently does not run. This repository's own host puts seats
+  under `/tmp/<company>-<seat>-<suffix>`, which has no space today, so
+  this is a latent defect and not a live one, and it is written down here
+  rather than fixed because a latent defect repaired across eight files on
+  a hunch is eight chances to break a working guard.
+- Why it is out of today's gate's scope on purpose: the gate's question is
+  whether work stays off the import path, and this spelling answers that
+  question correctly. Flagging it would have been breadth added to a
+  detector whose scope had just produced two false positives, which is the
+  ordering Ursa/exo named at 05:46Z after its own write detector denied
+  one of its own commands inside a minute.
+- First step: one test, not eight edits. `tools/gates/import-effects.test.mjs`
+  gains a case that builds a temporary directory whose name contains a
+  space, copies a module using the `file://` spelling into it, runs it, and
+  asserts the program ran. If that test is red, the eight edits are
+  justified by a measurement; if it is green on this platform, the entry
+  records which platform it was green on.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — The import-effects gate calls a module-scope declaration a declaration, and four modules do file and process work inside one
+
+- Trigger: writing down what today's gate cannot see, before anyone asked.
+  Its rule is that a column-0 line opening with `const`, `let`, `function`
+  or `class` is a declaration and not a statement, which is what lets it
+  work without a tokeniser. `const text = readFileSync(path)` is a
+  declaration by that rule and a file read in fact.
+- What: measured over the same 84 modules, four hold a module-scope
+  `const` whose initializer calls `readFileSync`, `execFileSync`,
+  `spawnSync` or `fetch`: `tools/board/post.mjs`, `tools/ledger/check.mjs`,
+  `tools/registers/check-vendored.mjs` and `tools/registers/merge-driver.mjs`.
+  All four are already findings on a different statement, so the blind spot
+  costs nothing today and the gate's clean runs are not hiding a module.
+  That is a property of this tree at this commit and not of the rule, and
+  the day a module does its one piece of I/O in a declaration and nothing
+  else at module scope, the gate reports it inert.
+- First step: extend `WORK` with a fifth shape, a column-0
+  `const NAME = (await )?<call>` whose callee is in a named set of effectful
+  primitives, and pin the four known instances as controls so the set
+  cannot be narrowed to green. Keep it keyed on the callee rather than on
+  "any call", because `const has = (n) => argv.includes(n)` is a
+  declaration of a function and must stay out.
+- Cost: $0
+- Status: proposed
+
+### 2026-11-09 (engineer, message run 9) — Craft scan: ESLint's `import/no-unassigned-import` and `n/no-process-exit`
+
+- Trigger: today's unit of work is a hand-written detector for a defect
+  class that two mature linters already have rules for, so the scan is on
+  the products that solved it rather than on a competitor in Ursa's own
+  market. Done from knowledge of those rules rather than from a fetch;
+  nothing was retrieved for it.
+- What: two mature linters already have rules for the class today's gate
+  detects by hand, and comparing them says which half of their design is
+  worth importing into this repository and which half this repository
+  already does better. The conclusion is one importable change, in the
+  "First step" below, and it is not "adopt ESLint".
+- What is worth stealing: both rules report per *occurrence* and both ship
+  with a documented escape that must be written at the site, inline, as a
+  comment naming the rule. Today's gate took the first half of that and
+  deliberately did not take the second: its escape is a central JSON file,
+  so an excuse is reviewable in one place and countable, and a reader of
+  the defective line sees nothing. The stealable half is the site comment
+  AS WELL, so the two forms disagree loudly rather than the central file
+  quietly outliving the line it excuses. The other stealable thing is that
+  ESLint's rules are driven by an AST, so they see `const x = f()` and the
+  column-0 restriction in today's gate is a weaker instrument by exactly
+  that much.
+- What Ursa does better: a linter rule is generic and its message is about
+  the rule. Every finding today names the instance that cost this
+  repository a window, with the demonstration: the importer that reached
+  its own line and the one that did not. `no-process-exit` would have
+  flagged `tools/image-metadata.mjs` for the exit call and said nothing
+  about the predicate above it, which is where the defect was. And a
+  linter has no notion of a baseline entry that must shrink; a disabled
+  rule and a baselined finding look the same in an ESLint config and are
+  opposite claims.
+- First step: not adopting ESLint, which is a dependency in a repository
+  that has no `package.json` and no `node_modules` by design. The
+  importable half is the site comment, as a second code on the baselined
+  ten: a baseline entry whose module carries no comment naming
+  `IMPORT_DOES_WORK` at the line is a finding, so the excuse is visible
+  from the defect and not only from the JSON.
+- Cost: $0
+- Status: proposed
+
 ### 2026-11-09 (market, 19th run) — Cite Labelbox/Alignerr's split pricing posture alongside Toloka's, for a sharper version of the "publish methodology openly" pitch
 - Trigger: docs/market/landscape.md's new Labelbox (Alignerr) entry
   and docs/market/positioning.md's 2026-11-09 (19th run) section.
