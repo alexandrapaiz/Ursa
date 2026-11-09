@@ -16,18 +16,16 @@ will ever touch, and point `PW_ROOT` at it:
 export FE_RUN="$PWD/.fe-run-<id>"
 mkdir -p "$FE_RUN/pw"
 
+# BEFORE any npm, and before every later one: would it race one already
+# running, in this tree, elsewhere in this checkout, or on this cache?
+# Exits 3 if so, and prints a count line either way.
+bash docs/design/review-kit/check-installs.sh --cache "$FE_RUN/npm-cache" || exit 3
+
 cd "$FE_RUN/pw" \
   && npm i --no-save playwright --cache "$FE_RUN/npm-cache" \
   && npx playwright install chromium
 export PW_ROOT="$FE_RUN/pw/node_modules"
 cd -
-
-# before any npm in a tree: is one already running there?
-ps -eo pid,args | grep -v grep | grep -q "npm" && \
-  for pid in $(pgrep -f "npm (ci|install)"); do \
-    [ "$(readlink -f /proc/$pid/cwd 2>/dev/null)" = "$PWD" ] && \
-      echo "REFUSING: npm $pid is live in this tree"; \
-  done
 
 # and at the end of the run: stop what you started, THEN delete what you
 # wrote. One command does both and prints a count line either way.
@@ -69,10 +67,25 @@ the runs ended. One directory per run means there is one `rm -rf`, and
 the next run of the seat can recognise `.fe-run-*` from another day as
 garbage without knowing what was in it.
 
-The `/proc/<pid>/cwd` check is the only reliable answer to "is an install
-already running in this tree", which is the question L51's rule needs
-answered and does not say how to answer. An exit status will not do it;
-see the end of this file.
+The install check became `check-installs.sh` on 2026-11-09, and the four
+lines it replaces were wrong in three ways that no reader of them could
+see, because they printed nothing on the clean path. Measured with one
+real `npm install` live in a sibling tree of the same run: the old block
+printed three `REFUSING` lines and not one of them was that install. It
+matched `pgrep -f`, so it matched the measuring shell itself and another
+seat's agent process whose prompt quotes a board message about npm; it
+was keyed on `$PWD`, so it missed the install six directories away
+sharing the same cache; and it exited 1 when clean and 0 while refusing,
+so nothing could gate on it. L68.
+
+**The question it needs to answer is not the one L51 asks.** L51 is two
+installs in one `node_modules`. The resource that actually failed on
+2026-11-09 is the cache, and Ursa's exo seat established from npm's own
+debug logs that the three concurrent installs that cost that morning
+twenty minutes were **one seat's own, in one sandbox**, with no two
+intervals from different sandboxes overlapping anywhere in the day. A
+per-run cache holds all of a run's installs, so the `--cache` rule below
+does not separate them and this check is the guard that does.
 
 `PW_ROOT` is the first entry in `lib/browser.mjs`'s search order and has
 been since that file was written, and until 2026-11-02 it appeared in no
@@ -314,6 +327,20 @@ cannot be committed by accident. This line used to say
 `/tmp/<seat>-<date>-<trigger>/`, which is a namespaced guess at privacy
 rather than privacy, and on 2026-11-02 this seat's own earlier run read
 it and reached for the bare name `/tmp/npm-fe-f` anyway.
+
+**Ask npm where its cache is; never ask the filesystem.** The detection
+line this seat offered the other seats for the shared cache was `ls -ld
+/srv/asc/home/.npm/_cacache`, and it fails open. npm removes that
+directory between installs and the host's watcher reclaims at eighty per
+cent, so it is absent exactly when nobody has installed yet, which is the
+moment a run is about to. Measured absent twice by the exo seat and a
+third time here on 2026-11-09. `npm config get cache` resolves whether or
+not anything was ever downloaded, which is why its answer is the finding:
+
+```bash
+bash docs/design/review-kit/check-installs.sh --cache-path
+# cache=/srv/asc/home/.npm shared_home=yes source=resolved
+```
 
 **That includes the path npm chooses for you.** Every `npm` this seat
 runs passes `--cache <checkout>/.fe-run-<id>/npm-cache`, because npm's
