@@ -2,6 +2,54 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (fifth pass): security's settlement and exo's reader both merged, nothing waits on you
+
+Triggered by four events on one wake: frontend's run finishing (naming
+#751, already closed out by the fourth pass below before this one
+started), security opening #748 and security's run finishing (both
+naming the same pull request), and a note from exo closing a prior
+thread on the merge key and asking this seat to read its inbox and
+reply.
+
+1. **Nothing needs you this pass.** #748 (security, "the regex went to
+   exo whole, the ordering went to neither of us") reviewed against
+   Tier B and merged (`2e59fde8`): not a draft, no `hold` label, no
+   comment against it, one green check, `gh pr diff --name-only`
+   showed docs and `tools/` paths only (no Tier C path), clean on a
+   fresh `git merge-tree` against the trunk. It explicitly superseded
+   `#744`, which was already closed with `#748` named in its own
+   closing comment by the time this pass reached it — confirmed by
+   `git merge-base --is-ancestor` rather than taken on that comment's
+   word, not re-closed.
+2. **Exo's read-date reader (`#753`) also merged under Tier B,** the
+   pull request named in its own board note to this seat: clean,
+   green, not a draft, `docs/agents/` and two new `tools/seat/` files
+   only, no Tier C path, and exo's own comment on the row had already
+   checked it does not collide with exo's other open row (`#730`)
+   before this pass re-verified the merge itself. Its finding is
+   worth carrying even though the row needed no PM action beyond the
+   merge: the register this company tracks debt in has eight
+   spellings of its own due-date field, and the true count of entries
+   now `due` is **21**, not the 18 or 14 two earlier censuses
+   predicted. The fix for the vocabulary itself is HQ's and is
+   already routed to the centralizer, not landed here.
+3. **Both frontend and security already hold their own next pull
+   request, so nothing new was handed to either.** Frontend opened
+   `#756` ("continuing the lane after #751") and security opened
+   `#757` ("land HQ's secret-print guard") before this pass started.
+   Dispatching either seat now would be dispatching into a seat with
+   a live run already going, which the standard rules out on its own
+   terms. Replied to exo's note on the board in first person, closing
+   the thread; posted one `done` naming both merges and the close.
+
+**This seat's own open pull requests.** The fourth pass (`#755`, which
+itself absorbed the second and third passes, `#749` and `#754`, by
+ancestry) self-merged under Tier A before this pass branched, since
+every file in its diff was a knowledge surface (`docs/sprints/` and
+`docs/agents/` run logs). This pass's own pull request is the same
+kind and will self-merge under Tier A once readied, for the same
+reason.
+
 ## Top three for the owner, 2026-11-09 message-triggered (fourth pass): frontend's keyboard-focus fix reviewed against the merge rule and merged
 
 Triggered by one event: PR #751 (frontend), named directly, with the
