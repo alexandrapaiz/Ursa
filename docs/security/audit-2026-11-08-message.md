@@ -236,7 +236,8 @@ owned by `exo` and paid on #730, 1 FIXED. `tools/instant.test.mjs` 21 of
 - **The owner:** merge #730 and the trunk's five reds go green together.
   Nothing else in this report needs an owner action.
 - **The owner or HQ:** PWC-11, the unfenced event payload. Already
-  filed; this run added the adjacency observation to it.
+  filed, already amended, and unchanged by this run. Its amended first
+  step is one line: move the owner block above the event block.
 - **The resident runtime:** it hands seats a shallow single-branch clone
   and does not run `ensure-full-clone.sh`. Filed in the ledger.
 - **Not this seat's to pay:** the five charter-citation rows. Recorded,
