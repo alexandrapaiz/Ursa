@@ -1,356 +1,199 @@
+/* Ursa Major's local surfaces: the capture panel (/) and the tuning
+   dashboard (/dashboard).
+
+   Ported 2026-11-19 from the owner's finalized designs in the Magic
+   Patterns surfaces OS. The system is the Ursa Minor site's (colours,
+   Helvetica body, Inter Tight 200 for display, Geist Mono for labels and
+   data, one polar accent) with two decisions the owner made for the
+   product surfaces: rounded corners throughout, and motion only on a
+   trigger. The three status hues (kept, case, tension) are the frozen
+   surface artboards'.
+
+   Kept from the previous stylesheet, because each was a measured fix:
+   every control's press target is at least 44px (the ::after overlays),
+   focus is a 1px polar ring 3px out, the house spring (--spring-lift,
+   measured off Elicit on 2026-10-24) drives the one-pixel lift, and
+   reduced motion removes every transform. */
+
 :root {
-  --ground: #050810;
-  --panel: #0a101e;
-  --accent: #a8c7fa;
-  --ink: #e8edf6;
-  --dim: #8b93a7;
-  --satisfied: #9ce0b9;
+  --night: #020308;
+  --raised: #05070f;
+  --overlay: #080b15;
+  --hover: rgba(232, 237, 247, 0.06);
+  --line: #141b2b;
+  --dot: #1c2436;
+
+  --star: #e8edf7;
+  --body: #b7c0d4;
+  --dim: #707fa0;
+  --gutter: #3a4560;
+
+  --polar: #a8c7fa;
+  --polar-soft: rgba(168, 199, 250, 0.08);
+  --polar-line: rgba(168, 199, 250, 0.4);
+  --kept: #7ee0a3;
+  --kept-soft: rgba(126, 224, 163, 0.08);
+  --tension: #c4b5fd;
+  --tension-soft: rgba(196, 181, 253, 0.08);
+  --tension-dim: #8b7fb8;
   --unsatisfied: #f2b8b5;
-  --tension: #e8c47c;
-  --line: rgba(168, 199, 250, 0.14);
 
-  /* The house spring, moved here rather than copied a third time.
+  --font-body: "Helvetica Neue", -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-display: var(--font-inter-tight), "Helvetica Neue", sans-serif;
+  --font-data: var(--font-geist-mono), ui-monospace, monospace;
 
-     It was measured on 2026-10-24 off Elicit's own animation engine and
-     is documented in full in `ursa-minor/app/globals.css`: 340ms,
-     damping ratio 0.80, 1.50 percent of overshoot, peaking at 207ms,
-     first reaching its target at 163ms, ringing zero times. Audited on
-     2026-10-26d rather than trusted, by the two instruments that exist
-     for it. `read-spring.mjs` reads 0.801 and 1.5 percent back out of
-     this literal, and `make-spring.mjs --damping 0.8 --duration 340
-     --wnT 8.88 --points 24` regenerates it byte-identically.
-
-     Until today this literal was declared in `dashboard/dashboard.css`,
-     which is imported by the dashboard page alone, and nothing in that
-     file used it. So the panel, which is the surface a user meets first,
-     could not reach the token at all, and the file that could reach it
-     had no use for it. `globals.css` is imported by the root layout, so
-     one declaration here serves both, and the dashboard's copy is
-     deleted in the same commit. Two copies of a 24-point literal in one
-     product is a drift waiting to happen; the remaining second copy, in
-     `ursa-minor`, is a different product with its own stylesheet and
-     stays. The two are byte-identical today and that was checked. */
+  --ease-house: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --spring-lift: linear(0 0%, 0.0606 4.3478%, 0.1964 8.6957%, 0.3579 13.0435%, 0.5155 17.3913%, 0.6537 21.7391%, 0.7662 26.087%, 0.8526 30.4348%, 0.9153 34.7826%, 0.9585 39.1304%, 0.9863 43.4783%, 1.0028 47.8261%, 1.0114 52.1739%, 1.0148 56.5217%, 1.015 60.8696%, 1.0134 65.2174%, 1.0111 69.5652%, 1.0087 73.913%, 1.0064 78.2609%, 1.0045 82.6087%, 1.0029 86.9565%, 1.0018 91.3043%, 1.001 95.6522%, 1 100%);
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 body {
-  /* dark glass at roughly 85% opacity so terminal text reads through faintly (§16.5) */
-  background: rgba(5, 8, 16, 0.85);
-  color: var(--ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 13px;
+  background: var(--night);
+  color: var(--star);
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 14px;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
-/* 380px is the window's design width (§16.5) and `min()` is the only
-   change: a bare `380px` with `margin: 0 auto` on a viewport narrower
-   than 380 centres a box that does not fit, so the left margin goes
-   negative and the panel is clipped on BOTH sides at once. Measured
-   2026-10-26 in `reviews/2026-10-26/data/narrow-before.txt`: 60px of
-   overflow and a left edge at -16px at 320, 20px and -4px at 360, 5px
-   and 0 at 375. The three review viewports start at 390, which is why
-   six reviews of this surface never asked. Nothing changes at 380 or
-   above. */
-main { width: min(380px, 100%); margin: 0 auto; padding: 14px 16px 16px; }
-code, .mono { font-family: var(--font-mono), ui-monospace, monospace; }
+::selection { background: rgba(168, 199, 250, 0.25); }
+:focus-visible { outline: 1px solid var(--polar); outline-offset: 3px; }
+input::placeholder { color: var(--dim); opacity: 1; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 
-/* ---------- the panel's own 44px floor and its focus ring ----------
+/* ---------- shared parts ---------- */
 
-   Added 2026-10-26 by the frontend seat, after the first measurement
-   this surface has ever had. The review kit's hit-area instrument was
-   pointed at `ursa-minor` and at the dashboard, never at the panel, and
-   the panel's controls are mostly behind a derived key, so a tool that
-   could only measure what a URL shows on arrival could not have seen
-   them either. `reviews/2026-10-26/data/` carries the numbers.
+.mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
 
-   What it found, at all three viewports: the passphrase field draws a
-   35px box and answers a 36px press, 8px under the floor, and the run
-   button draws 26px and answers 26px, 18px under it. Those are the only
-   two standalone controls the panel has, so both of them were short.
-
-   The mechanism is L3's in docs/design/ledger.md and it spends nothing:
-   the target goes on something that draws no pixel, and the control
-   keeps its own box and therefore its own ring. For the button that is
-   an `::after` on the button itself; for the field, which is a replaced
-   element and renders no pseudo-element, it is a wrapping `<label>`,
-   which forwards its activation to the control natively.
-
-   The inset is centred here where `.rec-field`'s is all above, and the
-   difference is a design decision rather than an oversight. A field in
-   ursa-minor is drawn as a rule under its text, so the rule is its
-   bottom edge and slack below it would reach past the field. This field
-   is drawn as a bordered box with two edges of equal standing, and the
-   gaps around it are 12px of header above and 8px of caption below,
-   both free and neither a control. Half of 9px into each is space that
-   was already empty. L14 says to measure that claim rather than assert
-   it, and `data/overlap-after.txt` does. */
-/* The field's 44px, re-mechanised 2026-10-26d, because the overlay above
-   was sitting on top of the control it was protecting.
-
-   `.panel-field::after` spanned `inset: calc((100% - 44px) / 2) 0`, which
-   on a 35px field is -4.5px top and bottom: the full width of the field
-   and 4.5px past each edge. A pseudo-element of the label is not a child
-   of the input, so every pointer event over the field landed on the label
-   and none reached the field. Measured at all three viewports in
-   `reviews/2026-10-26d/data/field-pointer-before.txt`:
-   `elementFromPoint` returns `label.panel-field` at the field's centre, at
-   10 percent in from its left, and 2px below its top edge.
-
-   Four ordinary things a pointer does to a text field were gone, and the
-   fourth is the one that makes this a defect rather than a nicety:
-
-     cursor over the field       default, not an I-beam
-     click near the left edge    caret lands at the end of the text
-     drag across the text        selects nothing, and drops the caret to 0
-     double click                blurs the field
-
-   A `type=password` field hides its own text, so caret placement matters
-   less here than it would in a visible field. It does not matter zero.
-   Someone who mistypes one character of a long passphrase cannot click to
-   fix it, and a double click, which is what a person does when they want
-   to replace what they typed, puts the field out of focus instead.
-
-   The fix keeps the mechanism and stops it covering the control: the slack
-   moves out of the field's own box and into two bands immediately outside
-   it, one above and one below. The input's 35px is then the topmost thing
-   over itself and behaves natively. The bands belong to the label, which
-   forwards activation to the control as it always did, so a finger landing
-   a few pixels high or low still opens the field. 44 contiguous pressable
-   pixels, which is what the floor asks for, and not one of them over the
-   field itself.
-
-   It still spends no layout, which was the whole point of the original
-   mechanism (L3): both bands are absolutely positioned and out of flow.
-
-   The arithmetic stays self-computing and the unit it resolves against is
-   the reason this is two rules rather than one. A percentage in `padding`
-   resolves against the containing block's *width*, so the obvious version
-   of this fix, 4.5px of padding on the label given back as margin, computes
-   `(44px - 348px) / 2`, goes negative, and is dropped by the parser. The
-   whole declaration would have done nothing and looked right. A percentage
-   in `height` on an out-of-flow box resolves against the containing block's
-   height, which is the 35px wanted, which is also how the original
-   `inset: calc((100% - 44px) / 2)` worked. A field that ever grows past
-   44px collapses both bands to nothing rather than going negative.
-
-   Verified by frame diff (`data/frame-diff-locked.txt`), by the pointer
-   probe re-run (`data/field-pointer-after.txt`), and by the tap-target
-   instrument (`data/hit-after.txt`), which is the one that would catch a
-   44px floor quietly becoming a 35px one. */
-.panel-field {
-  position: relative;
-  display: block;
-}
-
-.panel-field::before,
-.panel-field::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: calc((44px - 100%) / 2);
-}
-
-.panel-field::before { bottom: 100%; }
-.panel-field::after { top: 100%; }
-
-.panel-hit {
-  position: relative;
-}
-
-.panel-hit::after {
-  content: "";
-  position: absolute;
-  inset: calc((100% - 44px) / 2) 0;
-}
-
-/* The house ring, the same declaration ursa-minor makes once globally
-   and dashboard.css repeats under `.dash`. The panel had none: its one
-   field set `outline: none` inline with nothing in its place, so the
-   control that is focused on arrival showed no sign of it. A ring
-   traces the border box, which is why the target above is on a wrapper
-   and not on padding: the field keeps the 35px box it draws, and the
-   ring keeps tracing what the eye calls the field. */
-main :focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: 3px;
-}
-
-/* The placeholder's colour was nobody's decision.
-
-   Added 2026-10-26 (hook run), after the first contrast sweep this
-   surface has ever had: `reviews/2026-10-26c/data/contrast-panel/`.
-   The field set no placeholder colour, so `passphrase` was drawn in the
-   user agent's default, which composited to 4.12:1 against the glass at
-   all three viewports while every other secondary string on the panel
-   read 4.48. A value no one in this repository chose, sitting under both
-   the floor and the panel's own worst case, is not a palette decision
-   being protected; it is a gap. `--dim` is the token this panel already
-   uses for exactly this rank of text, so the placeholder now reads at
-   the panel's own number rather than at a vendor's.
-
-   `opacity: 1` because Firefox's default placeholder style applies an
-   opacity of its own on top of the colour, which would reintroduce the
-   same unowned value through the other door. */
-input::placeholder {
+/* A section mark: tracked mono caps, the site's `NORTH STARS` label. */
+.mark {
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--dim);
-  opacity: 1;
 }
+.mark-polar { color: var(--polar); }
+.ursa-glyph { font-family: var(--font-data); color: var(--polar); line-height: 1; }
 
-/* ---------- the panel's two buttons answer the pointer ----------
+/* Rule, case or tension: a mono word in its hue. */
+.kind { font-family: var(--font-data); font-size: 0.68rem; letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0; }
+.kind-rule { color: var(--kept); }
+.kind-case { color: var(--polar); }
+.kind-tension { color: var(--tension); }
+.kind small { font-size: inherit; opacity: 0.75; }
 
-   Added 2026-10-26d. Until today neither of them answered it at all, and
-   that was measured before it was changed rather than read off the file:
-   `hover.mjs` on each control reports `duration 0s` and `transform: none`
-   at 200ms into a hover that is not happening
-   (`reviews/2026-10-26d/data/hover-before.txt`). This is the surface a
-   person meets Ursa on, and a control that does not react to the pointer
-   reads as a control that is not there.
+.live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 999px; background: var(--kept); }
 
-   **Why the panel had none, mechanically, which is more useful than
-   calling it an omission.** Every rule on these two buttons was an inline
-   `style` object in `page.tsx`, and there is no way to write `:hover` in
-   one. So the presentation moves here, which is where this panel's other
-   presentation already lives, and the states become expressible.
-
-   **One resting pixel changes, and it is a third finding rather than a
-   side effect.** Moving `misread?` into a class gave it `font: inherit`,
-   and that is not cosmetic tidying: measured on the shipped build before
-   the change (`data/font-before.txt`), that button was drawn in **Arial**,
-   inside a sentence set in Inter Tight. Chromium's user agent stylesheet
-   gives a `<button>` its own family and a `<button>` does not inherit one,
-   so the single control on this panel that named no family was the single
-   word on the page in a typeface nobody in this repository chose. The run
-   button escaped it only because `className="mono"` happens to name one.
-   That is the placeholder-colour finding of the run before this one,
-   arriving through a different door, and the same answer applies: a value
-   no one here chose is a gap, not a palette decision being protected.
-
-   Everything else at rest is unchanged, and the frame diffs in
-   `data/frame-diff-synced.txt` are what check that rather than assert it:
-   the only pixels that move are inside that one word.
-
-   **The feel is not invented here and it is not Elicit's either.** The
-   house already owns a benchmarked answer to this exact question, derived
-   on 2026-10-24 off Elicit's own animation engine and written up in
-   `ursa-minor/app/globals.css`: 160ms on cubic-bezier(0.25,0.46,0.45,0.94)
-   for colour and border, a one-pixel lift on `--spring-lift`, and the
-   press beating the hover. The finding worth repeating is that "bouncy"
-   there is one and a half percent of overshoot, not a bounce: what carries
-   the feel is that the motion arrives, goes a hair past, and settles,
-   instead of stopping dead on its mark. So this run's job was to apply
-   that vocabulary to a surface it had never reached, not to go and measure
-   a fourth site. `.cta` and `.dash-action` are the two shapes copied.
-
-   Only tokens this panel already declares are used. No colour is
-   introduced. */
-
-/* The run button, which is `.cta`'s shape in the panel's palette. The
-   border walks up from `--line` to `--accent` and the fill goes to
-   `--line`, the token whose whole meaning here is "the accent at a
-   fourteen percent film", so the wash is the panel's own value rather
-   than a new one. The lift is one pixel and it springs. */
-.panel-run {
-  background: var(--panel);
-  color: var(--accent);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 4px 14px;
-  font-size: 12px;
-  cursor: pointer;
-  transition:
-    border-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    background-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    transform 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+/* The site's .cta, rounded: outlined, a polar wash on hover, a one-pixel
+   lift on the house spring, the press landing faster than the lift. */
+.cta {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative;
+  min-height: 40px; padding: 0 20px;
+  border: 1px solid var(--polar-line); border-radius: 10px;
+  color: var(--polar);
+  font-family: var(--font-data); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+  transition-property: border-color, background-color, transform;
+  transition-duration: 160ms, 160ms, 340ms;
+  transition-timing-function: var(--ease-house), var(--ease-house), var(--spring-lift);
 }
-
-.panel-run:disabled { cursor: wait; }
-
-/* Guarded because `linear()` is recent, and an @supports block rather than
-   two declarations in a row because a `var()` that fails to substitute
-   invalidates the whole property at computed-value time instead of falling
-   back to the declaration before it. A browser without `linear()` keeps the
-   160ms ease-out above. This is `.cta`'s guard, for `.cta`'s reason. */
-@supports (transition-timing-function: linear(0, 1)) {
-  .panel-run {
-    transition-property: border-color, background-color, transform;
-    transition-duration: 160ms, 160ms, 340ms;
-    transition-timing-function:
-      cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      var(--spring-lift);
-  }
-}
-
-/* This file is plain CSS, so the hover gates itself. On touch, where there
-   is no hover at all, the button keeps its resting state and `:active`
-   below is what answers the finger. */
+.cta:disabled { cursor: wait; opacity: 0.8; }
 @media (hover: hover) {
-  .panel-run:not(:disabled):hover {
-    border-color: var(--accent);
-    background-color: var(--line);
-    transform: translateY(-1px);
-  }
+  .cta:not(:disabled):hover { border-color: var(--polar); background-color: var(--polar-soft); transform: translateY(-1px); }
+}
+.cta:not(:disabled):active { transform: translateY(0); background-color: rgba(168, 199, 250, 0.14); transition-duration: 90ms; }
+
+/* The site's .quiet-link: no fill at rest, a faint star wash on hover. */
+.quiet {
+  position: relative;
+  display: inline-flex; align-items: center;
+  min-height: 28px; padding: 0 8px; border-radius: 8px;
+  font-family: var(--font-data); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--dim);
+  transition: background-color 260ms var(--ease-house), color 160ms var(--ease-house);
+}
+@media (hover: hover) { .quiet:hover { background-color: var(--hover); color: var(--star); } }
+.quiet:active { background-color: rgba(232, 237, 247, 0.11); }
+.quiet[aria-expanded="true"], .quiet[aria-current="page"] { background-color: var(--hover); color: var(--star); }
+
+/* The 44px floor: the press target is an overlay that draws nothing, so
+   each control keeps its own box and its own focus ring. */
+.hit::after { content: ""; position: absolute; inset: calc((100% - 44px) / 2) -2px; }
+
+/* A command the owner runs. It scrolls sideways on a phone. */
+.cmd {
+  display: block; margin-top: 10px; padding: 9px 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--polar-soft);
+  font-family: var(--font-data); font-size: 0.7rem; line-height: 1.6; color: var(--star);
+  white-space: pre; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent;
 }
 
-/* The press lands faster than the lift, which is what makes it feel
-   physical, and it carries the wash so a touch gets the same answer a
-   pointer gets. */
-.panel-run:not(:disabled):active {
-  transform: translateY(0);
-  background-color: var(--line);
-  border-color: var(--accent);
-  transition-duration: 90ms;
-}
+/* ---------- the glass card ---------- */
 
-/* `running…` is not a hover state and must not read as one: the button is
-   disabled while the run is in flight, so both rules above exclude it. */
+.glass-card { position: relative; }
+.glass-card-canvas { position: absolute; pointer-events: none; }
+.glass-card-canvas canvas { width: 100% !important; height: 100% !important; }
+.glass-card-content { position: relative; height: 100%; transform-origin: 50% 50%; }
+
+/* ---------- the aurora's fallback, when there is no WebGL ---------- */
+
+.aurora-fallback {
+  pointer-events: none; opacity: 0; transition: opacity 700ms ease;
+  background:
+    radial-gradient(18% 50% at 30% 55%, rgba(60, 240, 150, 0.28), transparent 70%),
+    radial-gradient(16% 45% at 62% 50%, rgba(60, 240, 150, 0.22), transparent 70%),
+    linear-gradient(to bottom, rgba(80, 70, 200, 0.18), rgba(20, 30, 90, 0.12));
+}
+.aurora-fallback.is-lit { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-  .panel-run {
-    transition:
-      border-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-      background-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-  .panel-run:not(:disabled):hover,
-  .panel-run:not(:disabled):active {
-    transform: none;
-  }
+  .cta { transition: border-color 160ms, background-color 160ms; }
+  .cta:not(:disabled):hover, .cta:not(:disabled):active { transform: none; }
+  .quiet { transition-duration: 1ms; }
 }
 
-/* `misread?`, which is `.dash-action`'s shape, with one difference that is
-   a decision and not a copy. `.dash-action` keeps its underline present
-   and transparent so it fades in without moving the line by a pixel. This
-   button's dotted underline is visible at rest on purpose: it sits inside
-   a sentence, with no box and no colour of its own, so the underline is
-   the only thing marking it as pressable, and taking it away at rest to
-   gain a fade would cost more than the fade is worth.
+/* ---------- the capture panel (/) ---------- */
 
-   So the colour alone transitions, and the underline follows it, because
-   `text-decoration-color` is left at its initial `currentcolor`. One
-   property, and the two cannot come apart. */
-.panel-action {
-  background: none;
-  border: none;
-  padding: 0;
-  margin-left: 6px;
-  font: inherit;
-  font-size: 11px;
-  color: var(--dim);
-  cursor: pointer;
-  text-decoration: underline dotted;
-  transition: color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+.pn-window { min-height: 100%; display: flex; justify-content: center; padding: 12px; }
+.pn { display: flex; flex-direction: column; height: 100%; padding: 16px 16px 14px; overflow: hidden; }
+.pn-head { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.pn-project { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pn-sync { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 0.62rem; color: var(--dim); white-space: nowrap; }
+.pn-session { margin-top: 6px; font-size: 0.62rem; color: var(--dim); }
+
+.pn-lock { margin-top: 18px; }
+.pn-field { position: relative; display: flex; flex-direction: column; gap: 8px; }
+.pn-input {
+  width: 100%; padding: 10px 12px; border-radius: 10px;
+  background: rgba(2, 3, 8, 0.6); border: 1px solid var(--line); color: var(--star); font-size: 13px;
+}
+.pn-caption { margin-top: 8px; font-size: 0.66rem; color: var(--dim); }
+
+.pn-list { flex: 1; min-height: 0; overflow-y: auto; margin: 8px -6px 0; padding: 0 6px; display: flex; flex-direction: column; gap: 2px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.pn-note { padding: 8px 4px; color: var(--dim); font-size: 0.85rem; }
+.pn-unit { display: flex; gap: 10px; align-items: baseline; padding: 10px 8px; border-radius: 10px; transition: background-color 160ms var(--ease-house); }
+.pn-unit .kind { min-width: 7ch; text-align: right; }
+@media (hover: hover) { .pn-unit:hover { background: var(--hover); } }
+.pn-unit-tension { background: var(--tension-soft); }
+.pn-unit-body { min-width: 0; }
+.pn-statement { font-size: 0.88rem; line-height: 1.5; color: var(--star); }
+.pn-unit-tension .pn-statement { color: var(--tension); }
+.pn-polarity { font-size: 0.7rem; }
+.pn-prefer { color: var(--kept); }
+.pn-avoid { color: var(--unsatisfied); }
+.pn-meta { margin-top: 2px; font-size: 0.64rem; letter-spacing: 0.04em; color: var(--dim); }
+
+.pn-run {
+  margin-top: 10px; padding: 10px 12px; max-height: 200px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 10px; background: rgba(2, 3, 8, 0.55);
+  font-size: 0.66rem; line-height: 1.6; white-space: pre-wrap; color: var(--body);
 }
 
-@media (hover: hover) {
-  .panel-action:hover { color: var(--accent); }
-}
-
-/* :active carries the same state, because on touch there is no hover at
-   all and the control still has to answer the finger. `.dash-action`'s
-   rule and its reason. */
-.panel-action:active { color: var(--accent); }
-
-@media (prefers-reduced-motion: reduce) {
-  .panel-action { transition-duration: 1ms; }
-}
+.pn-foot { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.pn-verdict { font-size: 0.85rem; color: var(--dim); }
+.pn-verdict-yes { color: var(--kept); }
+.pn-verdict-no { color: var(--unsatisfied); }
+.pn-misread { margin-left: 4px; text-decoration: underline dotted; text-underline-offset: 3px; }
+.pn-quote { font-size: 0.7rem; color: var(--dim); }
+.pn-runbtn { width: 100%; }
