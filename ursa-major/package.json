@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Ursa Major provenance resolver — joins finished work back to the model generations that fed it and emits a provenance-resolved outcome record.",
+  "engines": {
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
   "scripts": {
     "test": "tsc --noEmit && vitest run",
     "typecheck": "tsc --noEmit",

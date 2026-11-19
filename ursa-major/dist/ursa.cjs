@@ -4273,7 +4273,7 @@ function addressState(projectPath, recordId) {
     };
   }
   const repoRoot = top.out;
-  const absolute = (0, import_node_path7.join)(projectPath, STORE_RECORD_PATH(recordId));
+  const absolute = (0, import_node_path7.join)((0, import_node_fs6.realpathSync)(projectPath), STORE_RECORD_PATH(recordId));
   const path = (0, import_node_path7.relative)(repoRoot, absolute).split(import_node_path7.sep).join("/");
   const onDisk = (0, import_node_fs6.existsSync)(absolute);
   const remote = githubRemote(repoRoot);
