@@ -729,6 +729,32 @@
           "subject": "corpus: report what the finished works ARE, by area"
         }
       ]
+    },
+    {
+      "digest": "1eeed7a142638b4a",
+      "sha256": "1eeed7a142638b4a116847816c989f26625454c3109d7fadc81fd462a6b7b408",
+      "blob": "f3546eb333bb70c8bc7566be1f85534a3e9c290d",
+      "bytes": 347451,
+      "introducedBy": [
+        {
+          "commit": "3ecdece965cffd2e56f482f07e78eba5a906ecb0",
+          "date": "2026-11-09T08:45:17.000Z",
+          "subject": "Rebuild dist/ursa.cjs for the normalize split"
+        }
+      ]
+    },
+    {
+      "digest": "21b849debd375836",
+      "sha256": "21b849debd375836fbeec4294370e99ffd55468618ebdf640e657005ddd2bb92",
+      "blob": "85446daacccadf8224516038f348250bbbaa02df",
+      "bytes": 347486,
+      "introducedBy": [
+        {
+          "commit": "f5dce587c8c24838422a22af0536ebfdc2379b60",
+          "date": "2026-11-19T21:28:24.000Z",
+          "subject": "ursa-major: fix the address path through symlinks, pin Node, run the tests in CI"
+        }
+      ]
     }
   ]
 }
