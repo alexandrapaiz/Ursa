@@ -77,7 +77,7 @@
 // person reading it rather than only by the pull request that made it.
 
 import { execFileSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { isForgotten, loadConsent } from './consent'
 import { SAFE_RECORD_ID } from './store'
@@ -533,7 +533,12 @@ export function addressState(projectPath: string, recordId: string): AddressStat
     }
   }
   const repoRoot = top.out
-  const absolute = join(projectPath, STORE_RECORD_PATH(recordId))
+  // Git answers --show-toplevel with the real path, symlinks resolved, so
+  // the project path has to be resolved the same way before the two are
+  // compared. Without it a project reached through a symlink (macOS's
+  // /tmp and /var are both one) gets a path that climbs out of the
+  // repository, and every check below reads the wrong file.
+  const absolute = join(realpathSync(projectPath), STORE_RECORD_PATH(recordId))
   const path = relative(repoRoot, absolute).split(sep).join('/')
   const onDisk = existsSync(absolute)
 
