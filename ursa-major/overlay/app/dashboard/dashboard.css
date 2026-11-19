@@ -1,556 +1,148 @@
-/* ---------- the dashboard's own identity ----------
+/* The tuning dashboard. Tokens and shared parts are in ../globals.css. */
 
-   WHY THIS FILE EXISTS BESIDE overlay/app/globals.css. The panel in
-   app/page.tsx is drawn in a second identity: 6px radii, three hues the
-   rest of Ursa does not have (--satisfied, --unsatisfied, --tension),
-   and two Google faces. The record viewer in ursa-minor is drawn in the
-   house one: square hairlines, two lights on one night, Helvetica. Both
-   are Ursa Major surfaces the owner looks at on the same afternoon.
+.dash { min-height: 100vh; display: flex; background: var(--night); }
 
-   This file does not change the panel. Reconciling the two is an
-   identity decision and it is recorded as a proposal for the owner in
-   docs/design/reviews/2026-10-24g/README.md rather than taken here.
-   What it does is refuse to add a third identity: every value below is
-   lifted from ursa-minor/app/globals.css, named the same, so the two
-   surfaces that ARE in the house identity cannot drift apart silently.
-
-   Scoped under `.dash` rather than written into globals.css for the same
-   reason: the panel's rules stay exactly as the engineer seat shipped
-   them. */
-
-.dash {
-  --night: #020308;
-  --star: #e8edf7;
-  /* secondary text, the value ursa-minor lifted twice for contrast. Its
-     floor there was 4.86:1 against the brightest part of the animated
-     sky; this page has no sky, so on the flat night it measures 5.13:1,
-     which clears the 4.5:1 AA floor for the 0.65-0.7rem sizes it is used
-     at here. --star is 17.55:1 and --polar 11.99:1 on the same ground. */
-  --dim: #707fa0;
-  --polar: #a8c7fa;
-  --line: #141b2b;
-  --font-sans: "Helvetica Neue", -apple-system, "Segoe UI", Arial, sans-serif;
-
-  /* The house spring is no longer declared here. It was, on `.dash`,
-     which scopes it to the dashboard element, and nothing in this file
-     ever used it. It now lives on `:root` in `globals.css`, which the
-     root layout imports, so it reaches this page by inheritance and
-     reaches the panel for the first time. See the comment there. */
-
-  /* 100vh and not 100%: the panel's body sets a translucent ground so
-     terminal text can read through it, and this page is not over a
-     terminal. Its own night has to cover the viewport. */
-  min-height: 100vh;
-  background: var(--night);
-  color: var(--star);
-  font-family: var(--font-sans);
-  font-weight: 300;
-  -webkit-font-smoothing: antialiased;
+/* The sidebar floats: a rounded panel inset from the window's edges, not a
+   column ruled off by a line (owner's call, 2026-11-19). */
+.dash-nav {
+  position: sticky; top: 12px; align-self: flex-start; z-index: 10;
+  width: 232px; height: calc(100vh - 24px); flex-shrink: 0; margin: 12px 0 12px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 24px 12px;
+  border: 1px solid var(--line); border-radius: 18px;
+  background: rgba(5, 7, 15, 0.8);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
 }
-
-.dash *,
-.dash *::before,
-.dash *::after {
-  box-sizing: border-box;
+.dash-nav .quiet { border-radius: 12px; }
+.dash-brand {
+  display: flex; align-items: baseline; gap: 8px; padding: 0 8px 28px;
+  font-family: var(--font-display); font-weight: 200; font-size: 0.95rem; letter-spacing: 0.34em; text-transform: uppercase;
 }
+.dash-nav-item { justify-content: space-between; min-height: 36px; padding: 0 12px; font-size: 0.72rem; }
+.dash-count { padding-left: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.dash-nav-foot { margin-top: auto; padding: 16px 8px 0; border-top: 1px solid var(--line); }
+.dash-small { margin-top: 6px; font-size: 0.64rem; line-height: 1.6; color: var(--dim); }
 
-/* The measure is a property of the type and not of the column, which is
-   the correction ursa-minor made on 2026-10-24: a pixel box used at two
-   type sizes gives the smaller type the longer line. Same two values. */
-.dash-page {
-  /* The measure below is in `em`, which resolves against this element's
-     own font size, and this page sits inside the panel's document where
-     `body` is set to 13px. Inheriting that would make 44em into 572px
-     rather than the 704px the house measure means, which is the first
-     thing the frozen frames caught: the column came out 132px narrow.
-     Stated here rather than left to inheritance, because the whole point
-     of an `em` measure is that it belongs to the type it governs. */
-  font-size: 1rem;
-  max-width: 44em;
-  margin: 0 auto;
-  padding: 3rem 1.25rem 6rem;
+.dash-main { position: relative; flex: 1; min-width: 0; padding: 32px 48px 96px; }
+/* The aurora reaches down behind the content and fades out low on the page;
+   the content sits on glass cards above it, so the light shows through,
+   blurred (owner's call, 2026-11-19). */
+.dash-sky {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 0;
+  width: 100%; height: min(760px, 95vh); pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 45%, transparent);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent);
 }
+.dash-main > *:not(.dash-sky) { position: relative; z-index: 1; }
 
-@media (min-width: 640px) {
-  .dash-page { padding: 5rem 2rem 8rem; }
+.dash-glass,
+.dash-pair-side {
+  margin-top: 24px;
+  border: 1px solid rgba(232, 237, 247, 0.08);
+  border-radius: 18px;
+  background: rgba(5, 7, 15, 0.55);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  backdrop-filter: blur(18px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
-
-.dash-mono {
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-variant-numeric: tabular-nums;
-}
-
-.dash h1 {
-  font-size: 1.6rem;
-  font-weight: 200;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-  margin: 0;
-}
-
-.dash h2 {
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--dim);
-  margin: 0;
-}
-
-.dash p { margin: 0; }
-
-/* One hairline, one colour, no radius, no shadow anywhere. The record
-   viewer's note on why is the one that governs: a rounded, shadowed card
-   layer is the single most recognisable tell of a generated interface. */
-.dash-rule {
-  border: 0;
-  border-top: 1px solid var(--line);
-  margin: 0;
-}
-
-.dash-section { margin-top: 3rem; }
+.dash-glass { padding: 4px 24px; }
+.dash-glass > .dash-row:last-child, .dash-glass .dash-tombs .dash-row:last-child { border-bottom: 0; }
+.dash-glass > .dash-prose:first-child { margin-top: 20px; }
+.dash-glass > .dash-prose:last-child, .dash-glass > .cmd:last-child { margin-bottom: 20px; }
+.dash-sky-room { height: 120px; }
 
 .dash-head {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  align-items: baseline;
-  justify-content: space-between;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--line);
+  position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px;
+  padding-bottom: 24px; border-bottom: 1px solid var(--line);
 }
-
-.dash-meta {
-  font-size: 0.7rem;
-  color: var(--dim);
-  line-height: 1.6;
+.dash-h1 {
+  margin-top: 12px; font-family: var(--font-display); font-weight: 200;
+  font-size: clamp(1.7rem, 3vw, 2.3rem); line-height: 1.2; letter-spacing: -0.015em; color: var(--star);
 }
+.dash-accent { color: var(--polar); }
+.dash-head-actions { display: flex; align-items: center; gap: 12px; }
+.dash-seg { display: flex; padding: 2px; border: 1px solid var(--line); border-radius: 10px; }
+.dash-seg-item {
+  min-height: 28px; padding: 0 14px; border-radius: 8px;
+  font-family: var(--font-data); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim);
+  transition: background-color 160ms var(--ease-house), color 160ms var(--ease-house);
+}
+.dash-seg-item[aria-selected="true"] { background: var(--polar-soft); color: var(--polar); }
 
-/* ---------- a row ----------
+.dash-prose { margin-top: 16px; max-width: 38em; font-size: 0.9rem; line-height: 1.7; color: var(--body); }
 
-   Rows are separated by one hairline and nothing else: no fill, no
-   radius, no second border. The hairline is on the top so the first row
-   sits under the section's own rule without doubling it. */
 .dash-row {
-  display: block;
-  padding: 1.1rem 0;
-  border-top: 1px solid var(--line);
+  position: relative; display: grid; grid-template-columns: 120px 1fr auto; gap: 8px 32px;
+  padding: 22px 0; border-bottom: 1px solid var(--line);
+}
+.dash-row-kind { padding-top: 3px; }
+.dash-row-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; text-align: left; }
+button.dash-row-main:hover .dash-statement { text-decoration: underline; text-decoration-color: var(--polar-line); text-underline-offset: 4px; }
+.dash-row-actions { display: flex; align-items: flex-start; gap: 4px; margin-right: -8px; }
+@media (hover: hover) { .dash-row-actions { opacity: 0.7; transition: opacity 160ms var(--ease-house); } .dash-row:hover .dash-row-actions { opacity: 1; } }
+.dash-statement { font-size: 0.95rem; line-height: 1.7; color: var(--star); }
+.dash-meta { font-size: 0.66rem; line-height: 1.6; letter-spacing: 0.04em; color: var(--dim); }
+.dash-row-tension { margin: 8px -12px; padding: 22px 12px; border-bottom: 0; border-radius: 14px; background: var(--tension-soft); }
+.dash-row-revoked .dash-statement { color: var(--dim); text-decoration: line-through; text-decoration-thickness: 1px; }
+.dash-tombs { margin: 8px -24px 0; padding: 24px 24px 4px; border-top: 1px solid var(--line); }
+.dash-row-record { grid-template-columns: 1fr auto; }
+.dash-record-id { font-size: 0.8rem; color: var(--star); overflow-wrap: anywhere; }
+.dash-yes { color: var(--kept); }
+.dash-no { color: var(--tension); }
+.dash-disclose { display: block; margin-top: 4px; }
+
+.dash-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; padding: 20px 0 8px; border-bottom: 1px solid var(--line); font-size: 0.64rem; color: var(--dim); }
+.dash-legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { display: inline-block; width: 16px; height: 5px; border-radius: 999px; }
+.sw-verbatim, .seg-verbatim { background: var(--polar); }
+.sw-mutated, .seg-mutated { background: rgba(168, 199, 250, 0.45); }
+.sw-none, .seg-none { background: rgba(232, 237, 247, 0.45); }
+.sw-track { background: var(--line); box-shadow: inset 0 0 0 1px var(--dim); }
+.dash-bar { display: flex; gap: 1px; height: 5px; max-width: 520px; margin-top: 8px; overflow: hidden; border-radius: 999px; background: var(--line); }
+.seg { display: block; height: 100%; }
+
+.dash-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+.dash-pair-side { margin-top: 0; padding: 20px; }
+.dash-pair-statement { margin-top: 12px; font-family: var(--font-display); font-weight: 200; font-size: 1.2rem; line-height: 1.35; color: var(--star); }
+
+.dash-foot { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); max-width: 38em; font-size: 0.85rem; line-height: 1.7; color: var(--dim); }
+
+.dash-solo { max-width: 44em; margin: 0 auto; padding: 80px 24px; }
+
+/* The unit sheet floats in over the page, the way the panel floats over a chat. */
+.dash-sheet-scrim { position: fixed; inset: 0; z-index: 20; display: flex; justify-content: flex-end; background: rgba(2, 3, 8, 0.5); }
+.dash-sheet {
+  display: flex; flex-direction: column; width: 100%; max-width: 440px; margin: 12px; overflow-y: auto;
+  border: 1px solid rgba(168, 199, 250, 0.22); border-radius: 16px;
+  background: rgba(2, 3, 8, 0.86); -webkit-backdrop-filter: blur(20px) saturate(1.2); backdrop-filter: blur(20px) saturate(1.2);
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.6);
+}
+.dash-sheet-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.dash-sheet-close { margin-left: auto; font-size: 0.9rem; }
+.dash-sheet-title { padding: 20px; font-family: var(--font-display); font-weight: 200; font-size: 1.45rem; line-height: 1.3; letter-spacing: -0.015em; color: var(--star); }
+.dash-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 0 20px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--line); }
+.dash-facts div { padding: 12px 14px; background: var(--night); }
+.dash-facts dd { margin-top: 4px; font-size: 0.9rem; color: var(--star); }
+.dash-sheet-foot { margin-top: auto; padding: 8px 20px 20px; }
+
+@media (max-width: 760px) {
+  .dash { flex-direction: column; }
+  .dash-nav { position: static; width: auto; height: auto; margin: 12px 12px 0; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+  .dash-brand { width: 100%; padding-bottom: 8px; }
+  .dash-nav-foot { display: none; }
+  .dash-main { padding: 24px 20px 72px; }
+  .dash-sky-room { height: 72px; }
+  .dash-row { grid-template-columns: 1fr; }
+  .dash-row-actions { margin-right: 0; }
+  .dash-pair { grid-template-columns: 1fr; }
 }
 
-.dash-row:first-child { border-top: 0; }
-
-.dash-statement {
-  font-size: 0.95rem;
-  line-height: 1.55;
-  display: flex;
-  gap: 0.55rem;
-  align-items: baseline;
-}
-
-/* Polarity is a word and not a hue, because the palette has two lights
-   and neither of them means "avoid".
-
-   The first draft had both: a plus-or-minus glyph in its own column AND
-   the word beside it, which is the same fact twice and cost a column to
-   say it. The frames at 390 and 1440 are what made that obvious. The
-   word survives because it needs no legend, and because it still reads
-   in a screenshot printed in black and white.
-
-   Right-aligned in a fixed column so every statement on the page starts
-   at the same x, whichever word precedes it. The record rows put an
-   empty one in the same column for the same reason. */
-/* Below `sm` the column is the wrong trade. A 4.2rem gutter on a 358px
-   page leaves the statement 270px, which measured 33 characters a line
-   and turned a one-line rule into three
-   (`data/crop-phone-after.png`, first pass). So the tag is an inline
-   lead-in there and a column only where there is width to spend on one.
-   Same markup either way. */
-/* Below 640 this was `margin-right` and nothing else, so the statement
-   began wherever the tag happened to end and the list had a ragged left
-   edge: PREFER is 45.89px and AVOID is 34.69px in this type, measured in
-   `reviews/2026-10-26g/data/tag-column-before.txt`, so `Never introduce`
-   started 11.2px left of its four neighbours. Visible at 320 in
-   `crops/units-320-before.png`, and invisible to six reviews because the
-   dashboard had never been photographed with a unit in it.
-
-   The wide layout below already decided this should be a column. This is
-   that decision carried down, at the narrow layout's own cost: `4.5em` of
-   the tag's own type is the widest tag it can draw plus a hair, which is
-   L9's rule rather than a pixel somebody picked, and it is 46.8px against
-   4.2rem's 67.2px because a 320px line cannot spend a wide gutter. The
-   tags stay left-aligned here, unlike the wide layout, so both edges of
-   the column are straight; right-aligning in a narrow box would trade a
-   ragged statement edge for a ragged tag edge. */
-.dash-statement > .dash-tag {
-  flex: 0 0 4.5em;
-  margin-right: 0.15rem;
-  line-height: 1.9;
-}
-
-@media (min-width: 640px) {
-  .dash-statement > .dash-tag {
-    flex: 0 0 4.2rem;
-    text-align: right;
-    margin-right: 0;
-  }
-
-  /* The meta line is the statement's footnote, so it belongs under the
-     statement and not under the gutter. 4.2rem plus the flex gap. Only
-     on rows that have a gutter: a record row carries no polarity, so
-     indenting it would be indenting past a column that is not there. */
-  .dash-row-stated .dash-meta,
-  .dash-row-stated .dash-ask,
-  .dash-row-stated .dash-cmd {
-    margin-left: 4.75rem;
-  }
-}
-
-.dash-revoked .dash-statement { color: var(--dim); }
-
-/* A tombstone is the receipt that a revocation held, so it is drawn as
-   struck rather than hidden or faded alone: faded reads as unimportant,
-   struck reads as withdrawn. */
-.dash-revoked .dash-statement-text {
-  text-decoration: line-through;
-  text-decoration-color: var(--dim);
-  text-decoration-thickness: 1px;
-}
-
-/* A tension gets one vertical hairline in --polar, which is the only
-   emphasis this palette can spend. No amber, because there is no amber. */
-/* The three declarations are meant to cancel: pull the row a gutter to
-   the left, draw the rule there, and put the content back where every
-   other row's content is. They did not cancel. -1rem + 0.9rem + 1px is
-   -0.6px, so a row in tension sat 0.6px left of the rest of the list at
-   every width, which `data/tag-column-before.txt` shows as two statement
-   left edges where there should be one.
-
-   Nobody can see 0.6px and this is not reported as something a reader
-   noticed. It is changed because the arithmetic was written to come to
-   zero and came to -0.6, and saying so costs one `calc`. */
-.dash-tension {
-  border-left: 1px solid var(--polar);
-  padding-left: calc(1rem - 1px);
-  margin-left: -1rem;
-}
-
-/* A hyphen is a break opportunity in CSS, so "2026-10-23" splits after
-   "2026-" at phone width and the meta line reads as two half dates. Seen
-   at 390 in before/dashboard-phone.png. A date is one token to a reader
-   even though it is three to the line breaker. */
-.dash-nowrap { white-space: nowrap; }
-
-.dash-tag {
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--dim);
-}
-
-.dash-tag-mark {
-  color: var(--polar);
-}
-
-/* ---------- the survival bar ----------
-
-   WHAT THE FIRST DRAFT GOT WRONG, AND HOW THE SCREENSHOT CAUGHT IT. The
-   first version of this bar used the record viewer's own span fills,
-   rgba(232,237,247,0.05) and rgba(168,199,250,0.14). Those are correct
-   there and wrong here, and the reason is worth stating because it is
-   the same mistake any copy of them would make. In the viewer a fill
-   sits behind words, and the words carry 12.8:1 of their own; the fill
-   only has to say which region a word belongs to, so it is deliberately
-   below any contrast floor. A 6px bar has no words in it. Measured off
-   the first frame: the segment carrying 94.4% of one record came out
-   1.40:1 against the night and the segment beside it 1.20:1, which is
-   1.17:1 against each other. The owner's own text, the most valuable
-   class in the whole artifact, was drawn in a colour nobody can see,
-   and it was indistinguishable from the class that means nothing was
-   found at all.
-
-   WHY THE TRACK CARRIES THE REMAINDER. Four fills cannot be separated
-   on one axis in a palette with two lights: at equal lightness --polar
-   and --star land within 1.25:1 of each other, so any four-step ramp
-   has two steps nobody can tell apart. So only three things are
-   painted, and the fourth, the part of the finished work no span
-   covered at all, is the bare track showing through. That is also what
-   it means: an absence is drawn as an absence.
-
-   The three painted values, sampled out of a rendered frame rather than
-   read off this file, because 45% of --star over the track is not 45%
-   of --star over the night (`reviews/2026-10-24g/data/bar-pixels.txt`):
-
-     kept as written   --polar solid      rgb(168,199,250)   11.99:1
-     kept and edited   --polar solid with a 2px --night foot, separated
-                       from the one above by shape rather than lightness.
-                       Same device as the viewer's `.sp-survived_mutated`:
-                       the person's hand on the model's sentence.
-     yours             --star at 45%      rgb(116,121,134)    4.73:1,
-                       and 3.95:1 against the track.
-
-   One pair is below 3:1 and is left there deliberately: "yours" against
-   "kept as written" is 2.53:1, separated by hue rather than lightness.
-   The track is --line at 1.20:1, also deliberate, because it is an
-   absence. Nothing on this page depends on reading either: all four
-   figures are printed in words under the bar and named in its
-   aria-label. */
-.dash-bar {
-  display: flex;
-  height: 6px;
-  gap: 1px;
-  margin-top: 0.8rem;
-  background: var(--line);
-}
-
-.dash-bar span { display: block; }
-
-/* The share statement for a record whose finished work has no characters,
-   standing where the bar and the figures would be. Both margins were read
-   off a frame rather than guessed. The top one is the bar's own, because
-   without it the sentence butts against the metadata line and reads as a
-   fourth line of it. The bottom one is because the sentence ends in a full
-   stop and the line under it opens with a lowercase "and", which under the
-   bar continues "1.9% no span" correctly and under a sentence does not.
-   Compound rather than a bare class because `.dash p { margin: 0 }` above
-   is (0,1,1) and a bare `.dash-nothing` is (0,1,0), so the first version
-   of this rule lost and the frame came back byte-identical. */
-.dash .dash-nothing {
-  margin-top: 0.8rem;
-  margin-bottom: 0.5rem;
-  /* The same 38em `.dash-empty` carries, and for L9's reason rather than
-     for symmetry. Without it this paragraph inherits the row's full
-     width, and the row is as wide as the page: counted a character at a
-     time at 1440 it ran 128 characters a line against the 84 of the
-     page's own prose two blocks above it, which makes the smallest type
-     on the page the longest line on it. That is the exact drift L9 was
-     written against. 38em of 0.7rem is 426px and lands at 85, so this
-     sentence now reads at the width every other sentence here reads at,
-     and nothing about the page's overall measure moved: narrowing that
-     is L10's open proposal and the owner's to decide, not this run's. */
-  max-width: 38em;
-}
-
-.dash-seg-verbatim { background: var(--polar); }
-
-.dash-seg-mutated {
-  background: var(--polar);
-  box-shadow: inset 0 -2px 0 var(--night);
-}
-
-.dash-seg-none { background: rgba(232, 237, 247, 0.45); }
-
-.dash-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1rem;
-  font-size: 0.65rem;
-  color: var(--dim);
-  margin-top: 0.6rem;
-}
-
-.dash-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
-
-.dash-swatch {
-  width: 1.1rem;
-  height: 6px;
-  flex: 0 0 auto;
-}
-
-/* The track's own swatch, so the faintest mark on the page is at least
-   named next to the three that are easy to see.
-
-   WHAT WAS WRONG WITH IT UNTIL 2026-10-27. It was `var(--line)` and
-   nothing else, which is 1.20:1 against the night this legend sits on,
-   measured off a rendered frame rather than read off here
-   (`reviews/2026-10-26e/data/bar-contrast.txt`, reproduced on a second
-   host in `reviews/2026-10-27d/data/swatches-before.txt`). The three keys
-   beside it measure 11.99, 11.99 and 3.93. So three of the four lines in
-   this legend showed a mark and the fourth showed its words with nothing
-   in front of them, which reads as a swatch that failed to draw rather
-   than as a key, and the class it keys is the one CLAUDE.md §1 calls the
-   most valuable category in the whole artifact.
-
-   WHY A HAIRLINE INSIDE IT, AND NOT ONE OF THE TWO REPAIRS L36 NAMED.
-   Both of those traded something. Painting the swatch in its label's
-   colour would read, and would stop it showing what the track actually
-   looks like, which is the one job a swatch has. Lifting --line itself
-   would fix the legend and change every bar on the page with it. A 1px
-   hairline drawn inside the box trades neither: the interior stays
-   exactly the track's own colour, so the swatch is still a specimen of
-   the mark it keys, and the edge that locates it is --dim, which is the
-   colour the label next to it is already set in. No value enters the
-   palette that was not already on this line, and nothing outside this one
-   swatch moves.
-
-   It is also the house's own device rather than a new one. Every other
-   edge on these two surfaces is a square hairline, and `.dash-seg-mutated`
-   above already carries its mark as an inset shadow for the same reason
-   this one does: a 6px box cannot afford a mark that changes its size.
-
-   Measured after, by the same instrument on the same frame
-   (`reviews/2026-10-27d/data/swatches-after.txt`): 5.13:1 against the
-   night and against the pixel beside it, on 41% of the swatch's area, and
-   the interior still reads 20,27,43. */
-.dash-swatch-track {
-  background: var(--line);
-  box-shadow: inset 0 0 0 1px var(--dim);
-}
-
-/* ---------- quiet interactive text ----------
-
-   .rec-action's rule, copied: underline present and transparent rather
-   than absent, so it fades in instead of appearing and the line does not
-   move by a pixel when it lights up. 160ms on the curve this house uses
-   everywhere, which is the one Linear uses on nearly everything. */
-.dash-action {
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  font-size: 0.7rem;
-  color: var(--dim);
-  cursor: pointer;
-  text-decoration-line: underline;
-  text-decoration-color: transparent;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.3em;
-  transition:
-    text-decoration-color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
-    color 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-@media (hover: hover) {
-  .dash-action:hover { color: var(--polar); text-decoration-color: var(--polar); }
-}
-
-/* :active carries the same state, because on touch there is no hover at
-   all and the control still has to answer the finger. */
-.dash-action:active { color: var(--polar); text-decoration-color: var(--polar); }
-
-/* ---------- the 44px floor ----------
-
-   L3 in docs/design/ledger.md, learned the expensive way: the ring
-   belongs to what you see and the target to what you press. These
-   controls are set at 0.7rem, which draws a 17px box, and a 17px box is
-   a target you miss with a thumb.
-
-   Every control on this page is a <button>, which renders its own
-   ::after, so the overlay hangs off the control itself and a press on it
-   is a press on the button natively. Nothing drawn changes, because the
-   overlay has no paint, and nothing in layout changes, because it is out
-   of flow. The ring still traces the border box, which is the 17px one,
-   so the ring stays the size of the thing you can see. Once a control is
-   44px or taller the inset turns positive and the overlay shrinks back
-   inside the box, so this cannot overshoot.
-
-   The wrapping-label variant L3 also names is not needed here: this page
-   has no <input>. */
-.dash-hit { position: relative; }
-
-.dash-hit::after {
-  content: "";
-  position: absolute;
-  inset: calc((100% - 44px) / 2) 0;
-}
-
-/* ---------- the command a reader hands you ----------
-
-   The store server is a reader by design: every route is a GET and it
-   has no writer. So where a revoke button would go, this surface
-   discloses the command that does it instead of drawing a control that
-   cannot work. The block is the record viewer's `.rec-cmd` idiom.
-
-   IT WAS THE IDIOM AS IT STOOD BEFORE THE FIX. `.rec-cmd` had the same
-   `white-space: pre` inside the same `overflow-x: auto` until
-   2026-10-24, when the record viewer measured what that does and wrote
-   the answer into its own header: a reader cannot tell a clipped line
-   from a short one, because the clip is clean. This block was copied
-   from it the week before, so it carried the shape and not the lesson.
-
-   Measured here on 2026-10-26e, with a disclosure open, at the four
-   widths: `ursa forget <your project> --record <id>` needs 462px and is
-   drawn in 278 at 320 and 348 at 390, hiding 184px and 114px of itself
-   behind an edge that paints nothing. It fits at 820 and above, which is
-   why six reviews of this page never saw it. The page's whole job is to
-   hand the owner the command that deletes her work, and on a phone it
-   handed her two thirds of one.
-
-   The fade is `.rec-cmd`'s, and the reasoning there holds here: it is a
-   mask rather than a gradient so the glyph itself fades instead of being
-   covered, and the width is the distance left to scroll on that side
-   clamped to 32px rather than a boolean, so it shrinks away over the
-   last 32px instead of popping off and is 0px at both ends whenever the
-   line fits. Before hydration both are 0 and this paints exactly what
-   shipped before it. The widths are set from `page.tsx`, because only
-   the element knows how far it has left to go.
-
-   WHY THE BORDER MOVED TO A WRAPPER. The first version of this kept the
-   border, the padding and the fill on the scrolling element, which is
-   where they already were, and a mask clips to the border box: the
-   right hairline and the right end of the top and bottom hairlines
-   faded out with the glyph, so the box stopped closing. Read off the
-   frame, not reasoned about. `copy-line.tsx` in `ursa-minor` already
-   separates the two for this reason — its border is on the wrapping div
-   and the mask is on the `<pre>` inside it — and that is the half of
-   the idiom the copy had also dropped. The container is drawn whole and
-   only its contents fade. */
-.dash-cmd-box {
-  margin-top: 0.6rem;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--line);
-  background: rgba(168, 199, 250, 0.04);
-}
-
-.dash-cmd {
-  display: block;
-  font-size: 0.7rem;
-  line-height: 1.6;
-  color: var(--star);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  white-space: pre;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
-  --fade-l: 0px;
-  --fade-r: 0px;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--fade-l),
-    #000 calc(100% - var(--fade-r)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--fade-l),
-    #000 calc(100% - var(--fade-r)),
-    transparent 100%
-  );
-}
-
-.dash-ask {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  max-width: 38em;
-  color: var(--star);
-  margin-top: 0.6rem;
-}
-
-.dash-empty {
-  font-size: 0.85rem;
-  line-height: 1.7;
-  max-width: 38em;
-  color: var(--dim);
-  margin-top: 1rem;
-}
-
-.dash :focus-visible {
-  outline: 1px solid var(--polar);
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dash-action { transition-duration: 1ms; }
+.dash-select-wrap { display: inline-flex; align-items: center; gap: 10px; }
+.dash-select {
+  min-height: 32px; max-width: 260px; padding: 0 28px 0 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--night); color: var(--star);
+  font-size: 0.7rem; appearance: none; -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--dim) 50%), linear-gradient(135deg, var(--dim) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 50%, calc(100% - 10px) 50%;
+  background-size: 5px 5px; background-repeat: no-repeat;
 }

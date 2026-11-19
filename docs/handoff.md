@@ -141,3 +141,82 @@ If the tests are red on main, that is the first thing to know.
 - Which repository is the first real install: one of hers, or a stranger's?
 - Is Fatima (`fatimamichelg`, admin on the repo) part of the next stretch, and on which half?
 - When seats come back, which budget: Kimi (prepaid, about $38 left; the key on file was rejected on 2026-11-10 and needs replacing) or a capped API key?
+
+## Surfaces session, 2026-11-19 (afternoon)
+
+The owner finalized the four product surfaces in Magic Patterns and started porting them into the overlay app.
+Read this section before touching `ursa-major/overlay`.
+
+### Where things are
+
+| What | Where |
+|---|---|
+| The design source | Magic Patterns OS `hRdJbZZZKBarz62jf715GB` (https://www.magicpatterns.com/os/hRdJbZZZKBarz62jf715GB) |
+| The frozen artboards it came from | claude.ai artifact "Ursa Surfaces", https://claude.ai/artifact/Vj5jEG72MKmxn7ZzS6t2UV |
+| The port, uncommitted | worktree `~/Documents/Alexandra Programming/Ursa-surfaces`, branch `surfaces/port-from-magic-patterns`, cut from `origin/main` at 4efed904 |
+| The owner's original checkout | `~/Documents/Alexandra Programming/Ursa`, still on `chair/langfuse-traces`, untouched |
+
+In the Magic Patterns OS, the Surfaces prototype holds the four real frames: Chrome Panel, PR Comment, Editor Hover and Tuning Dashboard.
+Shared code is in `shared/surfaces/` (ui, PanelBody, AuroraWave, GlassCard3D, dashboardData).
+Two option canvases sit beside it: Chrome Panel Options and Motion Options.
+The six screenshot-built frames of the Ursa Minor site are still there for a later design-system pass.
+
+### Design decisions the owner made today
+
+The system is the Ursa Minor site's: its five colours, Helvetica body, Inter Tight 200 for display, Geist Mono for labels and data, one polar accent.
+Two departures from the site, both her calls.
+Rounded corners throughout the product surfaces, even though the site is square.
+Motion only on a trigger. Everything is still at rest.
+
+The Chrome panel is a collapsible floating window, Granola style, over the chat.
+It is a pane of real glass rendered with three.js, with the aurora inside it.
+It turns once when a capture or run starts and nods once when new data lands.
+
+The aurora is a 3D raymarched one: thin curtains seen from the ground in perspective, green below and violet above.
+She rejected every flat 2D version, because they read as mountains, strings or fingers.
+On the dashboard it is revealed only in a spotlight around the pointer and fades when the pointer stops.
+A reread sets off a three-second substorm.
+It reaches down behind the content, and the content sits on frosted glass cards so the light shows through.
+The dashboard sidebar is a floating rounded panel.
+
+She rejected an aurora halo around the card's edge and a shimmer sweep on text.
+
+### What the port contains
+
+All of it is in `ursa-major/overlay`.
+
+`app/page.tsx` is the capture panel. Its wiring is unchanged: passphrase, encrypted sync, run, verdict line and `misread?`. It now renders inside the glass card.
+`app/dashboard/page.tsx` is the dashboard on the real `/store` payload, with four sections (tuning, records, tensions, exports) and a unit sheet.
+`app/components/GlassCard.tsx` and `app/components/AuroraSky.tsx` are the glass and the sky.
+`lib/aurora-shader.ts` is the shader both use.
+`app/globals.css` and `app/dashboard/dashboard.css` are rewritten in plain CSS, because the overlay has no Tailwind.
+The 44px press targets, focus rings, house spring and reduced-motion rules from the old stylesheets are kept.
+
+New dependencies: `three` 0.187, `@react-three/fiber` 9 and `@react-three/drei` 10, the React 19 lines.
+They add no audit findings, and `node scripts/dep-floor.mjs` holds.
+
+### What was checked
+
+Type-check and `next build` pass.
+Both pages were viewed in a browser against the owner's real local store, served with `ursa serve`. It has 8 tuning units and 0 records, so the records view has not been seen with data.
+Three bugs were found that way and fixed.
+The three.js canvas stayed at the browser's default 300 by 150, and a resize kick after mount fixes it.
+Additive blending squared the aurora's brightness. It now adds the colour scaled.
+The sky clock started on a quiet stretch, so it now starts at 58.
+
+### Left out on purpose
+
+The design's `edit` action and the tension review's "this one is me" buttons are not drawn.
+Neither has a door in the product, and `src/serve.ts` is read only.
+The page shows the real command where those buttons would go.
+The unit sheet has no evidence quotes, because the store payload does not carry them.
+
+The editor hover and the PR comment are not ported.
+There is no VS Code extension or comment UI in the repository for them to live in.
+
+### Open items
+
+1. Commit the port and open a pull request. The owner has not said yes yet. Run `gh auth switch -u alexandrapaiz` first.
+2. `next` in the overlay carries a moderate advisory that was already on main. `next build` and `next dev` stop on a security reminder and continue when run again. Upgrading `next` is its own change.
+3. The `asc-chair` MCP was down all session, so nothing was claimed or posted on the board.
+4. The five-step definition of done from 2026-10-05 still has not been walked end to end.

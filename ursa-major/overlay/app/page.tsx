@@ -1,14 +1,26 @@
 'use client'
 
-// The window (plan §16.5). Three regions: header (project, session
-// file, last sync), body (tuning, one line per unit; rules and cases
-// distinct; tensions in their own color), footer (the verdict line,
-// then a single run button). No buttons for satisfied or unsatisfied:
-// the verdict line is a reading, and its only control is `misread?`,
-// which opens the quoted prompt so the owner can see why.
+// The capture panel (plan §16.5), in the finalized surfaces design.
+//
+// The window is a pane of real glass (components/GlassCard.tsx) with the 3D
+// aurora inside it. It is still at rest. It turns once when a run starts
+// and nods once when new data lands, and does nothing else.
+//
+// What it says is unchanged from the panel it replaces: a header (project,
+// session file, last sync), the tuning (one line per unit, rules and cases
+// distinct, tensions in their own colour), then the verdict line and a
+// single run button. No buttons for satisfied or unsatisfied: the verdict
+// line is a reading, and its only control is `misread?`, which opens the
+// quoted prompt so the owner can see why. The error has one home, above the
+// list (reviews/2026-10-26 §7.1), and the sync slot says which kind of
+// nothing it has rather than restating the error.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { deriveKeys, decryptJson, type DerivedKeys } from '../lib/crypto'
+
+// three.js needs a browser, so the glass loads on the client only.
+const GlassCard = dynamic(() => import('./components/GlassCard').then((m) => m.GlassCard), { ssr: false })
 
 interface Verdict {
   accepted: boolean | null
@@ -40,6 +52,22 @@ interface Payload {
 
 const BRIDGE = 'http://127.0.0.1:7817'
 const POLL_MS = 4000
+const MAX_W = 380 // the window's design width (§16.5)
+
+/** The card fills the window, up to the design width. */
+function useCardSize() {
+  const [size, setSize] = useState({ w: 340, h: 520 })
+  useEffect(() => {
+    const measure = () => setSize({
+      w: Math.min(MAX_W, window.innerWidth) - 24,
+      h: Math.max(320, window.innerHeight - 24),
+    })
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
+  return size
+}
 
 export default function Overlay() {
   const [keys, setKeys] = useState<DerivedKeys | null>(null)
@@ -50,7 +78,10 @@ export default function Overlay() {
   const [showQuote, setShowQuote] = useState(false)
   const [showRun, setShowRun] = useState(false)
   const [running, setRunning] = useState(false)
+  const [readKey, setReadKey] = useState(0)
+  const [landKey, setLandKey] = useState(0)
   const lastHash = useRef('')
+  const { w, h } = useCardSize()
 
   const unlock = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,6 +108,8 @@ export default function Overlay() {
         const hash = `${bytes.length}:${bytes[12]}${bytes[13]}${bytes[20]}`
         if (hash === lastHash.current) return
         const next = await decryptJson<Payload>(keys, bytes)
+        // A change after the first payload is new data landing: the card nods.
+        if (lastHash.current) setLandKey((k) => k + 1)
         lastHash.current = hash
         setPayload(next)
         setError(null)
@@ -91,6 +124,7 @@ export default function Overlay() {
 
   const run = useCallback(async () => {
     setRunning(true)
+    setReadKey((k) => k + 1)
     try {
       const res = await fetch(`${BRIDGE}/run`, { method: 'POST' })
       const body = await res.json().catch(() => null)
@@ -103,183 +137,95 @@ export default function Overlay() {
     }
   }, [])
 
-  if (!keys) {
-    return (
-      <main>
-        <header style={{ marginBottom: 12 }}>
-          <span style={{ color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.02em' }}>Ursa</span>
-        </header>
-        <form onSubmit={unlock}>
-          {/* The label draws nothing and carries the overlay that makes
-              this a 44px press (`.panel-field` in globals.css). The
-              field keeps its own 35px box, and therefore its own focus
-              ring, which is L3 in docs/design/ledger.md. */}
-          <label className="panel-field">
-            <input
-              type="password"
-              value={phrase}
-              onChange={(e) => setPhrase(e.target.value)}
-              placeholder="passphrase"
-              autoFocus
-              className="mono"
-              style={{
-                width: '100%', padding: '8px 10px', background: 'var(--panel)',
-                border: '1px solid var(--line)', borderRadius: 6, color: 'var(--ink)',
-                fontSize: 13,
-              }}
-            />
-          </label>
-          <p style={{ color: 'var(--dim)', marginTop: 8, fontSize: 12 }}>
-            {deriving ? 'deriving the key…' : 'held in memory only; it never leaves this page'}
-          </p>
-        </form>
-      </main>
-    )
-  }
-
   const v = payload?.verdict
-  const verdictColor = v?.accepted === true ? 'var(--satisfied)'
-    : v?.accepted === false ? 'var(--unsatisfied)' : 'var(--dim)'
+  const verdictClass = v?.accepted === true ? 'pn-verdict-yes' : v?.accepted === false ? 'pn-verdict-no' : ''
   const verdictText = v?.accepted === true ? `reads as satisfied at step ${v.step}`
     : v?.accepted === false ? `reads as unsatisfied at step ${v.step}`
     : 'no verdict yet — tell the model when it’s right'
 
   return (
-    <main>
-      <header style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-        borderBottom: '1px solid var(--line)', paddingBottom: 8, marginBottom: 10,
-      }}>
-        <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{payload?.project ?? '…'}</span>
-        <span className="mono" style={{ color: 'var(--dim)', fontSize: 10 }}>
-          {payload?.sessionFile ? `${payload.sessionFile.slice(0, 8)}… · ` : ''}
-          {/* This slot holds the time of the last good sync, so with no
-              payload it has no time and says which kind of nothing it
-              has. `connecting` after a connection that answered 500 is
-              the panel claiming an in-flight state it is not in, which
-              is the same defect as §7.1 one layer down. Neither branch
-              restates the error: that is one line below, once. */}
-          {payload ? new Date(payload.updatedAt).toLocaleTimeString()
-            : error ? 'not synced' : 'connecting'}
-        </span>
-      </header>
-
-      <section>
-        {/* The error has one home, and this is it.
-            It used to have two: this header's sync slot and the footer's
-            verdict line both fell back to the same string, so a panel with
-            no bridge behind it read `sync 500` twice and said nothing else
-            (reviews/2026-10-26 §7.1). Neither slot was the right one. The
-            header's is 10px dim and right-aligned, which is where a
-            sentence goes to not be read, and the footer's is the line that
-            reports the owner's own declaration, so a transport failure
-            printed there reads as a verdict.
-            Here is where the panel already says "nothing to show, and
-            why", one line above the empty state that says the same thing
-            about an empty tuning list. The wording of each error is
-            unchanged: which message a 500 deserves is the engineer's call
-            and was left to them. Only the place is this seat's. */}
-        {error && (
-          <p style={{ color: 'var(--dim)', marginBottom: payload ? 8 : 0 }}>{error}</p>
-        )}
-        {payload && payload.tuning.length === 0 && (
-          <p style={{ color: 'var(--dim)' }}>nothing distilled for this project yet</p>
-        )}
-        {payload?.tuning.map((t, i) => (
-          <div key={i} style={{ display: 'flex', gap: 8, padding: '3px 0', alignItems: 'baseline' }}>
-            {/* `whiteSpace: nowrap` added 2026-10-26d, from reading the 320
-                frame. `rule ×4` is one term and it was breaking after
-                `rule`, which put `×4` on a second baseline beside the
-                statement's own second line: the left column reads as two
-                labels where there is one
-                (`reviews/2026-10-26d/crops/label-wrap-320-before.png`).
-
-                That run also wrote `minWidth: 34` and this note beside
-                it: "a floor and not a ceiling, so the column still grows
-                to fit and nothing else moves." The first half is true and
-                the second is not, and it took a payload to see it, since
-                this list is empty without one and no review had ever put
-                one here. `minWidth` floors the used width; it does not
-                stop flex from shrinking the item down to it. These spans
-                are `nowrap`, so at 320 the glyphs leave the box and eat
-                the 8px gap to the polarity sign — measured at
-                `data/tuning-gap-before.txt`, where `tension` is drawn in
-                a 34px box twice and a 41px box once, in the same list.
-                Each row shrinks by its own amount because flex
-                distributes shrink in proportion to base size and the
-                statement beside it differs per row, so the column's right
-                edge was ragged as well as overrun.
-
-                `7ch` is the same floor said in the type's own unit, which
-                is L9. This face advances 6px per character at 10px, so
-                `case` (24px), `tension` and `rule ×2`…`rule ×9` (42px
-                each) all fit one column, and `rule ×10` and above still
-                grow it, as before. `flexShrink: 0` is the actual repair:
-                a label column that gives way is not a column. */}
-            <span className="mono" style={{
-              fontSize: 10, minWidth: '7ch', flexShrink: 0, textAlign: 'right', whiteSpace: 'nowrap',
-              color: t.tension ? 'var(--tension)' : t.evidenceCount > 1 ? 'var(--accent)' : 'var(--dim)',
-            }}>
-              {t.tension ? 'tension' : t.evidenceCount > 1 ? `rule ×${t.evidenceCount}` : 'case'}
-            </span>
-            <span style={{ color: t.tension ? 'var(--tension)' : 'var(--ink)' }}>
-              <span className="mono" style={{ color: t.polarity === 'prefer' ? 'var(--satisfied)' : 'var(--unsatisfied)', fontSize: 10 }}>
-                {t.polarity === 'prefer' ? '+' : '−'}
-              </span>{' '}
-              {t.statement}
-            </span>
+    <main className="pn-window">
+      <GlassCard width={w} height={h} readKey={readKey} landKey={landKey}>
+        {!keys ? (
+          <div className="pn">
+            <header className="pn-head">
+              <span className="ursa-glyph">✦</span>
+              <span className="mark mark-polar">Ursa</span>
+            </header>
+            <form onSubmit={unlock} className="pn-lock">
+              <label className="pn-field">
+                <span className="mark">Passphrase</span>
+                <input
+                  type="password"
+                  value={phrase}
+                  onChange={(e) => setPhrase(e.target.value)}
+                  placeholder="passphrase"
+                  autoFocus
+                  className="pn-input mono"
+                />
+              </label>
+              <p className="pn-caption">
+                {deriving ? 'deriving the key…' : 'held in memory only; it never leaves this page'}
+              </p>
+            </form>
           </div>
-        ))}
-      </section>
+        ) : (
+          <div className="pn">
+            <header className="pn-head">
+              <span className="ursa-glyph">✦</span>
+              <span className="mark mark-polar pn-project">Your tuning · {payload?.project ?? '…'}</span>
+              <span className="pn-sync mono">
+                {payload && <span className="live-dot" aria-hidden="true" />}
+                {payload ? new Date(payload.updatedAt).toLocaleTimeString() : error ? 'not synced' : 'connecting'}
+              </span>
+            </header>
+            {payload?.sessionFile && <p className="pn-session mono">session {payload.sessionFile.slice(0, 8)}…</p>}
 
-      {showRun && payload?.lastRunSummary && (
-        <pre className="mono" style={{
-          marginTop: 10, padding: 10, background: 'var(--panel)', borderRadius: 6,
-          border: '1px solid var(--line)', fontSize: 10.5, whiteSpace: 'pre-wrap',
-          maxHeight: 220, overflowY: 'auto', color: 'var(--ink)',
-        }}>{payload.lastRunSummary}</pre>
-      )}
+            <section className="pn-list">
+              {error && <p className="pn-note">{error}</p>}
+              {payload && payload.tuning.length === 0 && <p className="pn-note">nothing distilled for this project yet</p>}
+              {payload?.tuning.map((t, i) => (
+                <div key={i} className={`pn-unit ${t.tension ? 'pn-unit-tension' : ''}`}>
+                  <span className={`kind ${t.tension ? 'kind-tension' : t.evidenceCount > 1 ? 'kind-rule' : 'kind-case'}`}>
+                    {t.tension ? 'tension' : t.evidenceCount > 1 ? <>rule <small>×{t.evidenceCount}</small></> : 'case'}
+                  </span>
+                  <div className="pn-unit-body">
+                    <p className="pn-statement">
+                      <span className={`mono pn-polarity ${t.polarity === 'prefer' ? 'pn-prefer' : 'pn-avoid'}`}>
+                        {t.polarity === 'prefer' ? '+' : '−'}
+                      </span>{' '}
+                      {t.statement}
+                    </p>
+                    <p className="pn-meta mono">{t.domain} · {t.basis}</p>
+                  </div>
+                </div>
+              ))}
+            </section>
 
-      <footer style={{ borderTop: '1px solid var(--line)', marginTop: 12, paddingTop: 10 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ color: verdictColor }}>
-            {payload ? verdictText : 'no verdict yet'}
-            {v?.accepted !== null && v?.quote && (
-              /* Presentation moved to `.panel-action` in globals.css on
-                 2026-10-26d. It was an inline style object, and `:hover`
-                 cannot be written in one, which is the mechanical reason
-                 this control never answered the pointer. The resting
-                 pixels are unchanged. */
-              <button
-                onClick={() => setShowQuote(!showQuote)}
-                className="panel-action"
-              >misread?</button>
-            )}
-          </span>
-          {/* `.panel-hit` is the 44px target and stays; `.panel-run` is the
-              presentation and the hover, moved out of an inline style on
-              2026-10-26d for the same reason as `misread?` above. `wait`
-              while running is now `.panel-run:disabled`, keyed off the
-              same `disabled` attribute instead of off a second copy of
-              the condition. */}
-          <button
-            onClick={run}
-            disabled={running}
-            className="mono panel-hit panel-run"
-          >{running ? 'running…' : 'run'}</button>
-        </div>
-        {showQuote && v?.quote && (
-          <p className="mono" style={{ color: 'var(--dim)', fontSize: 11, marginTop: 6 }}>
-            step {v.step}: “{v.quote}”
-          </p>
+            {showRun && payload?.lastRunSummary && <pre className="pn-run mono">{payload.lastRunSummary}</pre>}
+
+            <footer className="pn-foot">
+              <p className={`pn-verdict ${verdictClass}`}>
+                {payload ? verdictText : 'no verdict yet'}
+                {v?.accepted !== null && v?.quote && (
+                  <button onClick={() => setShowQuote(!showQuote)} className="quiet hit pn-misread" aria-expanded={showQuote}>
+                    misread?
+                  </button>
+                )}
+              </p>
+              {showQuote && v?.quote && <p className="pn-quote mono">step {v.step}: “{v.quote}”</p>}
+              <button onClick={run} disabled={running} className="cta hit pn-runbtn">
+                {running ? 'running…' : 'run'}
+              </button>
+              {v?.accepted !== null && (payload?.declaredRecords?.length ?? 0) > 0 && (
+                <p className="pn-caption mono">
+                  written into {payload!.declaredRecords.length} record{payload!.declaredRecords.length === 1 ? '' : 's'} · your words are the label
+                </p>
+              )}
+            </footer>
+          </div>
         )}
-        {v?.accepted !== null && (payload?.declaredRecords?.length ?? 0) > 0 && (
-          <p className="mono" style={{ color: 'var(--dim)', fontSize: 10, marginTop: 6 }}>
-            written into {payload!.declaredRecords.length} record
-            {payload!.declaredRecords.length === 1 ? '' : 's'} · your words are the label
-          </p>
-        )}
-      </footer>
+      </GlassCard>
     </main>
   )
 }
