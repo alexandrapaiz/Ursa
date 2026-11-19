@@ -85,6 +85,7 @@ export const REGISTRY = [
   './../registers/closure-verdict.mjs',
   './../capture-provenance-verdict.mjs',
   './import-effects-verdict.mjs',
+  './acceptance-fields-verdict.mjs',
 ]
 
 // ---------------------------------------------------------------------------

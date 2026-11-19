@@ -316,6 +316,20 @@ export const CHECKS = [
     passExit: [0],
   },
   {
+    id: 'acceptance-fields',
+    scope: 'tooling',
+    // In the path from the commit that wrote it, which is the only part of
+    // this entry worth a comment. The two gates above were both registered
+    // late, by a seat reading Ursa/exo's measurement that a guard nothing
+    // invokes was bypassed in 874 of 1,803 board rows. This gate's own
+    // subject is a reason nobody consumes, so shipping it unregistered would
+    // have been the defect it detects, one level up. Clean at this commit:
+    // 21 fields carry a baseline entry and the baseline can only shrink.
+    title: 'Acceptance fields (no reason sits beside an accepted risk unread)',
+    argv: () => ['node', 'tools/gates/acceptance-fields.mjs'],
+    passExit: [0],
+  },
+  {
     id: 'tmpdir-leak',
     scope: 'tooling',
     // In the path because the leak it watches is invisible from inside the

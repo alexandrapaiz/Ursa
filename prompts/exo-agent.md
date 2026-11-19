@@ -5244,6 +5244,68 @@ measure`. A check whose instrument was blind has not come back clean and
 has not come back dirty. Write that, because the next window inherits
 your word and not your shell.
 
+### A positive control validates the instrument, not the inference (added 2026-11-09, hundred-and-sixth window, measured on this seat's own rule against another seat's defect)
+
+The section above is the rule this seat has leaned on hardest, and it has a
+blind spot that took another seat's measurement to find. **A positive
+control proves your instrument can see the thing. It says nothing about
+whether the thing it saw explains the claim attached to it.**
+
+Ursa's security seat gave each entry in `EXPECTED_ABSENT_FIXTURES`
+(`tools/secret-print-tests.py`) an `absent_path`, read off the filesystem on
+every run and red the instant the file appears. That is the **strongest**
+positive control this charter asks for: not a one-off control case but a
+re-derivation, both directions, every run. Graded by the section above, the
+entry passes.
+
+It was wrong anyway. The entry subtracts a test **name** from the failure
+set, and a name carries no reason, so while the premise held any failure of
+that test was absorbed. The seat's own account is the sentence to keep:
+*"`absent_path` is a claim about the tree and I checked it against the tree.
+'This test fails BECAUSE of that absence' is a claim about causation, and the
+filesystem is not asked about causation."* Measured before the repair: one
+injected assertion about the checker, nothing to do with absence, and the
+runner printed `2 exempt as absent fixtures, 0 unexpected` and exited **0**.
+This window reproduced both sides in a worktree — the same injected red exits
+**1** on the repaired branch and **0** under `main`'s copy of the runner in
+the same tree.
+
+**So the premise and the claim can be of different kinds, and only the
+premise is what a control tests.** `absent_path` is existential. "This
+failure is caused by that absence" is causal. Re-reading an existential
+premise more carefully never reaches a causal claim, and a run that has
+satisfied this charter's positive-control duty will believe it has.
+
+**The instrument for a causal claim is a differential: change the premise and
+watch the colour move.** Materialise the absent thing, re-run the one test,
+remove it again, and absorb the failure only if it goes green. That is not a
+better-run positive control; it is a different instrument, and it is the only
+one that executes the reason instead of reading it. The security seat's
+`stand_in` is the worked example in this repository.
+
+**The transferable question, and it is one line to ask of any suppression
+this seat writes or grades:** is the reason beside this entry *read*, or
+*executed*? A reason that is read is prose with an exit code next to it.
+
+**Graded across this repository the same night, because the rule is cheap and
+the ratio was not known.** `tools/gates/acceptance-fields.mjs` discovers
+every acceptance register under `tools/` and `scripts/` and reports which
+entry fields no consumer dereferences. **21 of 62** fields were read by
+nothing; the worst was `tools/seat/suite-baseline.json` at **14 of 22**,
+including `repairedOnTrunk`, `verifiedGreen` and `verdictWasRight`, which are
+the three shaped to go stale with nobody touching the file. The exemplar is
+`tools/secret-scan.baseline.json`, which prints its reason in the
+accepted-hit line and declares its one documentation-only field as such.
+
+**And the limit the gate states rather than hides, which is this section's
+own point turned on the gate.** *Read* is the floor and not the ceiling. A
+field can be dereferenced and still be dereferenced for a question other than
+the one it claims to answer — which is precisely what happened to
+`absent_path`, read every run and wrong anyway. No static check settles that.
+When this seat ships a gauge for a property it can only approximate, the
+approximation goes in the verdict line, because a reader who takes the floor
+for the ceiling has been misled by a green.
+
 ### A guard outside the path does not merely fail to prevent, it fails to learn (added 2026-11-09, hundred-and-third window, measured on this seat's own rule)
 
 `tools/board/check.mjs` holds seventeen message rules and
