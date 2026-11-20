@@ -2,6 +2,50 @@
 
 Maintained every PM run (docs/standards/pm.md §5). Each line dated.
 
+## Top three for the owner, 2026-11-09 message-triggered (thirty-ninth pass): #884 merged under Tier B, the #873 standing note false a seventh time (now stacked three copies deep in one wake), the ceremony clock still running
+
+Wake named three merge-event notifications (two prior `pm` self-merges
+now landed on `main` via HQ's `pm`, and HQ's own done reply), a new
+market PR to review under the merge rule, and three copies of the
+recurring standing note about `#873`. Full account in
+`docs/agents/pm-2026-11-09-message-39-run.md`.
+
+1. **`#884` (market, 25th run) merged under Tier B.** Not a draft,
+   `redaction-gate` green, `MERGEABLE`, scoped to `docs/ideas.md` and
+   `docs/market/` only (no Tier C path), no hold label, no reviews,
+   not this seat's own PR. Merged clean, branch deleted.
+2. **The `#873` standing note checked again, found false a seventh
+   time — and for the first time inconsistent with itself.** Three
+   copies of the identical note arrived in this one wake, giving the
+   engineer's run's age as 17, 18 and 19 minutes respectively.
+   `check-draft-prs.sh --repo alexandrapaiz/Ursa --json` reports `#873`
+   idle 36 minutes, `state: live`, `disposition: wait` — none of the
+   note's three numbers, and the opposite of its "no live run behind
+   it" claim. Pass 38 already found this same PR live; this pass
+   re-verified rather than trusting that prior finding, since the note
+   kept arriving. Added as Incident 19's seventh occurrence. Left
+   `#873` untouched, for the engineer seat's own next run.
+3. **Exo's merge-order ask (`#877` before `#879`/`#870`) is read and
+   queued, not yet actionable.** `#877` (security) is the branch exo
+   asked this seat to take first, because it is the only fix in flight
+   for two reds on `main`. It is still a live draft and GitHub reports
+   it `CONFLICTING`; `#879` is also still a live draft; `#870` is open
+   but `mergeable: UNKNOWN` with no checks run yet. Nothing here is
+   mergeable as it stands. Acknowledged on the board; will merge `#877`
+   ahead of the other two once it is readied and green, per the ask.
+
+**Also carried, not new.** The sprint-ceremony gap stands:
+`sprint-2026-10-12.md` is still the newest sprint file on `main`, now
+28 days old. Pass 25's own 48-hour silence clock on opening the
+ceremony from a message-triggered run (`docs/decisions.md`, "Finding —
+the Monday ceremony has not run in four weeks...") was posted
+2026-11-09T09:10:51Z; as of this pass (13:0xZ) roughly 4 hours have
+elapsed, not 48, so this pass is not the one that opens the ceremony
+under that clock. Flagging again rather than silently carrying: the
+gap is now a full lunar month, and whoever reads this with the clock
+expired should treat opening sections 1-3 as the next PM pass's first
+act, before anything reactive.
+
 ## Top three for the owner, 2026-11-09 message-triggered (thirty-second pass): the frontend report read, nothing of mine to merge because a live run already owns the only red check, the standing note false a sixth time and for the first time not even a draft
 
 The wake named the frontend seat's finished run and `#858`, plus the
