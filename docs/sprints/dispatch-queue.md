@@ -1,61 +1,71 @@
-# Dispatch queue — 2026-11-09, message-triggered (pass 32)
+# Dispatch queue — 2026-11-09, Monday ceremony (cron-triggered)
 
-Rechecked against the criteria table below rather than carried forward,
-per every prior pass's own practice. One new fact since pass 31: `#858`
-(frontend) now carries a red `redaction-gate` check. Not a dispatch
-case — `ursa-frontend` already has a live run (started 10:37:40Z,
-confirmed with `ps aux` at check time) woken by that exact failure, and
-§11.4's hard stop forbids dispatching a seat that already holds an open
-PR with a run behind it. Everything else below is unchanged from pass
-31's fresh check.
-
-`gh variable get PM_DISPATCH_ENABLED` returns HTTP 403 on this run's
-token, the same wall every host pass has hit since 2026-10-17, and
-`GITHUB_ACTIONS` is unset, confirming this is a host run rather than a
-GitHub Actions run. `gh workflow run agent-<seat>.yml` would not apply
-here even if the switch read `true`. This is logged as queue
-information for the owner, not as a plan this run executes.
+Checked fresh against `docs/standards/pm.md` §11.3 and Ursa's own three
+(§0b of `prompts/pm-agent.md`), not carried forward. `gh variable get
+PM_DISPATCH_ENABLED` returns HTTP 403 on this run's token, the same
+wall every host pass has hit since 2026-10-17, and `GITHUB_ACTIONS` is
+unset, confirming this is a host run rather than a GitHub Actions run.
+`gh workflow run agent-<seat>.yml` would not apply even if the switch
+read `true`. Logged as queue information for the owner, not as a plan
+this run executes.
 
 ## Checked against the criteria table (pm.md §11.3) and Ursa's own three (§0b)
 
 - **A seat run failed in the last 24h, diagnosable from its log:**
-  `gh run list --limit 30` showed a wave of `redaction-gate` failures
-  across nearly every open branch, but all of it traced to one cause,
-  already fixed: `main` carried a full-UUID leak from pass 29 until
-  this pass self-merged pass 30's own fix (`#861`). Every branch's own
-  content was clean; the failures were GitHub's stale merge-ref
-  against the old `main`, not a defect to dispatch anyone over.
+  `gh run list --limit 50` shows a wave of `redaction-gate` failures
+  across ten branches between 10:31Z and 10:45Z, all `pull_request`-
+  triggered runs checking out GitHub's synthetic merge against a
+  `main` state that predates a same-morning fix — the exact stale-base
+  pattern this seat's own earlier passes today (#864, #869) already
+  diagnosed and traced to live follow-up runs already in flight on the
+  affected branches (frontend's `#858`, security's `#859`, others).
+  Not a fresh dispatch case: re-diagnosing the same cause a third time
+  would commission work already running.
 - **A seat's open draft has failing CI, or a review comment unanswered
-  >24h:** six drafts open (`#866` skill, `#865` frontend, `#864` this
-  seat, `#863` exo, `#862` engineer, `#859` security), all opened or
-  updated within the last fifteen minutes — live runs, not orphans.
+  >24h:** six drafts open (`#865` frontend, `#866` skill, `#867`
+  engineer, `#868` security, `#870` exo, `#871` this seat), all opened
+  within the last 45 minutes of this check — live runs, not orphans.
   None qualify.
 - **A sprint item due this week with no run from its owning seat:**
-  unchanged. The newest sprint file is still `sprint-2026-10-12.md`,
-  28 days old; the ceremony gap stays escalated in `docs/decisions.md`
-  (pass 25) rather than repeated here.
-- **A seat has two or more open PRs on one scope, none merged:** exo
-  had five open before this pass (`#817`, `#826`, `#833`, `#846`,
-  `#863`); `#817` merged this pass (false conflict, see
-  `pending.md`), `#826`/`#833`/`#846` are each individually held at
-  Tier C by path, not an unreviewed pile, and `#863` is a live run
-  from minutes ago. Not a dispatch case: each row already has its own
-  disposition.
+  not yet applicable. `sprint-2026-11-09.md` opened in this same PR;
+  both its items are assigned to the engineer seat and neither is due
+  until later this week.
+- **A seat has two or more open PRs on one scope, none merged:**
+  checked for every seat with more than one open PR (exo 5, skill 4,
+  security 3, this seat 3, frontend 2, market 2, engineer 2) with
+  `git merge-base --is-ancestor` across each seat's own chain, not
+  assumed from the count alone. Every one is a single clean stack
+  whose newest PR already contains all the others — the own-PR-first
+  convention working as intended, not an independent pile of
+  duplicate builds (the shape this row exists to catch, per pm.md
+  §11.3a's epitome example). Dispatching "land or close this stack"
+  to a seat already doing exactly that would commission work the
+  repository already contains. Not fired. exo is additionally
+  never-dispatchable regardless (pm.md §11.4).
 - **A ruling or ADR merged since the last run names a seat with no run
-  following:** nothing new in `docs/decisions.md` since pass 25's
-  ceremony-gap finding.
-- **A milestone due within three days with open items:** none found.
+  following:** nothing in `docs/decisions.md` since the pass-25 entry
+  recording the ceremony gap (commit `dd0d4a27`, still the newest
+  commit touching that file).
+- **A milestone due within three days with open items:** none. The
+  milestone this run opened for `sprint-2026-11-09.md` is due
+  2026-11-16.
+- **An owner-merge PR older than seven days:** none. Every one of the
+  21 currently open PRs was opened today, 2026-11-09 (`gh pr list
+  --state open --json createdAt`).
 - **Ursa's own three (§0b):** no tuning or trial run with unrecorded
-  ledger results; no failing check on an open Minor-site or
-  Major-resolver PR (none open); no ADR naming an experiment with no
-  run started within two days.
+  ledger results this pass; no failing check on an open Minor-site or
+  Major-resolver PR beyond the stale-base pattern already named above;
+  no ADR naming an experiment with no run started within two days.
 
 ## Logged, not fired
 
-`#826` and `#833` (exo) stay Tier C by path (`prompts/exo-agent.md` in
-both diffs), unchanged from pass 28's finding, one of them already
-carrying the owner's own reviewed-and-held comment. `#846` likewise,
-per pass 28.
+**Research has produced no pull request, merged or open, since PR
+#263 (2026-10-23)** — roughly five missed Tue/Fri cadence slots.
+Named in `docs/agents/org-chart.md` and in this ceremony's sprint
+notes rather than fired here: no §11.3 row matches a quiet cadence
+with no failed run to diagnose and no sprint item currently assigned
+to research, and inventing a dispatch instruction without a cited rule
+is exactly what §11.4 forbids. Worth the owner's or HQ's judgment.
 
 ## Dispatched by the PM
 
